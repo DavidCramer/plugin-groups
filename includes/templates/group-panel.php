@@ -15,7 +15,7 @@
 			{{#unless config/group_name}}
 				<a><input class="autofocus-input" data-format="key" style="width: 100%; padding: 3px 6px; margin: -3px; background: none repeat scroll 0% 0% rgb(255, 255, 255); border: 0px none; border-radius: 2px;" type="text" data-id="{{_id}}" name="{{:name}}[config][group_name]" data-live-sync="true" data-sync=".group_title_{{_id}}" value="{{config/group_name}}" id="caldera_todo-group_name-{{_id}}"></a>
 			{{else}}
-				<a href="#" class="sortable-item plugin-groups-edit-group" data-id="{{_id}}"> <span class="group_title_{{_id}}">{{config/group_name}}</span></a>
+				<a href="#" class="sortable-item plugin-groups-edit-group" data-id="{{_id}}"> <span style="display: inline-block; width: 210px;" class="group_title_{{_id}}">{{config/group_name}}</span><span style="float:right;">{{config/plugins.length}}</span></a>
 			{{/unless}}
 
 			{{#is ../active_edit_group not=_id}}<input type="hidden" name="{{:name}}[config]" value="{{json config}}">{{/is}}

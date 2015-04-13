@@ -3853,6 +3853,7 @@ var __module0__ = (function(__dependency1__, __dependency2__, __dependency3__, _
       for(var i = name.length-1; i >= 0; i--){
         var nestname = name[i];
         if(nestname.length === 0){
+          lineconf = [];
           if( typeof arraynames[name[i-1]] === 'undefined'){
             arraynames[name[i-1]] = 0;
           }else{
