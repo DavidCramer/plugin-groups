@@ -12,7 +12,7 @@
 </div>
 <div class="plugin-groups-sub-headercaldera">
 	<ul class="plugin-groups-sub-tabs plugin-groups-nav-tabs">
-				<li class="{{#is _current_tab value="#plugin-groups-panel-group"}}active {{/is}}plugin-groups-nav-tab"><a href="#plugin-groups-panel-group"><?php _e('Plugin Groups', 'plugin-groups') ; ?></a></li>
+				<li class="{{#is _current_tab value="#plugin-groups-panel-group"}}active {{/is}}plugin-groups-nav-tab"><a href="#plugin-groups-panel-group"><?php _e('Group Setup', 'plugin-groups') ; ?></a></li>
 
 	</ul>
 </div>

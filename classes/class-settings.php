@@ -32,10 +32,43 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		add_filter( 'all_plugins', array( $this, 'prepare_filter_addons' ) );
 		add_filter( 'views_plugins', array( $this, 'filter_addons_filter_addons' ) );
 		add_filter( 'show_advanced_plugins', array( $this, 'filter_addons_do_filter_addons' ) );
-		//add_action( 'check_admin_referer', array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
+		add_action( 'after_plugin_row' , array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
+		add_action( 'check_admin_referer', array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
 	}
 
+	/**
+	 * Sets the status back to the group on action ( activate etc.)
+	 *
+	 * @since 0.0.1
+	 */
+	public function filter_addons_prepare_filter_addons_referer($a, $b){
+		global $status;
+		if( !function_exists('get_current_screen')){
+			return;
+		}
 
+		// work on plugins list 
+		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+
+		$screen = get_current_screen();
+		if( is_object($screen) && $screen->base === 'plugins' && isset( $_REQUEST['plugin_status'] ) && !empty( $plugin_groups['group'] ) ){
+			foreach( $plugin_groups['group'] as $group ){				
+				$key = sanitize_key( $group['config']['group_name'] );
+				if( $_REQUEST['plugin_status'] === $key ){
+
+					$status = $key;
+					break;
+				}
+			}
+		}
+	}	
+
+	/**
+	 * Add new filter group
+	 *
+	 * @since 0.0.1
+	 * @return Bool
+	 */
 	public function filter_addons_do_filter_addons($a){
 		global $plugins, $status;
 
@@ -64,7 +97,12 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		return $a;
 	}
 
-
+	/**
+	 * Add new filter view
+	 *
+	 * @since 0.0.1
+	 * @return array|Views with added groups
+	 */
 	public function filter_addons_filter_addons($views){
 		global $status, $plugins;
 		
@@ -89,7 +127,12 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		return $views;
 	}
 
-
+	/**
+	 * alter and set the current status.
+	 *
+	 * @since 0.0.1
+	 * @return array|plugins - no change
+	 */
 	public function prepare_filter_addons($plugins){
 		global $wp_list_table, $status;
 
@@ -105,6 +148,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 				}				
 			}
 		}
+
 		return $plugins;
 	}
 
