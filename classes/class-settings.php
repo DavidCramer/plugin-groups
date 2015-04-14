@@ -53,7 +53,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		$screen = get_current_screen();
 		if( is_object($screen) && $screen->base === 'plugins' && isset( $_REQUEST['plugin_status'] ) && !empty( $plugin_groups['group'] ) ){
 			foreach( $plugin_groups['group'] as $group ){				
-				$key = sanitize_key( $group['config']['group_name'] );
+				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				if( $_REQUEST['plugin_status'] === $key ){
 
 					$status = $key;
@@ -79,7 +79,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		if( !empty( $plugin_groups['group'] ) ){
 			foreach($plugins['all'] as $plugin_slug=>$plugin_data){
 				foreach( $plugin_groups['group'] as $group ){
-					$key = sanitize_key( $group['config']['group_name'] );
+					$key = '_' . sanitize_key( $group['config']['group_name'] );
 
 					if( !empty( $group['config']['plugins'] ) && in_array( $plugin_slug, $group['config']['plugins'] ) ){
 						$plugins[ $key ][ $plugin_slug ] = $plugin_data;
@@ -122,7 +122,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 				if( empty( $group['config']['plugins'] ) ){
 					continue;
 				}
-				$key = sanitize_key( $group['config']['group_name'] );
+				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				$class = "";
 				if( $status == $key ){
 					$class = 'current';
@@ -149,7 +149,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 
 		if( isset( $_REQUEST['plugin_status'] ) && !empty( $plugin_groups['group'] ) ){
 			foreach( $plugin_groups['group'] as $group ){
-				$key = sanitize_key( $group['config']['group_name'] );
+				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				if( $_REQUEST['plugin_status'] === $key ){
 					$status = $key;
 					break;
