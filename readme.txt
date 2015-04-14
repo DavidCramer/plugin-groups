@@ -1,7 +1,7 @@
 === Plugin Groups ===
 Contributors: Desertsnowman
 Donate link: https://CalderaWP.com
-Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
+Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group, calderawp
 Requires at least: 3.9
 Tested up to: 4.2
 Stable tag: 1.0.0
@@ -12,9 +12,9 @@ Organize plugins in the Plugins Admin Page by creating groups and filter types
 
 == Description ==
 
-If you have a lot of plugins installed, it can be difficult to manage them all and. Now you can organize the plugins admin page by grouping your plugins by purpose. Each group will be displayed as a plugin status tabs in the plugins admin page, so you can easily filter which plugins you are viewing by group.
+If you have a lot of plugins installed, it can be difficult to manage them all. Now you can organize the plugins admin page by grouping your plugins by purpose. Each group will be displayed as a plugin status tabs in the plugins admin page, so you can easily filter which plugins you are viewing by group.
 
-A free plugin by [CalderaWP](https://CalderaWP.com)
+A free plugin by [CalderaWP](https://CalderaWP.com).
 
 == Installation ==
 
@@ -29,8 +29,8 @@ Of course it does.
 
 == Screenshots ==
 
-1. Screenshot 1 Easy to use UI for creating and managing filter groups.
-2. Screenshot 2 The filter groups added to the Plugin Page.
+1. Easy to use UI for creating and managing filter groups.
+2. The filter groups added to the Plugin Page.
 
 == Changelog ==
 
