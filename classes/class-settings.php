@@ -83,10 +83,18 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 
 					if( !empty( $group['config']['plugins'] ) && in_array( $plugin_slug, $group['config']['plugins'] ) ){
 						$plugins[ $key ][ $plugin_slug ] = $plugin_data;
+						$plugins[ $key ][ $plugin_slug ]['plugin'] =  $plugin_slug;
 						// is a remove group?
 						if( !empty( $group['config']['remove_base'] ) ){
 							foreach( $group['config']['plugins'] as $plugin ){
 								unset( $plugins['all'][ $plugin ] );
+							}
+						}
+						// replicate teh next step
+						if ( current_user_can( 'update_plugins' ) ) {
+							$current = get_site_transient( 'update_plugins' );
+							if ( isset( $current->response[ $plugin_slug ] ) ) {
+								$plugins[ $key ][ $plugin_slug ]['update'] = true;
 							}
 						}
 					}
