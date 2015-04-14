@@ -12,8 +12,9 @@ Organize plugins in the Plugins Admin Page by creating groups and filter types
 
 == Description ==
 
-If you have amany many plugins installed, It can be difficult to manage which does what. Organize plugins in the Plugins Admin Page by creating groups and filter types.
-Groups display as plugin status tabs in the Plugin admin page, to filter the view by plugin within the group.
+If you have a lot of plugins installed, it can be difficult to manage them all and. Now you can organize the plugins admin page by grouping your plugins by purpose. Each group will be displayed as a plugin status tabs in the plugins admin page, so you can easily filter which plugins you are viewing by group.
+
+A free plugin by [CalderaWP](https://CalderaWP.com)
 
 == Installation ==
 
