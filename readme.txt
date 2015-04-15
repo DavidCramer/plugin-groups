@@ -4,7 +4,7 @@ Donate link: https://CalderaWP.com
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group, calderawp
 Requires at least: 3.9
 Tested up to: 4.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ Of course it does.
 2. The filter groups added to the Plugin Page.
 
 == Changelog ==
+
+= 1.0.3 =
+Added a notice to confirming saved changes.
 
 = 1.0.2 =
 prefixed group slugs to prevent overiding built in status types.
