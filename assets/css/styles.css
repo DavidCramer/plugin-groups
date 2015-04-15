@@ -43,7 +43,19 @@ h4 > small.description {
   font-size: 0.55em;
   line-height: 0;
 }
-
+.plugin-groups-main-headercaldera .error_notice_box,
+.plugin-groups-main-headercaldera .updated_notice_box {
+  background: none repeat scroll 0 0 rgb(175, 175, 0);
+  color: #fff;
+  display: inline-block;
+  padding: 10px 12px 12px;
+  position: absolute;
+  top: -75px;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+}
+.plugin-groups-main-headercaldera .error_notice_box {
+  background: none repeat scroll 0 0 rgb(175, 0, 0);
+}
 .plugin-groups-main-headerbrickroad h2,
 .plugin-groups-main-headercaldera h2 {
 	color: #4f4f4f;

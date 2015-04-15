@@ -1,13 +1,11 @@
 <div class="plugin-groups-main-headercaldera">
 		<h2>
 		<?php _e( 'Plugin Groups', 'plugin-groups' ); ?> <span class="plugin-groups-version"><?php echo PLORG_VER; ?></span>
-		<span style="position: absolute; top: 8px;" id="plugin-groups-save-indicator"><span style="float: none; margin: 16px 0px -5px 10px;" class="spinner"></span></span>
+		<span style="position: absolute; top: 5px;" id="plugin-groups-save-indicator"><span style="float: none; margin: 10px 0px -5px 10px;" class="spinner"></span></span>
 	</h2>
-		<ul class="plugin-groups-header-tabs plugin-groups-nav-tabs">
-				
-		
-				
-	</ul>
+	<div class="updated_notice_box"><?php _e( 'Changes saved successfully', 'plugin-groups' ); ?></div>
+	<div class="error_notice_box"><?php _e( 'Could not save changes.', 'plugin-groups' ); ?></div>
+
 	<span class="wp-baldrick" id="plugin-groups-field-sync" data-event="refresh" data-target="#plugin-groups-main-canvas" data-callback="plorg_canvas_init" data-type="json" data-request="#plugin-groups-live-config" data-template="#main-ui-template"></span>
 </div>
 <div class="plugin-groups-sub-headercaldera">
@@ -33,7 +31,7 @@
 	
 	<div class="clear"></div>
 	<div class="plugin-groups-footer-bar">
-		<button type="submit" class="button button-primary wp-baldrick" data-action="plorg_save_config" data-active-class="none" data-load-element="#plugin-groups-save-indicator" data-before="plorg_get_config_object" ><?php _e('Save Changes', 'plugin-groups') ; ?></button>
+		<button type="submit" class="button button-primary wp-baldrick" data-action="plorg_save_config" data-callback="plorg_handle_save" data-active-class="none" data-load-element="#plugin-groups-save-indicator" data-before="plorg_get_config_object" ><?php _e('Save Changes', 'plugin-groups') ; ?></button>
 	</div>	
 
 </form>

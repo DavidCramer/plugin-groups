@@ -3,13 +3,32 @@ var plugin_groups_canvas = false,
 	plorg_record_change,
 	plorg_canvas_init,
 	plorg_get_default_setting,
-	plorg_code_editor,
-	init_magic_tags,
+	plorg_code_editor,	
 	plorg_rebuild_magics,
-	config_object = {},
+	plorg_handle_save,
+	init_magic_tags,
+	config_object = {},	
 	magic_tags = [];
 
 jQuery( function($){
+
+	plorg_handle_save = function( obj ){
+
+		var notice;
+
+		if( obj.data.success ){
+			notice = $('.updated_notice_box');
+		}else{
+			notice = $('.error_notice_box');
+		}
+
+		notice.animate({top: 0}, 200, function(){
+			setTimeout( function(){
+				notice.animate({top: -75}, 200);
+			}, 2000);
+		});
+
+	}
 
 	init_magic_tags = function(){
 		//init magic tags
