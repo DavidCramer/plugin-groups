@@ -35,6 +35,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		// get plugins filters
 		add_filter( 'all_plugins', array( $this, 'prepare_filter_addons' ) );
 		add_filter( 'views_plugins', array( $this, 'filter_addons_filter_addons' ) );
+		add_filter( 'views_plugins-network', array( $this, 'filter_addons_filter_addons' ) );
 		add_filter( 'show_advanced_plugins', array( $this, 'filter_addons_do_filter_addons' ) );
 		add_action( 'after_plugin_row' , array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
 		add_action( 'check_admin_referer', array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
