@@ -24,8 +24,12 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 	 */
 	public function __construct(){
 
+		if ( is_multisite() ) {
+			$this->multisite = 'network_';
+		}
+
 		// add admin page
-		add_action( 'admin_menu', array( $this, 'add_settings_pages' ), 25 );
+		add_action( "{$this->multisite}admin_menu", array( $this, 'add_settings_pages' ), 25 );
 		// save config
 		add_action( 'wp_ajax_plorg_save_config', array( $this, 'save_config') );
 		// get plugins filters
@@ -263,10 +267,9 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 	 */
 	public function add_settings_pages(){
 		// This page will be under "Settings"
-		
-	
-			$this->plugin_screen_hook_suffix['plugin_groups'] =  add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Groups', $this->plugin_slug ), 'manage_options', 'plugin_groups', array( $this, 'create_admin_page' ) );
-			add_action( 'admin_print_styles-' . $this->plugin_screen_hook_suffix['plugin_groups'], array( $this, 'enqueue_admin_stylescripts' ) );
+
+		$this->plugin_screen_hook_suffix['plugin_groups'] =  add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Groups', $this->plugin_slug ), $this->capability, 'plugin_groups', array( $this, 'create_admin_page' ) );
+		add_action( 'admin_print_styles-' . $this->plugin_screen_hook_suffix['plugin_groups'], array( $this, 'enqueue_admin_stylescripts' ) );
 
 	}
 

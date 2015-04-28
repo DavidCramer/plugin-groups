@@ -43,6 +43,10 @@ class Plugin_Groups {
 	 */
 	protected $plugin_screen_hook_suffix = null;
 
+
+	protected $capability = 'manage_options';
+	protected $multisite = '';
+
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
 	 *
