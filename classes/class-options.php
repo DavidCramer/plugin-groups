@@ -63,15 +63,15 @@ class Plugin_Groups_Options {
 	 */
 	public static function get_single( $id ) {
 		$option_name = self::item_option_name( $id );
-		$plugin_groups = get_option( $option_name, false );
-		
+		$plugin_groups = get_site_option( $option_name, false );
+
 		// try slug based lookup
 		if( false === $plugin_groups ){
 			$registry = self::get_registry();
 			foreach( $registry as $single_id => $single ){
 				if( $single['slug'] === $id ){
 					$option_name = self::item_option_name( $single_id );
-					$plugin_groups = get_option( $option_name, false );
+					$plugin_groups = get_site_option( $option_name, false );
 					break;
 				}
 			}
@@ -98,7 +98,7 @@ class Plugin_Groups_Options {
 	 */
 
 	public static function get_registry() {
-		$registry = get_option( self::registry_name(), array() );
+		$registry = get_site_option( self::registry_name(), array() );
 
 		/**
 		 * Filter the registry before returning
@@ -175,7 +175,7 @@ class Plugin_Groups_Options {
 	 * @param array $registry The registry
 	 */
 	protected static function save_registry( $registry ) {
-		return update_option( self::registry_name(), $registry );
+		return update_site_option( self::registry_name(), $registry );
 
 	}
 
@@ -186,7 +186,7 @@ class Plugin_Groups_Options {
 	 * @param array $config plugin_groups config
 	 */
 	protected static function save_single( $id, $config ) {
-		return update_option( self::item_option_name( $id ), $config );
+		return update_site_option( self::item_option_name( $id ), $config );
 
 	}
 
