@@ -80,8 +80,7 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		// work on plugins list 
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		
-		
-		if( !empty( $plugin_groups['group'] ) ){
+		if( !empty( $plugin_groups['group'] ) && is_array( $plugins ) ){
 			foreach($plugins['all'] as $plugin_slug=>$plugin_data){
 				foreach( $plugin_groups['group'] as $group ){
 					$key = '_' . sanitize_key( $group['config']['group_name'] );
