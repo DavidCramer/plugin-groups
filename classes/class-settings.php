@@ -127,12 +127,21 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 				if( empty( $group['config']['plugins'] ) ){
 					continue;
 				}
+				$count = 0;
+				foreach( $group['config']['plugins'] as $plugin_file ){
+
+					if( file_exists( WP_PLUGIN_DIR . '/' . $plugin_file ) ){
+						$count++;
+					}
+					
+				}
+
 				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				$class = "";
 				if( $status == $key ){
 					$class = 'current';
 				}
-				$views[ $key ] = '<a class="' . $class . '" href="plugins.php?plugin_status=' . $key . '">' . $group['config']['group_name'] .' <span class="count">(' . count( $group['config']['plugins'] ) . ')</span></a>';
+				$views[ $key ] = '<a class="' . $class . '" href="plugins.php?plugin_status=' . $key . '">' . $group['config']['group_name'] .' <span class="count">(' . $count . ')</span></a>';
 
 			}
 		}
