@@ -1,3 +1,8 @@
+.plugin-groups-calderaadmin-wrap,
+.plugin-groups-calderamain-canvas {
+  margin-top: 103px;
+}
+
 .plugin-groups-input-error,
 input.plugin-groups-input-error,
 select.plugin-groups-input-error,
@@ -12,15 +17,87 @@ h4 > small.description {
 }
 .plugin-groups-main-headerbrickroad,
 .plugin-groups-main-headercaldera {
-	background: none repeat scroll 0 0 #fff;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 8px 0 0 rgb(175, 175, 0) inset;
-	margin: -10px -20px 10px -22px;
-	padding: 0 0 8px 22px;
-	overflow: hidden;
+  background: none repeat scroll 0 0 #fff;
+  box-shadow: 8px 1px 6px rgba(0, 0, 0, 0.04), 8px 0 0 rgb(175, 175, 0) inset;
+  margin: -10px -20px 10px -22px;
+  padding: 0 0 8px 22px;
+  overflow: hidden;
+}
+.plugin-groups-main-headercaldera,
+.plugin-groups-sub-headercaldera {
+  left: 182px;
+  position: fixed;
+  right: 0;
+  top: 42px;
+  z-index: 9999;
+}
+.plugin-groups-sub-headercaldera {
+  top: 96px;
+  z-index: 9998;
+}
+
+.plugin-groups-fixed-list {
+  width: 420px;
+  float:left;  
+}
+.plugin-groups-fixed-center {
+  bottom: 32px;
+  left: 630px;
+  overflow: hidden;
+  position: fixed;
+  top: 171px;
+  width: 750px;
+  z-index: 999;
+}
+.plugin-groups-list-control-button.button.button-small {
+  float: right;
+  margin: 6px 6px 0px 0px;
+  padding: 0 12px;
+}
+.folded .plugin-groups-main-headercaldera,
+.folded .plugin-groups-sub-headercaldera{
+  left: 58px;
+}
+.folded .plugin-groups-fixed-center {
+  left: 505px;
+}
+
+@media screen and ( max-width: 960px ) {
+  .plugin-groups-main-headercaldera,
+  .plugin-groups-sub-headercaldera{
+    left: 58px;
+  }
+  .plugin-groups-fixed-list {
+    width: 340px;
+  }
+  .plugin-groups-fixed-center {
+    left: 435px;
+  }
+}
+@media screen and ( max-width: 782px ) {
+  .plugin-groups-main-headercaldera,
+  .plugin-groups-sub-headercaldera{
+    top: 56px;
+    left: 22px;
+  } 
+  .plugin-groups-sub-headercaldera{
+    top: 110px;
+  }
+  .plugin-groups-fixed-center {
+    left: 370px;
+    top: 185px;
+  }  
+}
+@media screen and ( max-width: 600px ) {
+  .plugin-groups-main-headercaldera,
+  .plugin-groups-sub-headercaldera{
+    position: absolute;
+    left: 12px;
+  }
 }
 .plugin-groups-sub-headercaldera {
   background: none repeat scroll 0 0 #f8f8f8;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04), 8px 0 0 rgb(175, 175, 0) inset;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 8px 0 0 rgb(175, 175, 0) inset;
   margin: -10px -20px 10px -22px;
   padding: 0 0 0 8px;
   overflow: hidden;
@@ -34,7 +111,7 @@ h4 > small.description {
   overflow: hidden;
   padding: 0 0 0 8px;
   position: absolute;
-  top: 64px;
+  top: 65px;
   width: 140px;
 }
 .plugin-groups-subline,
@@ -42,34 +119,57 @@ h4 > small.description {
   color: #9f9f9f;
   font-size: 0.55em;
   line-height: 0;
+  margin-right: 12px;
 }
-.plugin-groups-main-headercaldera .error_notice_box,
-.plugin-groups-main-headercaldera .updated_notice_box {
-  background: none repeat scroll 0 0 rgb(175, 175, 0);
-  color: #fff;
-  display: inline-block;
-  padding: 10px 12px 12px;
-  position: absolute;
-  top: -75px;
-  box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-}
-.plugin-groups-main-headercaldera .error_notice_box {
-  background: none repeat scroll 0 0 rgb(175, 0, 0);
-}
+
 .plugin-groups-main-headerbrickroad h2,
 .plugin-groups-main-headercaldera h2 {
-	color: #4f4f4f;
-	font-size: 20px;
-	font-weight: 300;
+  color: #4f4f4f;
+  font-size: 20px;
+  font-weight: 300;
   float: left;
+  padding: 11px 15px 2px 0;  
+  margin: 6px;
+  line-height: 17px;
 }
+
 .plugin-groups-main-headerbrickroad .logo-icon,
 .plugin-groups-main-headercaldera .logo-icon{
-	color: rgb(175, 175, 0);
+  color: rgb(175, 175, 0);
   font-size: 72px;
   margin: -18px 20px 0 -60px;
   opacity: 0.2;
   padding: 0 15px 0 0;
+}
+
+.plugin-groups-main-headerwordpress .error_notice_box,
+.plugin-groups-main-headerwordpress .updated_notice_box,
+.plugin-groups-main-headerbrickroad .error_notice_box,
+.plugin-groups-main-headerbrickroad .updated_notice_box,
+.plugin-groups-main-headercaldera .error_notice_box,
+.plugin-groups-main-headercaldera .updated_notice_box {
+  background: #fff;
+  border-left: 8px solid rgb(175, 175, 0);
+  color: #333;
+  display: inline-block;
+  padding: 20px 23px 15px 12px;
+  position: fixed;
+  top: -175px;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+  z-index: 99999;
+}
+.plugin-groups-nav-separator {
+  background: #f8f8f8 none repeat scroll 0 0;
+  display: inline-block;
+  height: 55px;
+  margin: -23px 6px -23px 12px;
+  width: 1px;
+}
+
+.plugin-groups-main-headerwordpress .error_notice_box,
+.plugin-groups-main-headerbrickroad .error_notice_box,
+.plugin-groups-main-headercaldera .error_notice_box {
+  border-left: 8px solid rgb(175, 0, 0);
 }
 .plugin-groups-general-delete-link{
   color: #a00;
@@ -82,19 +182,26 @@ h4 > small.description {
 }
 .wrap .plugin-groups-main-headerbrickroad .add-new-h2,
 .wrap .plugin-groups-main-headercaldera .add-new-h2{
-	font-size: 12px;
-	margin: 13px;
-	cursor: pointer;
+  font-size: 12px;
+  margin: 6px;
+  cursor: pointer;
+  color: #4f4f4f;
+}
+.plugin-groups-main-headerbrickroad .add-new-h2.current,
+.plugin-groups-main-headercaldera .add-new-h2.current {
+  background: none repeat scroll 0 0 rgb(175, 175, 0);
+  color: #fff;
 }
 .plugin-groups-main-headerbrickroad .add-new-h2:hover,
 .plugin-groups-main-headercaldera .add-new-h2:hover {
-	background: none repeat scroll 0 0 rgb(175, 175, 0);
+  background: none repeat scroll 0 0 rgb(175, 175, 0);
+  color: #fff;
 }
 
 .plugin-groups-main-headerbrickroad .plugin-groups-header-tabs,
 .plugin-groups-main-headercaldera .plugin-groups-header-tabs {
   float: left;
-  margin: 0;
+  margin: 0 0 0 -22px;
   padding: 0;
 }
 .plugin-groups-sub-headerbrickroad .plugin-groups-sub-tabs,
@@ -169,11 +276,11 @@ h4 > small.description {
   width: 280px;
 }
 .plugin-groups-side-list > label{
-	display: block;
+  display: block;
 }
 .plugin-groups-side-list > select {
-	width: 100%;
-	margin-bottom: 2px;
+  width: 100%;
+  margin-bottom: 2px;
 }
 
 .plugin-groups-footer-bar {
@@ -251,7 +358,9 @@ h4 > small.description {
   width: 550px;
 }
 
-
+.plugin-groups-editor-panel{
+  height:100%;
+}
 
 /* Tags */
 .magic-tag-init {
@@ -283,7 +392,7 @@ h4 > small.description {
   overflow: hidden;
   padding: 0 0 0 50px;
   position: relative;
-  width: 517px;
+  width: 250px;
 }
 .plugin-groups-card-sub-item {
   background: none repeat scroll 0 0 #fcfcfc;
@@ -327,7 +436,7 @@ h4 > small.description {
   display: none;
 }
 .plugin-groups-card-item .plugin-groups-card-content > h4{
-	margin: 0;
+  margin: 0;
 }
 
 .plugin-groups-card-content input[type="text"] {
@@ -341,15 +450,26 @@ h4 > small.description {
   padding: 0;
 }
 .plugin-groups-card-content .plugin-groups-card-actions .row-actions{
-	visibility: visible;
+  visibility: visible;
 }
 .plugin-groups-card-content .plugin-groups-card-actions .row-actions a{
-	text-decoration: none;
+  text-decoration: none;
 }
 #plugin-groups-save-indicator.loading .spinner{
   display: block;
+  visibility: visible;
 }
 
+/* wp cleaups */
+/*.sticky-menu #adminmenuwrap{
+  position: relative;
+}*/
+.plugin-groups-config-group .CodeMirror.CodeMirror-wrap {
+  background: #fff none repeat scroll 0 0;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07) inset;
+  padding: 6px 0 3px;
+}
 
 .baldrick-modal-title .modal-label,
 .baldrick-modal-title .baldrick-modal-closer{
@@ -363,7 +483,7 @@ h4 > small.description {
   background-color: rgb(175, 175, 0);
 }
 .plugin-groups-main-headercaldera .loading{
-	top: -2px;
+  top: -2px;
 }.plugin-groups-module-side {
   float: left;
   margin-right: 22px;
@@ -394,3 +514,4 @@ h4 > small.description {
   background-color: rgb(175, 175, 0);
   color: #fff;
 }
+

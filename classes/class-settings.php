@@ -39,6 +39,40 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		add_filter( 'show_advanced_plugins', array( $this, 'filter_addons_do_filter_addons' ) );
 		add_action( 'after_plugin_row' , array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
 		add_action( 'check_admin_referer', array( $this, 'filter_addons_prepare_filter_addons_referer' ), 10, 2 );
+
+		// presets
+		add_filter( 'plugin-groups-get-presets', array( $this, 'get_preset_groups' ) );
+		
+		// exporter
+		add_action( 'init', array( $this, 'check_exporter' ) );
+
+		
+
+	}
+
+	/**
+	 * builds an export
+	 *
+	 * @uses "wp_ajax_plorg_check_exporter" hook
+	 *
+	 * @since 0.0.1
+	 */
+	public function check_exporter(){
+
+		if( current_user_can( 'manage_options' ) ){
+
+			if( !empty( $_REQUEST['download'] ) && !empty( $_REQUEST['plugin-groups-export'] ) && wp_verify_nonce( $_REQUEST['plugin-groups-export'], 'plugin-groups' ) ){
+
+				$data = Plugin_Groups_Options::get_single( $_REQUEST['download'] );
+
+				header( 'Content-Type: application/json' );
+				header( 'Content-Disposition: attachment; filename="plugin-groups-export.json"' );
+				echo wp_json_encode( $data );
+				exit;
+
+			}
+			
+		}
 	}
 
 	/**

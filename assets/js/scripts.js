@@ -1,16 +1,20 @@
 var plugin_groups_canvas = false,
 	plorg_get_config_object,
 	plorg_record_change,
+	plorg_canvas_reset,
 	plorg_canvas_init,
+	plorg_rebuild_canvas,
+	plorg_add_node,
 	plorg_get_default_setting,
-	plorg_code_editor,	
+	plorg_code_editor,
+	plorg_handle_save,	
 	plorg_rebuild_magics,
-	plorg_handle_save,
-	init_magic_tags,
-	config_object = {},	
-	magic_tags = [];
+	plorg_init_magic_tags,
+	plorg_config_object = {},
+	plorg_magic_tags = [];
 
 jQuery( function($){
+
 
 	plorg_handle_save = function( obj ){
 
@@ -22,15 +26,16 @@ jQuery( function($){
 			notice = $('.error_notice_box');
 		}
 
-		notice.animate({top: 0}, 200, function(){
+		notice.stop().animate({top: 32}, 200, function(){
 			setTimeout( function(){
-				notice.animate({top: -75}, 200);
+				notice.stop().animate({top: -175}, 200);
 			}, 2000);
 		});
 
 	}
 
-	init_magic_tags = function(){
+
+	plorg_init_magic_tags = function(){
 		//init magic tags
 		var magicfields = jQuery('.magic-tag-enabled');
 
@@ -97,9 +102,27 @@ jQuery( function($){
 		// hook and rebuild the fields list
 		jQuery(document).trigger('record_change');
 		jQuery('#plugin_groups-id').trigger('change');
-		if( config_object ){
+		if( plorg_config_object ){
 			jQuery('#plugin-groups-field-sync').trigger('refresh');
 		}
+	}
+
+	plorg_canvas_reset = function(el, ev){
+		// handy to add things before builing/rebuilding the canvas
+		// return false to stop.
+
+		// remove editors and quicktags
+		if ( typeof tinymce !== 'undefined' ) {
+			for ( ed in tinymce.editors ) {
+				tinymce.editors[ed].remove();
+			}
+		}
+		if ( typeof QTags !== 'undefined' ) {
+			QTags.buttonsInitDone = false;
+			QTags.instances = {};
+		}
+
+		return true
 	}
 	
 	plorg_canvas_init = function(){
@@ -107,25 +130,49 @@ jQuery( function($){
 		if( !plugin_groups_canvas ){
 			// bind changes
 			jQuery('#plugin-groups-main-canvas').on('keydown keyup change','input, select, textarea', function(e) {
-				config_object = jQuery('#plugin-groups-main-form').formJSON(); // perhaps load into memory to keep it live.
-				jQuery('#plugin-groups-live-config').val( JSON.stringify( config_object ) ).trigger('change');
+				plorg_config_object = jQuery('#plugin-groups-main-form').formJSON(); // perhaps load into memory to keep it live.
+				jQuery('#plugin-groups-live-config').val( JSON.stringify( plorg_config_object ) ).trigger('change');
 			});
 			// bind editor
 			plorg_init_editor();
 			plugin_groups_canvas = jQuery('#plugin-groups-live-config').val();
-			config_object = JSON.parse( plugin_groups_canvas ); // perhaps load into memory to keep it live.
+			plorg_config_object = JSON.parse( plugin_groups_canvas ); // perhaps load into memory to keep it live.
+			// wp_editor
+			if ( typeof tinymce !== 'undefined' ) {
+				tinymce.on('AddEditor', function(e) {
+
+					e.editor.on('keyup', function (e) { 
+						this.save();
+						jQuery( this.targetElm ).trigger('keyup');
+					});
+					e.editor.on('change', function (e) { 
+						this.save();
+						jQuery( this.targetElm ).trigger('change');
+					});
+				});
+			}
 		}
 		if( $('.color-field').length ){
 			$('.color-field').wpColorPicker({
 				change: function(obj){
-					$('#plugin_groups-id').trigger('change');
+					
+					var trigger = $(this);
+					if( trigger.data('target') ){
+						$( trigger.data('target') ).css( trigger.data('style'), trigger.val() );
+					}
+					
 				}
 			});
 		}
 		if( $('.plugin-groups-group-wrapper').length ){
 			$( ".plugin-groups-group-wrapper" ).sortable({
 				handle: ".sortable-item",
-				update: function(){
+				start: function(ev, ui){
+					ui.item.data('moved', true);
+					ui.placeholder.css( 'borderWidth', ui.item.css( 'borderTopWidth') );
+					ui.placeholder.css( 'margin', ui.item.css( 'marginTop') );					
+				},
+				update: function(ev, ui){
 					jQuery('#plugin_groups-id').trigger('change');
 				}
 			});
@@ -136,6 +183,10 @@ jQuery( function($){
 				}
 			});
 		}
+
+		//wp_editor refresh
+		plorg_init_wp_editors();
+
 		// live change init
 		$('[data-init-change]').trigger('change');
 		$('[data-auto-focus]').focus().select();
@@ -144,6 +195,25 @@ jQuery( function($){
 		plorg_rebuild_magics();
 		jQuery(document).trigger('canvas_init');
 	}
+	
+	plorg_add_node = function(node, node_default){
+		var id = 'nd' + Math.round(Math.random() * 99866) + Math.round(Math.random() * 99866),
+			newnode = { "_id" : id },
+			nodes = node.split('.'),
+			node_point_record = nodes.join('.') + '.' + id,
+			node_defaults = JSON.parse( '{ "_id" : "' + id + '", "_node_point" : "' + node_point_record + '" }' );
+
+		if( node_default && typeof node_default === 'object' ){				
+			$.extend( true, node_defaults, node_default );
+		}			
+		var node_string = '{ "' + nodes.join( '": { "') + '" : { "' + id + '" : ' + JSON.stringify( node_defaults );
+		for( var cls = 0; cls <= nodes.length; cls++){
+			node_string += '}';
+		}
+		var new_nodes = JSON.parse( node_string );
+		$.extend( true, plorg_config_object, new_nodes );
+	};
+
 	plorg_get_default_setting = function(obj){
 
 		var id = 'nd' + Math.round(Math.random() * 99866) + Math.round(Math.random() * 99866),
@@ -155,25 +225,13 @@ jQuery( function($){
 		// add simple node
 		if( trigger.data('addNode') ){
 			// new node? add one
-			var newnode = { "_id" : id };
-			nodes = trigger.data('addNode').split('.');
-			var node_point_record = nodes.join('.') + '.' + id,
-				node_defaults = JSON.parse( '{ "_id" : "' + id + '", "_node_point" : "' + node_point_record + '" }' );
-			if( trigger.data('nodeDefault') && typeof trigger.data('nodeDefault') === 'object' ){				
-				$.extend( true, node_defaults, trigger.data('nodeDefault') );
-			}			
-			var node_string = '{ "' + nodes.join( '": { "') + '" : { "' + id + '" : ' + JSON.stringify( node_defaults );
-			for( var cls = 0; cls <= nodes.length; cls++){
-				node_string += '}';
-			}
-			var new_nodes = JSON.parse( node_string );
-			$.extend( true, config_object, new_nodes );
+			plorg_add_node( trigger.data('addNode'), trigger.data('nodeDefault') );
 		}
 		// remove simple node (all)
 		if( trigger.data('removeNode') ){
 			// new node? add one
-			if( config_object[trigger.data('removeNode')] ){
-				delete config_object[trigger.data('removeNode')];
+			if( plorg_config_object[trigger.data('removeNode')] ){
+				delete plorg_config_object[trigger.data('removeNode')];
 			}
 
 		}
@@ -181,22 +239,27 @@ jQuery( function($){
 		switch( trigger.data('script') ){
 			case "add-to-object":
 				// add to core object
-				//config_object.entry_name = obj.data.value; // ajax method
+				//plorg_config_object.entry_name = obj.data.value; // ajax method
 
 				break;
 			case "add-field-node":
 				// add to core object
-				if( !config_object[trigger.data('slug')][trigger.data('group')].field ){
-					config_object[trigger.data('slug')][trigger.data('group')].field = {};
+				if( !plorg_config_object[trigger.data('slug')][trigger.data('group')].field ){
+					plorg_config_object[trigger.data('slug')][trigger.data('group')].field = {};
 				}
-				config_object[trigger.data('slug')][trigger.data('group')].field[id] = { "_id": id, 'name': 'new field', 'slug': 'new_field' };
-				config_object.open_field = id;
+				plorg_config_object[trigger.data('slug')][trigger.data('group')].field[id] = { "_id": id, 'name': 'new field', 'slug': 'new_field' };
+				plorg_config_object.open_field = id;
 				break;				
 		}
 
-		jQuery('#plugin-groups-live-config').val( JSON.stringify( config_object ) );
-		jQuery('#plugin-groups-field-sync').trigger('refresh');
-	}
+		plorg_rebuild_canvas();
+
+	};
+
+	plorg_rebuild_canvas = function(){
+		jQuery('#plugin-groups-live-config').val( JSON.stringify( plorg_config_object ) );
+		jQuery('#plugin-groups-field-sync').trigger('refresh');	
+	};
 	// sutocomplete category
 	$.widget( "custom.catcomplete", $.ui.autocomplete, {
 		_create: function() {
@@ -235,21 +298,41 @@ jQuery( function($){
 			minLength: 0,
 			source: function( request, response ) {
 				// delegate back to autocomplete, but extract the last term
-				magic_tags = [];
-				var category = '';
-				// Search form fields
-				if( config_object.search_form && config_object.form_fields ){
-					// set internal tags
-					var system_tags = [
-						'autocomplete_item',
-					];					
-					category = $('#plugin-groups-label-tags').text();
-					for( f = 0; f < system_tags.length; f++ ){
-						magic_tags.push( { label: '{' + system_tags[f] + '}', category: category }  );
-					}							
+				plorg_magic_tags = [];
+				var category = '',
+					tags = $('.plugin-groups-magic-tags-definitions');
+
+				if( tags.length ){
+
+					for( var tag_set = 0; tag_set < tags.length; tag_set++ ){
+
+						var magic_tags;
+						
+						category = 'Magic Tags';
+
+						if( $( tags[ tag_set ] ).data('category') ){
+							category = $( tags[ tag_set ] ).data('category');
+						}
+						// set internal tags
+						try{
+							magic_tags = JSON.parse( tags[ tag_set ].value );
+						} catch (e) {
+							magic_tags = [ $(tags[ tag_set ]).data('tag') ];
+						}
+
+						var display_label;
+						for( f = 0; f < magic_tags.length; f++ ){
+							display_label = magic_tags[f].split( '*' );
+							if( display_label[1] ){
+								display_label = display_label[0] + '*';
+							}
+							plorg_magic_tags.push( { label: '{' + display_label + '}',value: '{' + magic_tags[f] + '}', category: category }  );
+						}
+					}
+
 				}
 				
-				response( $.ui.autocomplete.filter( magic_tags, extractLast( request.term ) ) );
+				response( $.ui.autocomplete.filter( plorg_magic_tags, extractLast( request.term ) ) );
 			},
 			focus: function() {
 				// prevent value inserted on focus
@@ -267,7 +350,61 @@ jQuery( function($){
 				return false;
 			}
 		});
-	}	
+	}
+
+	plorg_init_wp_editors = function(){
+
+		if( typeof tinyMCEPreInit === 'undefined'){
+			return;
+		}
+
+		var ed, init, edId, qtId, firstInit, wrapper;
+
+		if ( typeof tinymce !== 'undefined' ) {
+
+			for ( edId in tinyMCEPreInit.mceInit ) {
+
+				if ( firstInit ) {
+					init = tinyMCEPreInit.mceInit[edId] = tinymce.extend( {}, firstInit, tinyMCEPreInit.mceInit[edId] );
+				} else {
+					init = firstInit = tinyMCEPreInit.mceInit[edId];
+				}
+
+				wrapper = tinymce.DOM.select( '#wp-' + edId + '-wrap' )[0];
+
+				if ( ( tinymce.DOM.hasClass( wrapper, 'tmce-active' ) || ! tinyMCEPreInit.qtInit.hasOwnProperty( edId ) ) &&
+					! init.wp_skip_init ) {
+
+					try {
+						tinymce.init( init );
+
+						if ( ! window.wpActiveEditor ) {
+							window.wpActiveEditor = edId;
+						}
+					} catch(e){}
+				}
+			}
+		}
+		
+		for ( qtId in tinyMCEPreInit.qtInit ) {
+			try {
+				quicktags( tinyMCEPreInit.qtInit[qtId] );
+
+				if ( ! window.wpActiveEditor ) {
+					window.wpActiveEditor = qtId;
+				}
+			} catch(e){};
+		}
+
+		jQuery('.wp-editor-wrap').on( 'click.wp-editor', function() {
+
+			if ( this.id ) {
+				window.wpActiveEditor = this.id.slice( 3, -5 );
+			}
+		});
+
+
+	}
 
 	// trash 
 	$(document).on('click', '.plugin-groups-card-actions .confirm a', function(e){
@@ -297,22 +434,15 @@ jQuery( function($){
 	// bind label update
 	$(document).on('keyup change', '[data-sync]', function(){
 		var input = $(this),
-			syncs = $(input.data('sync')),
-			value = input.val();
+			syncs = $(input.data('sync'));
 		
-		if( input.is(':checkbox') ){
-			if( !input.prop('checked') ){
-				value = '';
-			}
-		}
-
 		syncs.each(function(){
 			var sync = $(this);
 
 			if( sync.is('input') ){
-				sync.val( value ).trigger('change');
+				sync.val( input.val() ).trigger('change');
 			}else{
-				sync.text(value);
+				sync.text(input.val());
 			}
 		});
 	});
@@ -358,21 +488,7 @@ jQuery( function($){
 		if( !clean ){
 			return;
 		}
-		$('.plugin-groups-nav-tabs .current').removeClass('current');
-		$('.plugin-groups-nav-tabs .active').removeClass('active');
-		$('.plugin-groups-nav-tabs .nav-tab-active').removeClass('nav-tab-active');
-		if( clicked.parent().is('li') ){
-			clicked.parent().addClass('active');			
-		}else if( clicked.parent().is('div') ){
-			clicked.addClass('current');			
-		}else{			
-			clicked.addClass('nav-tab-active');
-		}
-		
 
-		$('.plugin-groups-editor-panel').hide();
-		$( tab_id ).show();
-		
 		if( plorg_code_editor ){
 			plorg_code_editor.toTextArea();
 			plorg_code_editor = false;
@@ -386,7 +502,7 @@ jQuery( function($){
 		}
 
 		jQuery('#plugin-groups-active-tab').val(tab_id).trigger('change');
-
+		plorg_record_change();
 	});
 
 	// row remover global neeto
@@ -465,42 +581,42 @@ function plorg_init_editor(el){
 		return;
 	}	
 	// custom modes
-	var mustache = function(plugin_groups, state) {
+	var mustache = function(plugin_groups_init, state) {
 
 		var ch;
 
-		if (plugin_groups.match("{{")) {
-			while ((ch = plugin_groups.next()) != null){
-				if (ch == "}" && plugin_groups.next() == "}") break;
+		if (plugin_groups_init.match("{{")) {
+			while ((ch = plugin_groups_init.next()) != null){
+				if (ch == "}" && plugin_groups_init.next() == "}") break;
 			}
-			plugin_groups.eat("}");
+			plugin_groups_init.eat("}");
 			return "mustache";
 		}
 		/*
-		if (plugin_groups.match("{")) {
-			while ((ch = plugin_groups.next()) != null)
+		if (plugin_groups_init.match("{")) {
+			while ((ch = plugin_groups_init.next()) != null)
 				if (ch == "}") break;
-			plugin_groups.eat("}");
+			plugin_groups_init.eat("}");
 			return "mustacheinternal";
 		}*/
-		if (plugin_groups.match("%")) {
-			while ((ch = plugin_groups.next()) != null)
+		if (plugin_groups_init.match("%")) {
+			while ((ch = plugin_groups_init.next()) != null)
 				if (ch == "%") break;
-			plugin_groups.eat("%");
+			plugin_groups_init.eat("%");
 			return "command";
 		}
 
 		/*
-		if (plugin_groups.match("[[")) {
-			while ((ch = plugin_groups.next()) != null)
-				if (ch == "]" && plugin_groups.next() == "]") break;
-			plugin_groups.eat("]");
+		if (plugin_groups_init.match("[[")) {
+			while ((ch = plugin_groups_init.next()) != null)
+				if (ch == "]" && plugin_groups_init.next() == "]") break;
+			plugin_groups_init.eat("]");
 			return "include";
 		}*/
-		while (plugin_groups.next() != null && 
-			//!plugin_groups.match("{", false) && 
-			!plugin_groups.match("{{", false) && 
-			!plugin_groups.match("%", false) ) {}
+		while (plugin_groups_init.next() != null && 
+			//!plugin_groups_init.match("{", false) && 
+			!plugin_groups_init.match("{{", false) && 
+			!plugin_groups_init.match("%", false) ) {}
 			return null;
 	};
 
