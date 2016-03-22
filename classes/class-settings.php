@@ -88,13 +88,20 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 
 		// work on plugins list 
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
-
+		if( !empty( $plugin_groups['presets'] ) ){
+			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
+		}
+		if( !empty( $presets ) ){
+			if( empty( $plugin_groups['group'] ) ){
+				$plugin_groups['group'] = array();
+			}
+			$plugin_groups['group'] = array_merge( $plugin_groups['group'], $presets );
+		}
 		$screen = get_current_screen();
 		if( is_object($screen) && $screen->base === 'plugins' && isset( $_REQUEST['plugin_status'] ) && !empty( $plugin_groups['group'] ) ){
 			foreach( $plugin_groups['group'] as $group ){				
 				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				if( $_REQUEST['plugin_status'] === $key ){
-
 					$status = $key;
 					break;
 				}
@@ -113,7 +120,15 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 
 		// work on plugins list 
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
-		
+		if( !empty( $plugin_groups['presets'] ) ){
+			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
+		}
+		if( !empty( $presets ) ){
+			if( empty( $plugin_groups['group'] ) ){
+				$plugin_groups['group'] = array();
+			}
+			$plugin_groups['group'] = array_merge( $plugin_groups['group'], $presets );
+		}
 		if( !empty( $plugin_groups['group'] ) && is_array( $plugins ) ){
 			foreach($plugins['all'] as $plugin_slug=>$plugin_data){
 				foreach( $plugin_groups['group'] as $group ){
@@ -136,6 +151,17 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 							}
 						}
 					}
+					// do keyword
+					if( !empty( $group['config']['auto_keyword'] ) && !empty( $group['config']['keywords'] ) ){
+						$keywords = explode( "\n", $group['config']['keywords'] );
+						foreach( $keywords as $keyword ){
+							$keyword = strtolower( trim( $keyword ) );
+							if( false !== strpos( strtolower( $plugin_data['Name']) , $keyword ) || false !== strpos( strtolower( $plugin_data['Description'] ), $keyword ) ){
+								$plugins[ $key ][ $plugin_slug ] = $plugin_data;
+								$plugins[ $key ][ $plugin_slug ]['plugin'] =  $plugin_slug;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -154,22 +180,31 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		
 		// work on plugins list 
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
-
+		if( !empty( $plugin_groups['presets'] ) ){
+			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
+		}
+		if( !empty( $presets ) ){
+			if( empty( $plugin_groups['group'] ) ){
+				$plugin_groups['group'] = array();
+			}
+			$plugin_groups['group'] = array_merge( $plugin_groups['group'], $presets );
+		}
 		if( !empty( $plugin_groups['group'] ) ){
 			foreach( $plugin_groups['group'] as $group ){
-				if( empty( $group['config']['plugins'] ) ){
+				
+				$key = '_' . sanitize_key( $group['config']['group_name'] );
+				if( empty( $plugins[ $key ] ) ){
 					continue;
 				}
 				$count = 0;
-				foreach( $group['config']['plugins'] as $plugin_file ){
+				foreach( $plugins[ $key ] as $plugin_data ){
 
-					if( file_exists( WP_PLUGIN_DIR . '/' . $plugin_file ) ){
+					if( file_exists( WP_PLUGIN_DIR . '/' . $plugin_data['plugin'] ) ){
 						$count++;
 					}
 					
 				}
 
-				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				$class = "";
 				if( $status == $key ){
 					$class = 'current';
@@ -193,7 +228,15 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 
 		// work on plugins list 
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
-
+		if( !empty( $plugin_groups['presets'] ) ){
+			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
+		}
+		if( !empty( $presets ) ){
+			if( empty( $plugin_groups['group'] ) ){
+				$plugin_groups['group'] = array();
+			}
+			$plugin_groups['group'] = array_merge( $plugin_groups['group'], $presets );
+		}
 		if( isset( $_REQUEST['plugin_status'] ) && !empty( $plugin_groups['group'] ) ){
 			foreach( $plugin_groups['group'] as $group ){
 				$key = '_' . sanitize_key( $group['config']['group_name'] );
@@ -205,6 +248,52 @@ class Plugin_Groups_Settings extends Plugin_Groups{
 		}
 
 		return $plugins;
+	}
+
+	/**
+	 * built in presets keywords
+	 *
+	 * @since 0.0.1
+	 * @return array with preset groups
+	 */
+	public function get_preset_groups( $groups ){
+		
+		$baseGroups = array(
+			'WooCommerce' 				=> array( 'WooCommerce' ),
+			'Easy Digital Downloads' 	=> array( 'Easy Digital Downloads' ),
+			'Ninja Forms' 				=> array( 'Ninja Forms' ),
+			'Gravity Forms' 			=> array( 'Gravity Forms' ),
+			'CalderaWP' 				=> array( 'Caldera' )
+		);
+
+		$baseGroups = array_merge( $groups, $baseGroups );
+		return $baseGroups;
+	}
+
+	/**
+	 * get presets keywords
+	 *
+	 * @since 0.0.1
+	 * @return array with preset groups
+	 */
+	public function apply_preset_groups( $presets ){
+
+		$presetGroups = apply_filters( 'plugin-groups-get-presets', array() );
+		$groups = array();
+		foreach( $presets as $preset_key => $preset ){
+			if( empty( $presetGroups[ $preset ] ) ){
+				continue;
+			}
+			$group_id = sanitize_key( $preset );
+			$groups[ $group_id ] = array(
+				'config'	=>	array(
+					'group_name' 	=>	$preset,
+					'auto_keyword'	=>	true,
+					'keywords'		=>	implode("/n", (array) $presetGroups[ $preset ] )
+				)
+			);
+		}
+		return $groups;
 	}
 
 	/**

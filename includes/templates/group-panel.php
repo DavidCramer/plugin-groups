@@ -42,7 +42,7 @@
 		<button style="float:right" type="button" class="button" data-confirm="<?php echo esc_attr( __( 'Remove this Group?', 'plugin-groups' ) ); ?>" data-remove-element=".{{_id}}" style="float: right; padding: 3px 6px;"><?php _e( 'Delete Group', 'plugin-groups' ); ?></button>
 
 		<div style="border-bottom: 1px solid rgb(209, 209, 209); margin: 0px 0px 12px; padding: 5px 0px 12px;">
-			<input style="border: 0px none; background: none repeat scroll 0% 0% transparent; box-shadow: none; font-weight: bold; padding: 0px; margin: 0px; width: 450px;" type="text" name="{{:name}}[config][group_name]" data-live-sync="true" data-sync=".group_title_{{_id}}" data-format="key" value="{{config/group_name}}" id="caldera_todo-group_name-{{_id}}">
+			<input style="box-shadow: none; font-weight: bold; width: 450px; margin: -4px 0px 0px;" type="text" name="{{:name}}[config][group_name]" data-live-sync="true" data-sync=".group_title_{{_id}}" data-format="key" value="{{config/group_name}}" id="caldera_todo-group_name-{{_id}}">
 		</div>
 
 		<!-- Add custom code here fields names are {{:name}}[config][field_name] -->
@@ -56,15 +56,16 @@
 			<p class="description" style="margin-left:190px;"><?php _e( 'Add plugins to this group for filtering.', 'plugin-groups' ); ?></p>
 		</div>
 
-		<?php /*<div class="plugin-groups-config-group">
-			<label for="plugin-groups-remove-{{_id}}"><?php _e( "Remove from 'All'", 'plugin-groups' ); ?></label>
-			<label style="width: auto;"><input type="checkbox" id="plugin-groups-remove-{{_id}}" name="{{:name}}[config][remove_base]" value="1" {{#if config/remove_base}}checked="checked"{{/if}}> <?php _e( 'Remove this selection from the "All" filter.', 'plugin-groups' ); ?></label>
-		</div>*/?>
+		<div class="plugin-groups-config-group">
+			<label for="plugin-keywords-{{_id}}"> </label>
+			<label style="width: auto;"><input type="checkbox" data-live-sync="true" id="plugin-keywords-{{_id}}" name="{{:name}}[config][auto_keyword]" value="1" {{#if config/auto_keyword}}checked="checked"{{/if}}> <?php _e( 'Enable Keyword Grouping.', 'plugin-groups' ); ?></label>
+		</div>
 
-		<?php /*<div class="plugin-groups-config-group">
-			<label for="plugin-groups-default-{{_id}}"><?php _e( "Default Group", 'plugin-groups' ); ?></label>
-			<label style="width: auto;"><input type="checkbox" id="plugin-groups-default-{{_id}}" data-sync="#set_default_group" value="{{_id}}" data-livse-sync="true" {{#is @root/default_group value=_id}}checked="checked"{{/is}}> <?php _e( 'Set this as the default group.', 'plugin-groups' ); ?></label>
-		</div> */ ?>
+		<div class="plugin-groups-config-group" {{#unless config/auto_keyword}}style="display:none;"{{/unless}}>
+			<label for="plugin-keywords-{{_id}}"><?php _e( 'Keywords', 'plugin-groups' ); ?></label>
+			<textarea id="plugin-keywords-{{_id}}" name="{{:name}}[config][keywords]" style="width: 395px; height:120px;">{{config/keywords}}</textarea>
+			<p class="description" style="margin-left:190px;"><?php _e( 'Keywords to search for in plugin names & descriptions. 1 phrase per line.', 'plugin-groups' ); ?></p>
+		</div>
 
 		{{#script}}	
 		jQuery( function($){
