@@ -121,8 +121,6 @@ class Plugin_Groups {
 			wp_enqueue_script( 'plugin_groups-wp-baldrick', PLORG_URL . '/assets/js/wp-baldrick-full.js', array( 'jquery' ) , false, true );
 			wp_enqueue_script( 'jquery-ui-autocomplete' );
 			wp_enqueue_script( 'jquery-ui-sortable' );
-			wp_enqueue_style( 'plugin_groups-codemirror-style', PLORG_URL . '/assets/css/codemirror.css' );
-			wp_enqueue_script( 'plugin_groups-codemirror-script', PLORG_URL . '/assets/js/codemirror.js', array( 'jquery' ) , false );
 			wp_enqueue_script( 'plugin_groups-core-script', PLORG_URL . '/assets/js/scripts.js', array( 'plugin_groups-wp-baldrick' ) , false );
 			wp_enqueue_style( 'wp-color-picker' );
 			wp_enqueue_script( 'wp-color-picker' );			
