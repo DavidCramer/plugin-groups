@@ -4,7 +4,7 @@ Donate link: https://CalderaWP.com
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group, calderawp
 Requires at least: 3.9
 Tested up to: 4.2
-Stable tag: 1.0.3
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,8 +31,16 @@ Of course it does.
 
 1. Easy to use UI for creating and managing filter groups.
 2. The filter groups added to the Plugin Page.
+2. Presets makes common plugins easier
 
 == Changelog ==
+
+= 1.1.3 =
+Made editing of Group names more obvious.
+Added Export and Import to easily share configs between sites
+Added Presets for WooCommerce, Easy Digital Downloads, Ninja Forms and Gravity Forms. 
+Added Filter `plugin-groups-get-presets` to allow other plugins to register thier own preset groups
+Added Keyword Grouping. This allows you to add keywords to a group and will automatically add plugins that match
 
 = 1.0.3 =
 Added a notice to confirming saved changes.

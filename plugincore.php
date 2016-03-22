@@ -10,7 +10,7 @@
  * Plugin Name: Plugin Groups
  * Plugin URI:  http://CalderaWP.com
  * Description: Organize plugins in the Plugins Admin Page by creating groups and filter types
- * Version:     1.0.3
+ * Version:     1.1.0
  * Author:      David Cramer <david@digilab.co.za>
  * Author URI:  http://digilab.co.za/
  * Text Domain: plugin-groups
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 define('PLORG_PATH',  plugin_dir_path( __FILE__ ) );
 define('PLORG_URL',  plugin_dir_url( __FILE__ ) );
-define('PLORG_VER',  '1.0.3' );
+define('PLORG_VER',  '1.1.0' );
 
 
 
