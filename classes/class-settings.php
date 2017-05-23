@@ -80,7 +80,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		), 10, 3 );
 
 		// add options.
-		add_filter( 'screen_options_show_submit', array(
+		add_filter( 'disabled-screen_options_show_submit', array(
 			$this,
 			'screen_options',
 		), 10, 2 );

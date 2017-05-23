@@ -23,9 +23,9 @@ Install the plugin through the WordPress Plugins Installer or upload the decompr
 
 == Frequently Asked Questions ==
 
-= Does It Got To Eleven? =
+= Does it support Multi-site? =
 
-Of course it does.
+Not yet, still working on it and will be out asap!
 
 == Screenshots ==
 
@@ -34,6 +34,9 @@ Of course it does.
 2. Presets makes common plugins easier
 
 == Changelog ==
+
+= 1.2.0 =
+Added to Bulk Actions! You can now create and add plugins to groups via the Bulk Actions Dropdown.
 
 = 1.1.3 =
 Made editing of Group names more obvious.
