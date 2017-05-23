@@ -186,6 +186,7 @@ class Plugin_Groups_Options {
 	 * @param array $config plugin_groups config
 	 */
 	protected static function save_single( $id, $config ) {
+
 		return update_site_option( self::item_option_name( $id ), $config );
 
 	}

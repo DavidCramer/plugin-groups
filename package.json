@@ -4,12 +4,12 @@
   "description": "Organize plugins by groups and filter types",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CalderaWP/plugin-groups"
+    "url": "https://github.com/Desertsnowman/plugin-groups"
   },
-  "author": "CalderaWP",
+  "author": "Desertsnowman",
   "license": "GPLv2+",
   "bugs": {
-    "url": "https://github.com/CalderaWP/plugin-groups/issues"
+    "url": "https://github.com/Desertsnowman/plugin-groups/issues"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

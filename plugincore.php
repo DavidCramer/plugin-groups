@@ -3,16 +3,16 @@
  * @package   Plugin_Groups
  * @author    David Cramer <david@digilab.co.za>
  * @license   GPL-2.0+
- * @link      
+ * @link      https://cramer.co.za
  * @copyright 2015 David Cramer <david@digilab.co.za>
  *
  * @wordpress-plugin
  * Plugin Name: Plugin Groups
- * Plugin URI:  http://CalderaWP.com
+ * Plugin URI:  https://cramer.co.za
  * Description: Organize plugins in the Plugins Admin Page by creating groups and filter types
- * Version:     1.1.0
+ * Version:     2.0.0
  * Author:      David Cramer <david@digilab.co.za>
- * Author URI:  http://digilab.co.za/
+ * Author URI:  https://cramer.co.za/
  * Text Domain: plugin-groups
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 define('PLORG_PATH',  plugin_dir_path( __FILE__ ) );
 define('PLORG_URL',  plugin_dir_url( __FILE__ ) );
-define('PLORG_VER',  '1.1.0' );
+define('PLORG_VER',  '2.0.0' );
 
 
 
