@@ -227,6 +227,21 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 
 			$group_id                            = uniqid( 'nd' );
 			$new_name                            = filter_input( INPUT_POST, 'new_group', FILTER_SANITIZE_STRING );
+
+			// check does the group with same name already exists
+			// and if does, rename new group to contain unique id
+			$oldgroup = null;
+			if ( ! empty( $plugin_groups['group'] ) ) {
+				foreach ( $plugin_groups['group'] as $group_key => $group ) {
+					if ( $new_name === $group['config']['group_name'] ) {
+						$oldgroup = $group_key;
+					}
+				}
+			}
+			if ( $oldgroup ) {
+				$new_name = $new_name . "_" . $group_id;
+			}
+
 			$plugin_groups['group'][ $group_id ] = array(
 				'_id'         => $group_id,
 				'_node_point' => 'group.' . $group_id,
