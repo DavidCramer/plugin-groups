@@ -367,7 +367,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 
 				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				if ( empty( $plugins[ $key ] ) ) {
-					$views[ $key ] = $group['config']['group_name'] . ' <span class="count">(0)</span>';
+					$views[ $key ] = "<a href='?page=plugin_groups'>" . $group['config']['group_name'] . ' <span class="count">(0)</span></a>';
 					continue;
 				}
 				$count = 0;
