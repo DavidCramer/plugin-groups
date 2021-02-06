@@ -106,7 +106,7 @@ class Plugin_Groups {
 	 */
 	public function replace_scripts( $scripts ) {
 		$ver = get_bloginfo( 'version' );
-		if ( ! version_compare( '5.6', $ver, '<=' ) || ! self::is_plugin_group_screen() ) {
+		if ( ! version_compare( '5.6', $ver, '<=' ) ) {
 			return;
 		}
 
