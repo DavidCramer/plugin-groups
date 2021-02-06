@@ -147,9 +147,6 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 
 		$plugin_groups  = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		$current_status = filter_input( INPUT_GET, 'plugin_status', FILTER_SANITIZE_STRING );
-		if ( $this->is_group( $current_status ) ) {
-			$actions['_remove_group'] = __( 'Remove Group' );
-		}
 		$actions['_add_to_new_group'] = __( 'New Group' );
 		if ( ! empty( $plugin_groups['group'] ) ) {
 			foreach ( $plugin_groups['group'] as $key => $group ) {
