@@ -336,6 +336,19 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// create a list of ungrouped plugins
+		$ungrouped = $plugins['all'];
+		foreach ( $plugins as $plugingroup => $plugin ) {
+			if ( strpos($plugingroup , "_") === 0 ) {
+			    foreach ( $plugins[$plugingroup] as $pluginname => $plugindata ) {
+				    unset( $ungrouped[$pluginname] );
+			    }
+			}
+		}
+		foreach ( $ungrouped as $pluginname => $plugindata ) {
+			$plugins[ '_ungrouped-plugins' ][ $pluginname ] = $plugindata;
+		}
+
 		return $a;
 	}
 
@@ -385,6 +398,29 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// count a number of plugins that are not grouped in any of our groups
+		$ungrouped = $plugins['all'];
+		foreach ( $plugins as $plugingroup => $plugin ) {
+			if ( $this->is_group( $plugingroup ) ) {
+				foreach ( $plugins[$plugingroup] as $pluginname => $plugindata ) {
+					unset( $ungrouped[ $pluginname ] );
+				}
+			}
+		}
+		$count = count( $ungrouped );
+
+		// we keep extra '-' in $key, so that user can have its own group named 'Ungrouped Plugins', if they like so. This one is internal group.
+		$key = '_ungrouped-plugins';
+
+		// remove existing '_ungrouped-plugins' group from the list
+		unset( $views[ $key ] ) ;
+
+		$class = "";
+		if ( $status == $key ) {
+			$class = 'current';
+		}
+		$views[ $key ] = '<a class="' . $class . '" href="plugins.php?plugin_status=' . $key . '">' . __("Ungrouped") . ' <span class="count">(' . $count . ')</span></a>';
+
 		return $views;
 	}
 
@@ -416,6 +452,11 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 					break;
 				}
 			}
+		}
+
+		// if we are at the tab of Ungrouped plugins, stay there
+		if ( isset( $_REQUEST['plugin_status'] ) && $_REQUEST['plugin_status'] === '_ungrouped-plugins' ) {
+			$status = '_ungrouped-plugins';
 		}
 
 		return $plugins;
