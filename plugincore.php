@@ -25,6 +25,9 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+if ( ! is_admin() )
+     return;
+
 define( 'PLORG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PLORG_URL', plugin_dir_url( __FILE__ ) );
 define( 'PLORG_VER', '1.2.2' );
