@@ -569,7 +569,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function add_settings_pages() {
 		// This page will be under "Settings"
 
-		$this->plugin_screen_hook_suffix['plugin_groups'] = add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Groups', $this->plugin_slug ), $this->capability, 'plugin_groups', array(
+		$this->plugin_screen_hook_suffix['plugin_groups'] = add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Plugin Groups', $this->plugin_slug ), $this->capability, 'plugin_groups', array(
 			$this,
 			'create_admin_page',
 		) );
