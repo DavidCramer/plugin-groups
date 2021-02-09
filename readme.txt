@@ -1,10 +1,10 @@
 === Plugin Groups ===
-Contributors: Desertsnowman
+Contributors: Desertsnowman, dlcramer
 Donate link: https://cramer.co.za
-Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group, calderawp
+Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 3.9
-Tested up to: 4.2
-Stable tag: 1.1.0
+Tested up to: 5.6
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,13 +35,20 @@ Not yet, still working on it and will be out asap!
 
 == Changelog ==
 
+= 1.2.1 =
+- WordPress 5.6 compatibility.
+
+= 1.2.1 =
+- Fixed warnings on activation.
+- Fixed bulk action creation when no groups exist.
+
 = 1.2.0 =
 Added to Bulk Actions! You can now create and add plugins to groups via the Bulk Actions Dropdown.
 
 = 1.1.3 =
 Made editing of Group names more obvious.
 Added Export and Import to easily share configs between sites
-Added Presets for WooCommerce, Easy Digital Downloads, Ninja Forms and Gravity Forms. 
+Added Presets for WooCommerce, Easy Digital Downloads, Ninja Forms and Gravity Forms.
 Added Filter `plugin-groups-get-presets` to allow other plugins to register thier own preset groups
 Added Keyword Grouping. This allows you to add keywords to a group and will automatically add plugins that match
 
