@@ -2,6 +2,7 @@
 $plugin_groups = Plugin_Groups_Options::get_config();
 $plugins = get_plugins();
 
+wp_add_inline_script( 'plugin_groups-core', 'var pluginGroupsConfig = ' . wp_json_encode( $plugin_groups ), 'before' );
 ?>
 <div class="wrap plugin-groups-calderamain-canvas" id="plugin-groups-main-canvas">
 	<span class="wp-baldrick spinner" style="float: none; display: block;" data-target="#plugin-groups-main-canvas" data-callback="plorg_canvas_init" data-type="json" data-request="#plugin-groups-live-config" data-event="click" data-template="#main-ui-template" data-autoload="true"></span>

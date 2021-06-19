@@ -73,10 +73,12 @@ class Plugin_Groups_Options {
 	public static function get_group_by_name( $name ) {
 		$config = self::get_config();
 		$return = null;
-		foreach ( $config['group'] as $group ) {
-			if ( $name === $group['config']['group_name'] ) {
-				$return = $group;
-				break;
+		if( !empty( $config['group'] ) ) {
+			foreach ( $config['group'] as $group ) {
+				if ( $name === $group['config']['group_name'] ) {
+					$return = $group;
+					break;
+				}
 			}
 		}
 

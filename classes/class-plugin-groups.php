@@ -42,7 +42,7 @@ class Plugin_Groups {
 	protected $plugin_screen_hook_suffix = null;
 
 	protected $capability = 'manage_options';
-	protected $multisite = '';
+	protected $multisite  = '';
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and
@@ -210,8 +210,8 @@ class Plugin_Groups {
 		}
 
 		if ( 'plugins' === self::current_page() ) {
-			wp_enqueue_script( 'plugin_groups-bulk', PLORG_URL . '/assets/js/bulk.js', array( 'jquery' ), false );
-			wp_enqueue_style( 'plugin_groups-editor', PLORG_URL . 'assets/css/edit.css' );
+			wp_enqueue_script( 'plugin_groups-bulk', PLORG_URL . '/js/bulk.js', array(), PLORG_VER );
+			wp_enqueue_style( 'plugin_groups-editor', PLORG_URL . 'assets/css/edit.css', array(), PLORG_VER );
 		}
 	}
 }
