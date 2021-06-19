@@ -134,7 +134,7 @@ module.exports = function (grunt) {
     grunt.registerTask( 'version_number', [ 'replace:core_file' ] );
     grunt.registerTask( 'pre_vcs', [ 'shell:composer', 'version_number', 'copy', 'compress' ] );
     grunt.registerTask( 'do_git', [ 'gitadd', 'gitcommit', 'gittag', 'gitpush' ] );
-    grunt.registerTask( 'just_build', [  'shell:composer', 'copy', 'compress' ] );
+    grunt.registerTask( 'just_build', [  'copy', 'compress' ] );
 
     grunt.registerTask( 'release', [ 'pre_vcs', 'do_git', 'clean:post_build' ] );
 

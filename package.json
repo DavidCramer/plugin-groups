@@ -1,24 +1,24 @@
 {
   "name": "plugin-groups",
-  "version": "0.0.1",
+  "version": "1.2.2",
   "description": "Organize plugins by groups and filter types",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Desertsnowman/plugin-groups"
+    "url": "https://github.com/DavidCramer/plugin-groups"
   },
-  "author": "Desertsnowman",
+  "author": "DavidCramer",
   "license": "GPLv2+",
   "bugs": {
-    "url": "https://github.com/Desertsnowman/plugin-groups/issues"
+    "url": "https://github.com/DavidCramer/plugin-groups/issues"
   },
   "devDependencies": {
-    "grunt": "~0.4.2",
-    "grunt-cli": "~0.1.11",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-compress": "^0.13.0",
-    "grunt-contrib-copy": "^0.7.0",
-    "grunt-git": "^0.3.3",
-    "grunt-shell": "^1.1.1",
+    "grunt": "^1.4.1",
+    "grunt-cli": "^1.4.3",
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-compress": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-git": "^1.0.14",
+    "grunt-shell": "^3.0.1",
     "grunt-text-replace": "^0.4.0"
   }
 }
