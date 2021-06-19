@@ -75,7 +75,7 @@
 
 	<div class="clear"></div>
 	<div class="plugin-groups-footer-bar">
-		<button type="submit" class="button button-primary wp-baldrick" data-action="plorg_save_config" data-callback="plorg_handle_save" data-active-class="none" data-load-element="#plugin-groups-save-indicator" data-before="plorg_get_config_object" ><?php _e('Save Changes', 'plugin-groups') ; ?></button>
+		<button type="submit" class="button button-primary wp-baldrick" data-action="plorg_save_config" data-nonce="<?php echo esc_attr( wp_create_nonce('plugin-groups' ) ); ?>" data-callback="plorg_handle_save" data-active-class="none" data-load-element="#plugin-groups-save-indicator" data-before="plorg_get_config_object" ><?php _e('Save Changes', 'plugin-groups') ; ?></button>
 	</div>
 
 </form>

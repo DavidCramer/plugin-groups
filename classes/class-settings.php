@@ -17,7 +17,13 @@
  */
 class Plugin_Groups_Settings extends Plugin_Groups {
 
-
+	/**
+	 * Holds class isntance
+	 *
+	 * @since 0.0.1
+	 * @var      object|Plugin_Groups
+	 */
+	protected static $instance = null;
 	/**
 	 * Constructor for class
 	 *
@@ -30,43 +36,63 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		}
 
 		// add admin page
-		add_action( "{$this->multisite}admin_menu", array(
-			$this,
-			'add_settings_pages',
-		), 25 );
+		add_action(
+			"{$this->multisite}admin_menu",
+			array(
+				$this,
+				'add_settings_pages',
+			),
+			25
+		);
 		// save config
-		add_action( 'wp_ajax_plorg_save_config', array(
-			$this,
-			'save_config',
-		) );
+		add_action(
+			'wp_ajax_plorg_save_config',
+			array(
+				$this,
+				'save_config',
+			)
+		);
 		// get plugins filters
 		add_filter( 'all_plugins', array( $this, 'prepare_filter_addons' ) );
-		add_filter( 'views_plugins', array(
-			$this,
-			'filter_addons_filter_addons',
-		) );
-		add_filter( 'views_plugins-network', array(
-			$this,
-			'filter_addons_filter_addons',
-		) );
-		add_filter( 'show_advanced_plugins', array(
-			$this,
-			'filter_addons_do_filter_addons',
-		) );
-		add_action( 'after_plugin_row', array(
-			$this,
-			'filter_addons_prepare_filter_addons_referer',
-		), 10, 2 );
-		add_action( 'check_admin_referer', array(
-			$this,
-			'filter_addons_prepare_filter_addons_referer',
-		), 10, 2 );
-
-		// presets
-		add_filter( 'plugin-groups-get-presets', array(
-			$this,
-			'get_preset_groups',
-		) );
+		add_filter(
+			'views_plugins',
+			array(
+				$this,
+				'filter_addons_filter_addons',
+			)
+		);
+		add_filter(
+			'views_plugins-network',
+			array(
+				$this,
+				'filter_addons_filter_addons',
+			)
+		);
+		add_filter(
+			'show_advanced_plugins',
+			array(
+				$this,
+				'filter_addons_do_filter_addons',
+			)
+		);
+		add_action(
+			'after_plugin_row',
+			array(
+				$this,
+				'filter_addons_prepare_filter_addons_referer',
+			),
+			10,
+			2
+		);
+		add_action(
+			'check_admin_referer',
+			array(
+				$this,
+				'filter_addons_prepare_filter_addons_referer',
+			),
+			10,
+			2
+		);
 
 		// exporter
 		add_action( 'init', array( $this, 'check_exporter' ) );
@@ -74,19 +100,43 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		// add to bulk actions.
 		add_filter( 'bulk_actions-plugins', array( $this, 'bulk_actions' ) );
 		// action handler.
-		add_filter( 'handle_bulk_actions-plugins', array(
-			$this,
-			'bulk_action_handler',
-		), 10, 3 );
+		add_filter(
+			'handle_bulk_actions-plugins',
+			array(
+				$this,
+				'bulk_action_handler',
+			),
+			10,
+			3
+		);
 
 		// add options.
-		add_filter( 'disabled-screen_options_show_submit', array(
-			$this,
-			'screen_options',
-		), 10, 2 );
+		add_filter(
+			'disabled-screen_options_show_submit',
+			array(
+				$this,
+				'screen_options',
+			),
+			10,
+			2
+		);
 
 	}
+	/**
+	 * Return an instance of this class.
+	 *
+	 * @since 0.0.1
+	 * @return    object|\Plugin_Groups_Settings    A single instance of this class.
+	 */
+	public static function get_instance() {
 
+		// If the single instance hasn't been set, set it now.
+		if ( null == self::$instance ) {
+			self::$instance = new self;
+		}
+
+		return self::$instance;
+	}
 	/**
 	 * Checks if is a group status.
 	 *
@@ -97,7 +147,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			echo '<fieldset class="metabox-prefs plugin-groups">';
 			echo '<legend>' . __( 'Preset Groups' ) . '</legend>';
 			// Presets / Intergrations
-			$presetGroups = apply_filters( 'plugin-groups-get-presets', array() );
+			$presetGroups = $this->get_preset_groups();
 			foreach ( $presetGroups as $group => $group_keys ) {
 				echo '<label for="list-preset-group">';
 				echo '<input id="list-view-mode" type="checkbox" name="group_preset[]" value="' . esc_attr__( $group ) . '" />';
@@ -116,7 +166,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 * @since 0.0.1
 	 */
 	public function is_group( $status ) {
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+		$plugin_groups = Plugin_Groups_Options::get_config();
 		$return        = false;
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			foreach ( $plugin_groups['presets'] as $preset_key => $preset ) {
@@ -144,79 +194,67 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 * @since 0.0.1
 	 */
 	public function bulk_actions( $actions ) {
+		global $plugins, $status;
 
-		$plugin_groups  = Plugin_Groups_Options::get_single( 'plugin_groups' );
+		$plugin_groups  = Plugin_Groups_Options::get_config();
 		$current_status = filter_input( INPUT_GET, 'plugin_status', FILTER_SANITIZE_STRING );
-		if ( $this->is_group( $current_status ) ) {
-			$actions['_remove_group'] = __( 'Remove Group' );
-		}
-		$actions['_add_to_new_group'] = __( 'New Group' );
 		if ( ! empty( $plugin_groups['group'] ) ) {
 			foreach ( $plugin_groups['group'] as $key => $group ) {
-				$actions[ $key ] = __( 'Add to ' ) . $group['config']['group_name'];
+				$groupname = '_' . sanitize_key( $group['config']['group_name'] );
+				if ( $status !== $groupname ) {
+					$actions[ $key ] = __( 'Add to group: ' ) . $group['config']['group_name'];
+				}
 			}
 		}
+
+		$actions['_add_to_new_group'] = __( 'Add to New Group' );
+
+		// prepare a list of group showed plugins belongs to
+		if ( ! empty( $plugin_groups['group'] ) ) {
+			foreach ( $plugin_groups['group'] as $key => $group ) {
+				$groupname = '_' . sanitize_key( $group['config']['group_name'] );
+				if ( $status === $groupname ) {
+					$actions[ "removefrom_" . $key ] = __( 'Remove from group: ' ) . $group['config']['group_name'];
+				}
+			}
+		}
+
 		return $actions;
 	}
 
 	/**
-	 * Handle bulk action.
+	 * Handle build actions.
 	 *
-	 * @since 0.0.1
+	 * @param bool   $sendback Flag to send back to referrer.
+	 * @param string $action   The group ID or action to do.
+	 * @param array  $plugins  List of selected plugins.
+	 *
+	 * @return bool|string
 	 */
 	public function bulk_action_handler( $sendback, $action, $plugins ) {
 
-
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
-		if ( ! empty( $plugin_groups['group'][ $action ] ) ) {
-
-			foreach ( $plugins as $plugin ) {
-				if ( ! in_array( $plugin, $plugin_groups['group'][ $action ]['config']['plugins'], true ) ) {
-					$plugin_groups['group'][ $action ]['config']['plugins'][] = $plugin;
-				}
-			}
-			Plugin_Groups_Options::update( $plugin_groups );
-			$key      = '_' . sanitize_key( $plugin_groups['group'][ $action ]['config']['group_name'] );
-			$sendback = admin_url( 'plugins.php?plugin_status=' . $key );
-
-		}
 		if ( '_add_to_new_group' === $action ) {
-
-			$group_id                            = uniqid( 'nd' );
-			$new_name                            = filter_input( INPUT_POST, 'new_group', FILTER_SANITIZE_STRING );
-			$plugin_groups['group'][ $group_id ] = array(
-				'_id'         => $group_id,
-				'_node_point' => 'group.' . $group_id,
-				'config'      => array(
-					'group_name' => $new_name,
-					'plugins'    => $plugins,
-					'keywords'   => '',
-				),
-			);
-			$key                                 = '_' . sanitize_key( $new_name );
-			$sendback                            = admin_url( 'plugins.php?plugin_status=' . $key );
-			Plugin_Groups_Options::update( $plugin_groups );
+			$new_name = filter_input( INPUT_POST, 'new_group', FILTER_SANITIZE_STRING );
+			$action   = Plugin_Groups_Options::create_group( $new_name );
 		}
-		if ( '_remove_group' === $action ) {
-			$to_remove = filter_input( INPUT_POST, 'plugin_status', FILTER_SANITIZE_STRING );
-			// presets.
-			if ( ! empty( $plugin_groups['presets'] ) ) {
-				foreach ( $plugin_groups['presets'] as $preset_key => $preset ) {
-					$key = '_' . sanitize_key( $preset );
-					if ( $to_remove === $key ) {
-						unset( $plugin_groups['presets'][ $preset_key ] );
-					}
-				}
-			}
 
-			foreach ( $plugin_groups['group'] as $group_key => $group ) {
-				$key = '_' . sanitize_key( $group['config']['group_name'] );
-				if ( $to_remove === $key ) {
-					unset( $plugin_groups['group'][ $group_key ] );
-				}
+		// Add or remove from group.
+		$add = true;
+		if ( strpos( $action, "removefrom_" ) === 0 ) {
+			$action = substr( $action, strlen( "removefrom_" ) );
+			$add    = false;
+		}
+		$group = Plugin_Groups_Options::get_group( $action );
+		if ( $group ) {
+			if ( $add ) {
+				$group['config']['plugins'] = array_merge( $group['config']['plugins'], $plugins );
+			} else {
+				$group['config']['plugins'] = array_diff( $group['config']['plugins'], $plugins );
 			}
-			$sendback = admin_url( 'plugins.php' );
-			Plugin_Groups_Options::update( $plugin_groups );
+			$group['config']['plugins'] = array_unique( $group['config']['plugins'] );
+			Plugin_Groups_Options::set_group( $group );
+			$key      = '_' . sanitize_key( $group['config']['group_name'] );
+			$sendback = admin_url( 'plugins.php?plugin_status=' . $key );
 		}
 
 		return $sendback;
@@ -225,16 +263,16 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	/**
 	 * builds an export
 	 *
-	 * @uses  "wp_ajax_plorg_check_exporter" hook
 	 * @since 0.0.1
+	 * @uses  "wp_ajax_plorg_check_exporter" hook
 	 */
 	public function check_exporter() {
 
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( current_user_can( 'manage_options' ) && Plugin_Groups::is_plugin_group_screen() ) {
+			$nonce = filter_input( INPUT_GET, 'plugin-groups-export', FILTER_SANITIZE_STRING );
+			if ( $nonce && wp_verify_nonce( $nonce, 'plugin-groups' ) ) {
 
-			if ( ! empty( $_REQUEST['download'] ) && ! empty( $_REQUEST['plugin-groups-export'] ) && wp_verify_nonce( $_REQUEST['plugin-groups-export'], 'plugin-groups' ) ) {
-
-				$data = Plugin_Groups_Options::get_single( $_REQUEST['download'] );
+				$data = Plugin_Groups_Options::get_config();
 
 				header( 'Content-Type: application/json' );
 				header( 'Content-Disposition: attachment; filename="plugin-groups-export.json"' );
@@ -258,7 +296,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		}
 
 		// work on plugins list
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+		$plugin_groups = Plugin_Groups_Options::get_config();
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
 		}
@@ -290,7 +328,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		global $plugins, $status;
 
 		// work on plugins list
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+		$plugin_groups = Plugin_Groups_Options::get_config();
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
 		}
@@ -339,6 +377,19 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// create a list of ungrouped plugins
+		$ungrouped = $plugins['all'];
+		foreach ( $plugins as $plugingroup => $plugin ) {
+			if ( strpos( $plugingroup, "_" ) === 0 ) {
+				foreach ( $plugins[ $plugingroup ] as $pluginname => $plugindata ) {
+					unset( $ungrouped[ $pluginname ] );
+				}
+			}
+		}
+		foreach ( $ungrouped as $pluginname => $plugindata ) {
+			$plugins['_ungrouped-plugins'][ $pluginname ] = $plugindata;
+		}
+
 		return $a;
 	}
 
@@ -352,7 +403,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		global $status, $plugins;
 
 		// work on plugins list
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+		$plugin_groups = Plugin_Groups_Options::get_config();
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
 		}
@@ -367,7 +418,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 
 				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				if ( empty( $plugins[ $key ] ) ) {
-					$views[ $key ] = $group['config']['group_name'] . ' <span class="count">(0)</span>';
+					$views[ $key ] = "<a href='?page=plugin_groups'>" . $group['config']['group_name'] . ' <span class="count">(0)</span></a>';
 					continue;
 				}
 				$count = 0;
@@ -388,6 +439,29 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// count a number of plugins that are not grouped in any of our groups
+		$ungrouped = $plugins['all'];
+		foreach ( $plugins as $plugingroup => $plugin ) {
+			if ( $this->is_group( $plugingroup ) ) {
+				foreach ( $plugins[ $plugingroup ] as $pluginname => $plugindata ) {
+					unset( $ungrouped[ $pluginname ] );
+				}
+			}
+		}
+		$count = count( $ungrouped );
+
+		// we keep extra '-' in $key, so that user can have its own group named 'Ungrouped Plugins', if they like so. This one is internal group.
+		$key = '_ungrouped-plugins';
+
+		// remove existing '_ungrouped-plugins' group from the list
+		unset( $views[ $key ] );
+
+		$class = "";
+		if ( $status == $key ) {
+			$class = 'current';
+		}
+		$views[ $key ] = '<a class="' . $class . '" href="plugins.php?plugin_status=' . $key . '">' . __( "Ungrouped" ) . ' <span class="count">(' . $count . ')</span></a>';
+
 		return $views;
 	}
 
@@ -401,7 +475,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		global $wp_list_table, $status;
 
 		// work on plugins list
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+		$plugin_groups = Plugin_Groups_Options::get_config();
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
 		}
@@ -421,6 +495,11 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// if we are at the tab of Ungrouped plugins, stay there
+		if ( isset( $_REQUEST['plugin_status'] ) && $_REQUEST['plugin_status'] === '_ungrouped-plugins' ) {
+			$status = '_ungrouped-plugins';
+		}
+
 		return $plugins;
 	}
 
@@ -430,19 +509,24 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 * @since 0.0.1
 	 * @return array with preset groups
 	 */
-	public function get_preset_groups( $groups ) {
+	public function get_preset_groups() {
 
 		$baseGroups = array(
 			'WooCommerce'            => array( 'WooCommerce' ),
 			'Easy Digital Downloads' => array( 'Easy Digital Downloads' ),
 			'Ninja Forms'            => array( 'Ninja Forms' ),
 			'Gravity Forms'          => array( 'Gravity Forms' ),
-			'CalderaWP'              => array( 'Caldera' ),
+			'Cloudinary'             => array( 'Cloudinary' ),
 		);
 
-		$baseGroups = array_merge( $groups, $baseGroups );
-
-		return $baseGroups;
+		/**
+		 * Filter a preset_groups.
+		 *
+		 * @param string $option_name The name of the option it was stored in.
+		 *
+		 * @param array  $config      The config to be returned
+		 */
+		return apply_filters( 'plugin_groups_get_presets', $baseGroups );
 	}
 
 	/**
@@ -453,7 +537,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 */
 	public function apply_preset_groups( $presets ) {
 
-		$presetGroups = apply_filters( 'plugin-groups-get-presets', array() );
+		$presetGroups = $this->get_preset_groups();
 		$groups       = array();
 		foreach ( $presets as $preset_key => $preset ) {
 			if ( empty( $presetGroups[ $preset ] ) ) {
@@ -475,30 +559,16 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	/**
 	 * Saves a config
 	 *
-	 * @uses  "wp_ajax_plorg_save_config" hook
 	 * @since 0.0.1
+	 * @uses  "wp_ajax_plorg_save_config" hook
 	 */
 	public function save_config() {
+		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
+		if ( $nonce && wp_verify_nonce( $nonce, 'plugin-groups' ) ) {
 
-		if ( empty( $_POST['plugin-groups-setup'] ) || ! wp_verify_nonce( $_POST['plugin-groups-setup'], 'plugin-groups' ) ) {
-			if ( empty( $_POST['config'] ) ) {
-				return;
-			}
-		}
+			$config_raw = filter_input( INPUT_POST, 'config', FILTER_SANITIZE_STRING );
 
-		if ( ! empty( $_POST['plugin-groups-setup'] ) && empty( $_POST['config'] ) ) {
-			$config = stripslashes_deep( $_POST['config'] );
-
-			Plugin_Groups_Options::update( $config );
-
-
-			wp_redirect( '?page=plugin_groups&updated=true' );
-			exit;
-		}
-
-		if ( ! empty( $_POST['config'] ) ) {
-
-			$config = json_decode( stripslashes_deep( $_POST['config'] ), true );
+			$config = json_decode( stripslashes_deep( html_entity_decode( $config_raw ) ), true );
 
 			if ( wp_verify_nonce( $config['plugin-groups-setup'], 'plugin-groups' ) ) {
 				Plugin_Groups_Options::update( $config );
@@ -506,59 +576,9 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 
 		}
-
 		// nope
-		wp_send_json_error( $config );
-
+		wp_send_json_error();
 	}
-
-	/**
-	 * Array of "internal" fields not to mess with
-	 *
-	 * @since 0.0.1
-	 * @return array
-	 */
-	public function internal_config_fields() {
-		return array( '_wp_http_referer', 'id', '_current_tab' );
-	}
-
-
-	/**
-	 * Deletes an item
-	 *
-	 * @uses  'wp_ajax_plorg_create_plugin_groups' action
-	 * @since 0.0.1
-	 */
-	public function delete_plugin_groups() {
-
-		$deleted = Plugin_Groups_Options::delete( strip_tags( $_POST['block'] ) );
-
-		if ( $deleted ) {
-			wp_send_json_success( $_POST );
-		} else {
-			wp_send_json_error( $_POST );
-		}
-
-
-	}
-
-	/**
-	 * Create a new item
-	 *
-	 * @uses  "wp_ajax_plorg_create_plugin_groups"  action
-	 * @since 0.0.1
-	 */
-	public function create_new_plugin_groups() {
-		$new = Plugin_Groups_Options::create( $_POST['name'], $_POST['slug'] );
-
-		if ( is_array( $new ) ) {
-			wp_send_json_success( $new );
-		} else {
-			wp_send_json_error( $_POST );
-		}
-
-	}
-
 
 	/**
 	 * Add options page
@@ -569,14 +589,24 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function add_settings_pages() {
 		// This page will be under "Settings"
 
-		$this->plugin_screen_hook_suffix['plugin_groups'] = add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Groups', $this->plugin_slug ), $this->capability, 'plugin_groups', array(
-			$this,
-			'create_admin_page',
-		) );
-		add_action( 'admin_print_styles-' . $this->plugin_screen_hook_suffix['plugin_groups'], array(
-			$this,
-			'enqueue_admin_stylescripts',
-		) );
+		$this->plugin_screen_hook_suffix['plugin_groups'] = add_submenu_page(
+			'plugins.php',
+			__( 'Plugin Groups', $this->plugin_slug ),
+			__( 'Plugin Groups', $this->plugin_slug ),
+			$this->capability,
+			'plugin_groups',
+			array(
+				$this,
+				'create_admin_page',
+			)
+		);
+		add_action(
+			'admin_print_styles-' . $this->plugin_screen_hook_suffix['plugin_groups'],
+			array(
+				$this,
+				'enqueue_admin_stylescripts',
+			)
+		);
 
 	}
 
@@ -601,7 +631,6 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 		}
 
 	}
-
 
 }
 

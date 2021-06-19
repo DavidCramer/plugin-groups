@@ -1,5 +1,5 @@
 <?php
-$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+$plugin_groups = Plugin_Groups_Options::get_config();
 $plugins = get_plugins();
 
 ?>
@@ -15,7 +15,7 @@ $plugins = get_plugins();
 	<?php
 	// pull in the join table card template
 	include PLORG_PATH . 'includes/templates/main-ui.php';
-	?>	
+	?>
 </script>
 <script type="text/javascript">
 	function plorg_start_importer(){
@@ -44,20 +44,20 @@ $plugins = get_plugins();
 
 				if (f) {
 					var r = new FileReader();
-					r.onload = function(e) { 
+					r.onload = function(e) {
 						contents = e.target.result;
 						var data;
-						 try{ 
+						 try{
 						 	data = JSON.parse( contents );
 						 } catch(e){};
-						 
+
 						 if( !data || ! data['plugin-groups-setup'] ){
 						 	alert("<?php echo esc_attr( __('Not a valid Plugin-groups export file.', 'plugin-groups') ); ?>");
 						 	input[0].value = null;
 							return false;
 						 }
 
-						$('#plugin-groups-live-config').val( contents );						
+						$('#plugin-groups-live-config').val( contents );
 						$('#plorg_import_init').prop('disabled', false).removeClass('disabled');
 					}
 					if( f.type !== 'application/json' ){
@@ -66,7 +66,7 @@ $plugins = get_plugins();
 						return false;
 					}
 					r.readAsText(f);
-				} else { 
+				} else {
 					alert("Failed to load file");
 					return false;
 				}

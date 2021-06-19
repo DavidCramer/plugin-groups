@@ -180,7 +180,9 @@ class Plugin_Groups {
 		$return = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 		if ( is_null( $return ) && function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
-			$return = $screen->base;
+			if ( $screen instanceof WP_Screen && isset( $screen->base ) ) {
+				$return = $screen->base;
+			}
 		}
 
 		return $return;
@@ -195,7 +197,6 @@ class Plugin_Groups {
 	public function enqueue_admin_stylescripts() {
 
 		if ( self::is_plugin_group_screen() ) {
-
 			wp_enqueue_style( 'plugin_groups-core-style', PLORG_URL . '/assets/css/styles.css' );
 			wp_enqueue_style( 'plugin_groups-baldrick-modals', PLORG_URL . '/assets/css/modals.css' );
 			wp_enqueue_script( 'plugin_groups-wp-baldrick', PLORG_URL . '/assets/js/wp-baldrick-full.js', array( 'jquery' ), false, true );

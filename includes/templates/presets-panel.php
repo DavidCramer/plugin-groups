@@ -1,7 +1,7 @@
 <?php
 
 	// Presets / Intergrations
-	$presetGroups = apply_filters( 'plugin-groups-get-presets', array() );
+	$presetGroups = Plugin_Groups_Settings::get_instance()->get_preset_groups();
 	foreach( $presetGroups as $group => $group_keys ){
 		$index = uniqid();
 ?>
