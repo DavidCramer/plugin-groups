@@ -32,13 +32,13 @@ h4 > small.description {
   z-index: 9999;
 }
 .plugin-groups-sub-headercaldera {
-  top: 96px;
+  top: 94px;
   z-index: 9998;
 }
 
 .plugin-groups-fixed-list {
   width: 420px;
-  float:left;  
+  float:left;
 }
 .plugin-groups-fixed-center {
   bottom: 32px;
@@ -79,14 +79,14 @@ h4 > small.description {
   .plugin-groups-sub-headercaldera{
     top: 56px;
     left: 22px;
-  } 
+  }
   .plugin-groups-sub-headercaldera{
     top: 110px;
   }
   .plugin-groups-fixed-center {
     left: 370px;
     top: 185px;
-  }  
+  }
 }
 @media screen and ( max-width: 600px ) {
   .plugin-groups-main-headercaldera,
@@ -128,7 +128,7 @@ h4 > small.description {
   font-size: 20px;
   font-weight: 300;
   float: left;
-  padding: 11px 15px 2px 0;  
+  padding: 11px 15px 2px 0;
   margin: 6px;
   line-height: 17px;
 }
@@ -491,7 +491,7 @@ h4 > small.description {
 }
 
 .plugin-groups-module-tabs {
-  background: none repeat scroll 0 0 #f4f4f4;  
+  background: none repeat scroll 0 0 #f4f4f4;
   margin: 0 0 0 -22px;
   padding: 0;
   overflow: hidden;

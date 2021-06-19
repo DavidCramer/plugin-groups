@@ -126,10 +126,12 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 				}
 			}
 		}
-		foreach ( $plugin_groups['group'] as $group_key => $group ) {
-			$key = '_' . sanitize_key( $group['config']['group_name'] );
-			if ( $status === $key ) {
-				$return = true;
+		if ( ! empty( $plugin_groups['group'] ) ) {
+			foreach ( $plugin_groups['group'] as $group_key => $group ) {
+				$key = '_' . sanitize_key( $group['config']['group_name'] );
+				if ( $status === $key ) {
+					$return = true;
+				}
 			}
 		}
 
@@ -149,10 +151,11 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			$actions['_remove_group'] = __( 'Remove Group' );
 		}
 		$actions['_add_to_new_group'] = __( 'New Group' );
-		foreach ( $plugin_groups['group'] as $key => $group ) {
-			$actions[ $key ] = __( 'Add to ' ) . $group['config']['group_name'];
+		if ( ! empty( $plugin_groups['group'] ) ) {
+			foreach ( $plugin_groups['group'] as $key => $group ) {
+				$actions[ $key ] = __( 'Add to ' ) . $group['config']['group_name'];
+			}
 		}
-
 		return $actions;
 	}
 
@@ -254,7 +257,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			return;
 		}
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -286,7 +289,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function filter_addons_do_filter_addons( $a ) {
 		global $plugins, $status;
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -348,7 +351,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function filter_addons_filter_addons( $views ) {
 		global $status, $plugins;
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -397,7 +400,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function prepare_filter_addons( $plugins ) {
 		global $wp_list_table, $status;
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -583,7 +586,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 * @since 0.0.1
 	 */
 	public function create_admin_page() {
-		// Set class property        
+		// Set class property
 		$screen = get_current_screen();
 		$base   = array_search( $screen->id, $this->plugin_screen_hook_suffix );
 

@@ -602,6 +602,9 @@ html[dir="rtl"] .ccselect2-container-multi .ccselect2-choices .ccselect2-search-
     font-size: 1px;
     outline: none;
 }
+.ccselect2-search-choice-close.dashicons {
+    background-image: none !important;
+}
 html[dir="rtl"] .ccselect2-search-choice-close {
     right: auto;
     left: 3px;

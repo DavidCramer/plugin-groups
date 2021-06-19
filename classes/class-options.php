@@ -63,7 +63,8 @@ class Plugin_Groups_Options {
 	 */
 	public static function get_single( $id ) {
 		$option_name = self::item_option_name( $id );
-		$plugin_groups = get_site_option( $option_name, false );
+		$default = array( 'id' => $id );
+		$plugin_groups = get_option( $option_name, $default );
 
 		// try slug based lookup
 		if( false === $plugin_groups ){
@@ -71,7 +72,7 @@ class Plugin_Groups_Options {
 			foreach( $registry as $single_id => $single ){
 				if( $single['slug'] === $id ){
 					$option_name = self::item_option_name( $single_id );
-					$plugin_groups = get_site_option( $option_name, false );
+					$plugin_groups = get_option( $option_name, array() );
 					break;
 				}
 			}
@@ -98,7 +99,7 @@ class Plugin_Groups_Options {
 	 */
 
 	public static function get_registry() {
-		$registry = get_site_option( self::registry_name(), array() );
+		$registry = get_option( self::registry_name(), array() );
 
 		/**
 		 * Filter the registry before returning

@@ -18,9 +18,6 @@ jQuery(function ($) {
 
     $(document).ready(function () {
         $('#bulk-action-selector-top,#bulk-action-selector-bottom').trigger('init');
-        //$('.subsubsub').after('<div class="plugin-group-settings">wooo</div>');
-        //$('.subsubsub a.current').addClass('edit');
-
     });
 
 });
