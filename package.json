@@ -1,6 +1,6 @@
 {
   "name": "plugin-groups",
-  "version": "1.2.2",
+  "version": "2.0.0",
   "description": "Organize plugins by groups and filter types",
   "repository": {
     "type": "git",
@@ -17,6 +17,14 @@
   },
   "devDependencies": {
     "@wordpress/scripts": "^16.0.0",
+    "@wordpress/api-fetch": "^3.23.1",
+    "@wordpress/data": "^4.27.3",
+    "@wordpress/i18n": "^4.2.1",
+    "@wordpress/url": "^3.2.1",
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "grunt": "^1.4.1",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-clean": "^2.0.0",
@@ -28,6 +36,9 @@
     "webpack": "^4.44.2",
     "webpack-cli": "^4.2.0",
     "webpackbar": "^4.0.0",
-    "handlebars": "^4.7.7"
+    "postcss-loader": "^6.1.0",
+    "mini-css-extract-plugin": "^1.6.0",
+    "optimize-css-assets-webpack-plugin": "^6.0.0",
+    "sortablejs": "^1.13.0"
   }
 }

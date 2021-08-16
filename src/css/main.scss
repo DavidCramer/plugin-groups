@@ -1,0 +1,102 @@
+@import "variables";
+
+
+.plugin-groups {
+	margin-left: -20px;
+
+	.ui {
+		&-header {
+			display: flex;
+			align-items: center;
+			padding-left: 20px;
+			margin-bottom: 20px;
+			background-color: $color_brand_green;
+			box-shadow: 0 1px 1px $color_shadow_light;
+
+			h2 {
+				margin: 0;
+				padding: 1em 1em 1em 0;
+				color: $color_white;
+				text-shadow: 0 1px 1px $color_shadow;
+			}
+
+			&-version {
+				font-size: 0.8em;
+				color: $color_white;
+			}
+
+			.button{
+				background-color: $color_dark_green;
+				border-color: $color_brand_green;
+				box-shadow: none;
+				margin-left: 20px;
+				&:focus{
+					opacity: 0.4;
+				}
+			}
+		}
+
+		&-body {
+			display: flex;
+
+			&-sidebar {
+				min-width: 400px;
+				width: 400px;
+				padding: 0 20px 20px;
+
+				h3 {
+					margin: 0 0 10px;
+				}
+
+				&-list {
+					margin: 10px -20px 0;
+					border-top: 1px solid $color_brand_green;
+					display: flex;
+					flex-direction: column;
+
+					.active {
+						background: $color_white;
+					}
+
+					&-item {
+						display: flex;
+						justify-content: space-between;
+						padding: 0.6em 20px;
+						cursor: pointer;
+
+						&:hover {
+							&:not(.active) {
+								background-color: $color_white_hover;
+							}
+						}
+						&-icons{
+							display: flex;
+							justify-content: space-between;
+							width: 50px;
+						}
+					}
+				}
+			}
+
+			&-edit {
+				margin: 0 20px;
+				width: 100%;
+				h3 {
+					margin: 0 0 10px;
+				}
+				&-title {
+					border: 1px transparent;
+					padding: 6px;
+					margin: -7px;
+					font-size: inherit;
+					&:focus{
+						box-shadow: 0 0 0;
+					}
+					&:focus-visible{
+						outline: 0;
+					}
+				}
+			}
+		}
+	}
+}

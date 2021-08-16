@@ -2,7 +2,7 @@
  * External dependencies
  */
 const path = require( 'path' );
-//const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 
 /**
@@ -11,18 +11,42 @@ const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 
-const bulkActions = {
+const pluginGroups = {
 	...defaultConfig,
 	entry: {
-		bulk: './assets/js/src/bulk.js',
+		"plugin-groups": './src/js/main.js',
 	},
 	output: {
 		path: path.resolve( process.cwd(), 'js' ),
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			// Remove the css/postcss loaders from `@wordpress/scripts` due to version conflicts.
+			...defaultConfig.module.rules.filter(
+				( rule ) => ! rule.test.toString().match( '.css' )
+			),
+			{
+				test: /\.css$/,
+				use: [
+					// prettier-ignore
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
+	},
+	plugins: [
+		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name].css',
+		} )
+	],
 };
 
 module.exports = [
-	bulkActions
+	pluginGroups
 ];
