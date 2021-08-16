@@ -6,3 +6,10 @@ tools:
 checks:
     php:
         code_rating: true
+build:
+    nodes:
+        analysis:
+            tests:
+                override:
+                    - js-scrutinizer-run
+                    - php-scrutinizer-run
