@@ -2,9 +2,16 @@
 
 
 .plugin-groups {
-	margin-left: -20px;
+	&-main > & {
+		margin-left: -20px;
+	}
+
+	.subsubsub {
+		float: none;
+	}
 
 	.ui {
+
 		&-header {
 			display: flex;
 			align-items: center;
@@ -25,12 +32,13 @@
 				color: $color_white;
 			}
 
-			.button{
+			.button {
 				background-color: $color_dark_green;
 				border-color: $color_brand_green;
 				box-shadow: none;
 				margin-left: 20px;
-				&:focus{
+
+				&:focus {
 					opacity: 0.4;
 				}
 			}
@@ -69,7 +77,8 @@
 								background-color: $color_white_hover;
 							}
 						}
-						&-icons{
+
+						&-icons {
 							display: flex;
 							justify-content: space-between;
 							width: 50px;
@@ -81,18 +90,22 @@
 			&-edit {
 				margin: 0 20px;
 				width: 100%;
+
 				h3 {
 					margin: 0 0 10px;
 				}
+
 				&-title {
 					border: 1px transparent;
 					padding: 6px;
 					margin: -7px;
 					font-size: inherit;
-					&:focus{
+
+					&:focus {
 						box-shadow: 0 0 0;
 					}
-					&:focus-visible{
+
+					&:focus-visible {
 						outline: 0;
 					}
 				}

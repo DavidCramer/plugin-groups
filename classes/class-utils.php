@@ -10,7 +10,30 @@ namespace Plugin_Groups;
 /**
  * Class Plugin_Groups_Utils
  */
-class Plugin_Groups_Utils {
+class Utils {
+
+	/**
+	 * Get all the attributes from an HTML tag.
+	 *
+	 * @param string $tag HTML tag to get attributes from.
+	 *
+	 * @return array
+	 */
+	public static function get_tag_attributes( $tag ) {
+		$tag    = strstr( $tag, ' ', false );
+		$tag    = trim( $tag, '> ' );
+		$args   = shortcode_parse_atts( $tag );
+		$return = array();
+		foreach ( $args as $key => $value ) {
+			if ( is_int( $key ) ) {
+				$return[ $value ] = 'true';
+				continue;
+			}
+			$return[ $key ] = $value;
+		}
+
+		return $return;
+	}
 
 	/**
 	 * Check if an element type is a void elements.
@@ -45,21 +68,27 @@ class Plugin_Groups_Utils {
 	 *
 	 * @param string $element    The element to build.
 	 * @param array  $attributes The attributes for the tags.
-	 * @param string $state      The element state.
+	 * @param string $content    The element content.
 	 *
 	 * @return string
 	 */
-	public static function build_tag( $element, $attributes = array(), $state = 'open' ) {
+	public static function build_tag( $element, $attributes = array(), $content = '' ) {
 
-		$prefix_element = 'close' === $state ? '/' : '';
-		$tag            = array();
-		$tag[]          = $prefix_element . $element;
-		if ( 'close' !== $state ) {
-			$tag[] = self::build_attributes( $attributes );
+		$parts = array(
+			'<' . $element,
+		);
+		if ( ! empty( $attributes ) ) {
+			$parts[] = self::build_attributes( $attributes );
 		}
-		$tag[] = self::is_void_element( $element ) ? '/' : null;
+		$suffix = null;
+		if ( self::is_void_element( $element ) ) {
+			$parts[] = '/>';
+		} else {
+			$parts[] = '>';
+			$suffix  = $content . '</' . $element . '>';
+		}
 
-		return self::compile_tag( $tag );
+		return implode( ' ', $parts ) . $suffix;
 	}
 
 	/**
@@ -84,43 +113,5 @@ class Plugin_Groups_Utils {
 
 		return implode( ' ', $parts );
 
-	}
-
-	/**
-	 * Compiles a tag from a parts array into a string.
-	 *
-	 * @param array $tag Tag parts array.
-	 *
-	 * @return string
-	 */
-	public static function compile_tag( $tag ) {
-		$tag = array_filter( $tag );
-
-		return '<' . implode( ' ', $tag ) . '>';
-	}
-
-	/**
-	 * Build an array of tags.
-	 *
-	 * @param array $array The array of tags to build.
-	 *
-	 * @return string
-	 */
-	public static function build_tags_array( $array ) {
-		$default = array(
-			'tag'   => '',
-			'atts'  => array(),
-			'state' => 'open',
-		);
-		$html    = array();
-		foreach ( $array as $tag ) {
-			if ( is_array( $tag ) ) {
-				$tag = wp_parse_args( $tag, $default );
-				$tag = self::build_tag( $tag['tag'], $tag['atts'], $tag['state'] );
-			}
-			$html[] = $tag;
-		}
-
-		return implode( '', $html );
 	}
 }

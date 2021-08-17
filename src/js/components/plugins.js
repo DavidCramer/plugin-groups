@@ -1,20 +1,15 @@
-export default function PluginGroupPlugins( config ) {
-	const { group, plugins, addPlugin } = config;
+export default function PluginGroupPlugins( props ) {
+	const { group, plugins, addPlugin } = props;
 	const keys = Object.keys( plugins );
-
-	const handleCheck = ( id, plugin ) => {
-		addPlugin( id, plugin );
-	};
 
 	return ( keys.map( ( item, index ) => {
 			const plugin = plugins[ item ];
-			const exists = -1 < group.config.plugins.indexOf(
-				item ) ? true : false;
+			const exists = -1 < group.plugins.indexOf( item );
 			return (
 				<div>
 					<label>
 						<input type={ 'checkbox' } value={ item } checked={ exists } onChange={ () => addPlugin(
-							group._id, item ) }/>
+							group.id, item ) }/>
 						{ plugin.Name } : { plugin.Version }
 					</label>
 				</div>

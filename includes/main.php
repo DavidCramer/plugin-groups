@@ -5,4 +5,4 @@
  * @package plugin_groups
  */
 ?>
-<div id="plg-app"></div>
+<div class="plugin-groups-main" id="plg-app"></div>
