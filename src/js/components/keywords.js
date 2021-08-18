@@ -1,12 +1,16 @@
+import { __ } from '@wordpress/i18n';
+
 function KeyWordsList( { group, removeKeyword } ) {
 	const { id, keywords } = group;
 
 	return ( keywords.map( ( keyword ) => {
 			return (
-				<button
-					type={ 'button' }
-					onClick={ () => removeKeyword( id, keyword ) }
-				>{ keyword }</button>
+				<span className={ 'ui-keyword' }>{ keyword }
+					<label
+						className="dashicons dashicons-no-alt"
+						onClick={ () => removeKeyword( id, keyword ) }
+					/>
+				</span>
 			);
 		} )
 	);
@@ -17,17 +21,19 @@ export default function PluginGroupKeywords( props ) {
 	const { group, addKeyword, removeKeyword } = props;
 
 	const handleKeyword = ( event ) => {
-		event.stopPropagation();
-		if ( 'Enter' === event.key ) {
-			addKeyword( group.id, event.target.value );
-			event.target.value = '';
+		const value = event.target.value.trim();
+		if ( 'Enter' === event.key || ',' === event.key ) {
+			event.preventDefault();
+			if( event.target.dataset.keywords && 0 < value.length ){
+				event.stopPropagation();
+				addKeyword( group.id, value );
+				event.target.value = '';
+			}
 		}
 	};
-
-	console.log( group.keywords );
 	return (
-		<div>
-			<h4>Keywords</h4>
+		<div className={ 'ui-body-sidebar-list-item-keywords' }>
+			<strong>Keywords:</strong>
 			<KeyWordsList
 				group={ group }
 				removeKeyword={ removeKeyword }
@@ -35,8 +41,10 @@ export default function PluginGroupKeywords( props ) {
 			/>
 			<hr/>
 			<input
+				className={ 'regular-text' }
 				type={ 'text' }
-				placeholder={ 'enter key word' }
+				placeholder={ __( 'Add keyword' ) }
+				data-keywords={ true }
 				onKeyDown={ handleKeyword }/>
 		</div>
 	);

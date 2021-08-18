@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { __ } from '@wordpress/i18n';
 import PluginGroupHeader from './header';
 import PluginGroupList from './group-list';
-import PluginGroupEdit from './group-edit';
+import PluginsList from './plugins-list';
 
 function PluginGroupApp( data ) {
 
@@ -19,25 +20,41 @@ function PluginGroupApp( data ) {
 	const getConf = () => {
 		return { ...config };
 	};
+	const updateConfig = ( update ) => {
+		setConfig( { ...config, ...update } );
+	};
 	const selectGroup = ( id ) => {
+		selectGroups( [ id ] );
+	};
+	const selectGroups = ( ids, type ) => {
 		const newConf = getConf();
-		if ( -1 < getList().indexOf( id ) ) {
-			if ( config.edit ) {
-				if ( config.edit === config.activeGroup ) {
-					// Check that the name is set.
-					if ( ! hasName( config.activeGroup ) ) {
-						// Delete if temp, stop if not.
-						if ( isTemp( config.activeGroup ) ) {
-							delete newConf.groups[ config.activeGroup ];
-						} else {
-							changeName( config.activeGroup, true, true );
-						}
-					}
-				}
-				newConf.edit = null;
+		ids.forEach( ( id ) => {
+			const selected = type ? ! type : newConf.groups[ id ].selected;
+			newConf.groups[ id ].selected = ! selected;
+			if ( selected ) {
+				delete newConf.groups[ id ].open;
+				delete newConf.groups[ id ].edit;
+				delete newConf.groups[ id ].focus;
 			}
-			newConf.activeGroup = newConf.activeGroup === id ? null : id;
-			setConfig( newConf );
+			newConf.activeGroup = id;
+		} );
+		setConfig( newConf );
+	};
+	const openGroups = ( ids, type ) => {
+		const newConf = getConf();
+
+		ids.forEach( ( id ) => {
+			newConf.groups[ id ].open = type;
+		} );
+		updateConfig( newConf );
+	};
+	const openGroup = ( id ) => {
+		if ( config.groups[ id ] ) {
+			const newConf = getConf();
+			newConf.groups[ id ].open = ! newConf.groups[ id ].open;
+			newConf.groups[ id ].selected = true;
+			newConf.activeGroup = id;
+			updateConfig( newConf );
 		}
 	};
 	const changeName = ( id, name, reset ) => {
@@ -47,62 +64,75 @@ function PluginGroupApp( data ) {
 		} else if ( reset ) {
 			name = newConf.groups[ id ].prevName ? newConf.groups[ id ].prevName : newConf.groups[ id ].name;
 			delete newConf.groups[ id ].prevName;
-			newConf.edit = null;
+			delete newConf.groups[ id ].edit;
+			delete newConf.groups[ id ].selected;
+			delete newConf.groups[ id ].open;
 		}
 		newConf.groups[ id ].name = name;
 		setConfig( newConf );
 	};
-	const deleteGroup = ( id ) => {
+
+	const deleteGroups = ( ids, ask ) => {
 		const newConf = getConf();
-		if ( newConf.activeGroup && newConf.activeGroup === id ) {
-			newConf.activeGroup = getShiftedID( config.activeGroup, 'p' );
+		if (  ask && ! confirm( __( ' Are you sure you want to delete all' +
+			' selected' +
+			' groups?' ) ) ) {
+			return;
 		}
-		delete newConf.groups[ id ];
-		if ( id === newConf.activeGroup ) {
-			newConf.activeGroup = null;
-		}
-		newConf.edit = null;
+		ids.forEach( ( id ) => {
+			delete newConf.groups[ id ];
+		} );
 		setConfig( newConf );
 	};
-	const createGroup = ( name, temp ) => {
+	const deleteGroup = ( id ) => {
+		deleteGroups( [ id ] );
+	};
+	const createGroup = ( name ) => {
 		const newID = generateID();
 		const newGroup = {
 			id: newID,
 			name,
 			plugins: [],
 			keywords: [],
+			temp: true,
+			selected: true,
+			edit: true,
+			focus: true,
 		};
-		if ( temp ) {
-			newGroup.temp = true;
-		}
 		const newConf = getConf();
 		if ( ! newConf.groups ) {
 			newConf.groups = {};
 		}
 		newConf.groups[ newID ] = newGroup;
-		newConf.activeGroup = newID;
-		newConf.edit = newID;
+
 		setConfig( newConf );
 	};
 
-	const addPlugin = ( id, plugin ) => {
-		const newConf = getConf();
-		if ( ! newConf.groups[ id ].plugins.length ) {
-			newConf.groups[ id ].plugins = [];
+	const addPlugins = ( id, plugins ) => {
+		if ( config.groups[ id ] ) {
+			const newConf = getConf();
+			plugins.forEach( ( plugin ) => {
+				const index = config.groups[ id ].plugins.indexOf( plugin );
+				if ( -1 === index ) {
+					newConf.groups[ id ].plugins.push( plugin );
+				}
+			} );
+
+			setConfig( newConf );
 		}
-		const exists = newConf.groups[ id ].plugins.indexOf( plugin );
-		if ( -1 < exists ) {
-			newConf.groups[ id ].plugins.splice( exists, 1 );
-		} else {
-			newConf.groups[ id ].plugins.push( plugin );
+	};
+
+	const removePlugin = ( id, plugin ) => {
+		const newConf = getConf();
+		const index = config.groups[ id ].plugins.indexOf( plugin );
+		if ( -1 < index ) {
+			newConf.groups[ id ].plugins.splice( index, 1 );
 		}
 		setConfig( newConf );
 	};
 	const handleSave = () => {
 		const newConf = getConf();
 		const data = JSON.stringify( newConf.groups );
-		console.log( newConf.groups );
-		console.log( data );
 		newConf.saving = true;
 		fetch( config.saveURL, {
 			method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -126,23 +156,42 @@ function PluginGroupApp( data ) {
 	const isTemp = ( id ) => {
 		return !! config.groups[ id ].temp;
 	};
-
-	const editGroup = ( id ) => {
+	const editGroups = ( ids ) => {
 		const newConf = getConf();
-		if ( newConf.edit && id === newConf.edit && hasName( id ) ) {
-			newConf.edit = null;
-			if ( newConf.groups[ id ].temp ) {
-				delete newConf.groups[ id ].temp;
-			}
-			delete newConf.groups[ id ].prevName;
-		} else {
-			newConf.edit = id;
-			newConf.activeGroup = id;
-		}
+		let focused = false;
 
+		ids.forEach( ( id ) => {
+			if ( newConf.groups[ id ].edit && hasName( id ) ) {
+				delete newConf.groups[ id ].edit;
+				delete newConf.groups[ id ].selected;
+				delete newConf.groups[ id ].open;
+				delete newConf.groups[ id ].focus;
+				delete newConf.groups[ id ].temp;
+				delete newConf.groups[ id ].prevName;
+			} else {
+
+				newConf.groups[ id ].edit = true;
+				if ( ! focused ) {
+					newConf.groups[ id ].focus = true;
+					focused = true;
+				}
+			}
+		} );
 		setConfig( newConf );
+		maybeFocus();
+	};
+	const editGroup = ( id ) => {
+		editGroups( [ id ] );
 	};
 
+	const maybeFocus = () => {
+		const editing = getEditing();
+		if ( editing.length ) {
+			const newFocus = document.querySelector(
+				'[data-edit=' + editing.shift() + ']' );
+			newFocus.focus();
+		}
+	};
 	const newTempGroup = () => {
 		createGroup( '', true );
 	};
@@ -150,11 +199,9 @@ function PluginGroupApp( data ) {
 		const keys = getList();
 		const position = keys.indexOf( id );
 		const next = 'n' === direction ? position + 1 : position - 1;
-		let groupID = keys.length ? keys[ 0 ] : null;
+		let groupID = null;
 		if ( keys[ next ] ) {
 			groupID = keys[ next ];
-		} else if ( 'p' === direction ) {
-			groupID = keys[ keys.length - 1 ];
 		}
 		return groupID !== id ? groupID : null;
 	};
@@ -165,33 +212,60 @@ function PluginGroupApp( data ) {
 		selectGroup( getShiftedID( config.activeGroup, 'p' ) );
 	};
 
+	const getGroupsBy = ( type ) => {
+		const groups = [];
+		Object.keys( config.groups ).forEach( ( id ) => {
+			if ( config.groups[ id ][ type ] ) {
+				groups.push( id );
+			}
+		} );
+		return groups;
+	};
+
+	const getSelected = () => {
+		return getGroupsBy( 'selected' );
+	};
+	const getOpen = () => {
+		return getGroupsBy( 'open' );
+	};
+	const getEditing = () => {
+		return getGroupsBy( 'edit' );
+	};
+
 	const keyNavHandler = ( event ) => {
 
-		if ( 'ArrowUp' === event.key ) {
+		if ( 'ArrowRight' === event.key ) {
+			openGroups( getSelected(), true );
+		} else if ( 'ArrowLeft' === event.key ) {
+			openGroups( getSelected(), false );
+		} else if ( 'ArrowUp' === event.key ) {
 			selectPrev();
 		} else if ( 'ArrowDown' === event.key ) {
 			selectNext();
-		} else if ( config.activeGroup && 'Enter' === event.key && ! event.target.type ) {
-			event.stopPropagation();
-			editGroup( config.activeGroup );
 		} else if ( 'Enter' === event.key && event.target.dataset.edit ) {
 			editGroup( event.target.dataset.edit );
+		} else if ( 'Enter' === event.key ) {
+			event.stopPropagation();
+			event.preventDefault();
+			editGroups( getSelected() );
 		} else if ( '/' === event.key ) {
 			event.preventDefault();
 			event.stopPropagation();
 			newTempGroup( event );
-		} else if ( 'Escape' === event.key && config.edit ) {
-			if ( config.groups[ config.activeGroup ] && isTemp(
-				config.activeGroup ) ) {
-				deleteGroup( config.activeGroup );
-			} else {
-				changeName( config.activeGroup, '', true );
+		} else if ( 'Escape' === event.key ) {
+			const id = event.path[ 0 ].dataset.edit;
+			if ( config.groups[ id ] ) {
+				if ( isTemp( id ) ) {
+					deleteGroup( id );
+				} else {
+					changeName( id, '', true );
+					maybeFocus();
+				}
 			}
 		} else if ( 'Delete' === event.key ) {
-			if ( config.groups[ config.activeGroup ] ) {
-				if ( confirm( ' Are you sure' ) ) {
-					deleteGroup( config.activeGroup );
-				}
+			const selected = getSelected();
+			if ( selected.length ) {
+				deleteGroups( selected, true );
 			}
 		} else if ( 's' === event.key && event.metaKey ) {
 			event.preventDefault();
@@ -227,25 +301,28 @@ function PluginGroupApp( data ) {
 		selectGroup,
 		createGroup,
 		deleteGroup,
+		deleteGroups,
 		changeName,
 		handleSave,
 		editGroup,
 		getList,
-		addPlugin,
+		addPlugins,
 		addKeyword,
 		removeKeyword,
+		removePlugin,
+		openGroup,
+		selectGroups,
+		getSelected,
 	};
 	return (
 		<div className={ config.slug }>
 			<PluginGroupHeader handleSave={ handleSave } { ...config } />
 			<div className={ 'ui-body' }>
+				<PluginsList { ...config } { ...actions } />
 				<PluginGroupList
 					{ ...config }
 					{ ...actions }
 				/>
-				{ config.activeGroup &&
-				<PluginGroupEdit group={ config.groups[ config.activeGroup ] } { ...actions } { ...config } />
-				}
 			</div>
 		</div>
 	);

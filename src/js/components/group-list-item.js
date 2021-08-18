@@ -1,46 +1,61 @@
 import GroupNameInput from './group-name-input';
+import PluginGroupEdit from './group-edit';
+
+import React from 'react';
 
 export default function GroupListItem( props ) {
 	const {
 		selectGroup,
-		id,
+		openGroup,
+		group,
 		changeName,
 		editGroup,
 		index,
-		name,
-		selected,
-		editing,
-		temp,
-		activeGroup,
 	} = props;
-
+	const { temp, name, id, plugins, selected, open, edit, focus } = group;
 	const handleEdit = ( event ) => {
 		event.stopPropagation();
 		editGroup( id );
 	};
+
 	return (
 		<li
-			className={ 'ui-body-sidebar-list-item ' + selected }
+			className={ selected ? 'active' : '' }
 			id={ index }
-			onClick={ ( event ) => selectGroup( id ) }>
-					<span className={ 'ui-body-sidebar-list-item-title' }>
-						{ ! editing &&
-						<>{ name }</>
-						}
-						{ editing &&
-						<GroupNameInput
-							temp={ temp }
-							name={ name }
-							id={ id }
-							changeName={ changeName }
-							editGroup={ editGroup }
-						/>
-						}
+		>
+			<div className={ 'ui-body-sidebar-list-item' }>
+
+				<>
+					{ ! edit &&
+					<span>
+						<input type={ 'checkbox' } checked={ selected } onClick={ ( event ) => selectGroup(
+							id ) }/>
+						<span className={ 'ui-body-sidebar-list-item-title' } onClick={ ( event ) => openGroup(
+							id ) }>
+							{ name }
+						</span>
 					</span>
-			<span className={ 'ui-body-sidebar-list-item-icons' }>
-						<span className={ 'dashicons dashicons-edit' } onClick={ handleEdit }/>
-						<span className={ 'dashicons dashicons-trash' }/>
+					}
+					{ edit &&
+					<GroupNameInput
+						temp={ temp }
+						name={ name }
+						id={ id }
+						changeName={ changeName }
+						editGroup={ editGroup }
+						focus={ focus }
+					/>
+					}
+					<span className={ 'ui-body-sidebar-list-item-icons' }>
+						{ plugins.length }
 					</span>
+				</>
+				
+
+			</div>
+			{ ! temp && open &&
+			<PluginGroupEdit group={ group } { ...props } />
+			}
 		</li>
 	);
 }
