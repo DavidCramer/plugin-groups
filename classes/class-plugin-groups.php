@@ -121,11 +121,13 @@ class Plugin_Groups {
 	/**
 	 * Render the Group navigation.
 	 */
-	public function render_group_navigation( $plugins ) {
+	public function render_group_navigation() {
 		$parts   = array();
 		$parts[] = $this->make_all_tag();
 		foreach ( $this->config['groups'] as $key => $group ) {
-			$parts[] = $this->make_group_tag( $group );
+			if ( isset( $this->groups[ $key ] ) ) {
+				$parts[] = $this->make_group_tag( $group );
+			}
 		}
 		$groups    = implode( " |\n", $parts );
 		$group_set = Utils::build_tag( 'ul', array( 'class' => 'subsubsub' ), $groups );
