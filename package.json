@@ -21,8 +21,6 @@
     "@wordpress/data": "^4.27.3",
     "@wordpress/i18n": "^4.2.1",
     "@wordpress/url": "^3.2.1",
-    "@material-ui/core": "^4.12.3",
-    "@material-ui/icons": "^4.11.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "grunt": "^1.4.1",
