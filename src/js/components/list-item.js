@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function ListItem( props ) {
-	const { name, version, id, callback, checked, bold } = props;
+	const { name, version, id, callback, checked, bold, subname, className } = props;
 	const title = () => {
 		if ( bold ) {
 			return (
@@ -15,20 +15,25 @@ export default function ListItem( props ) {
 			);
 		}
 		return (
-			<>
+			<span>
 				{ name }
 				{
 					version &&
 					<>: { version }</>
 				}
-			</>
+			</span>
 		);
 	};
 	return (
-		<div className={ 'ui-body-sidebar-plugins-item' }>
+		<div className={ 'ui-body-sidebar-list-item ' + className }>
 			<label>
 				<input type={ 'checkbox' } checked={ checked } value={ id } onChange={ callback }/>
-				{ title() }
+				<span>
+					{ title() }
+					{ subname &&
+					<div>{ subname }</div>
+					}
+				</span>
 			</label>
 			{ props.children }
 		</div>

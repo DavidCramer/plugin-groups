@@ -5,8 +5,11 @@ import ListItem from './list-item';
 
 export default function PluginsList( props ) {
 	const { plugins, addPlugins } = props;
-	const [ state, setState ] = React.useState(
-		{ checkedAll: false, search: '', checked: [] } );
+	const [ state, setState ] = React.useState( {
+		checkedAll: false,
+		search: '',
+		checked: []
+	} );
 	const keys = Object.keys( plugins );
 
 	const updateChange = ( change ) => {
@@ -38,7 +41,8 @@ export default function PluginsList( props ) {
 		const index = newState.checked.indexOf( event.target.value );
 		if ( event.target.checked && -1 === index ) {
 			newState.checked.push( event.target.value );
-		} else if ( ! event.target.checked && -1 < index ) {
+		}
+		else if ( ! event.target.checked && -1 < index ) {
 			newState.checked.splice( index, 1 );
 		}
 		if ( newState.checked.length !== newState.checkedAll ) {
@@ -47,7 +51,8 @@ export default function PluginsList( props ) {
 		if ( newState.checked.length === keys.length ) {
 			checkAll( true );
 
-		} else {
+		}
+		else {
 			updateChange( newState );
 		}
 	};
@@ -62,8 +67,7 @@ export default function PluginsList( props ) {
 	};
 
 	const isMatched = ( item ) => {
-		return state.search ? -1 < item.toLowerCase()
-			.indexOf( state.search.toLowerCase() ) : true;
+		return state.search ? -1 < item.toLowerCase().indexOf( state.search.toLowerCase() ) : true;
 	};
 
 	const hasSelected = () => {
@@ -90,33 +94,36 @@ export default function PluginsList( props ) {
 					callback={ ( event ) => checkAll( event.target.checked ) }
 					checked={ state.checkedAll }
 					bold={ true }
+					className={ 'list-control' }
 				>
 					<button className={ 'button' } type={ 'button' } onClick={ addSelected } disabled={ ! enabledButton }>
 						{ __( 'Send to Selected Groups' ) }
 						<span className="dashicons dashicons-arrow-right-alt2"></span>
 					</button>
 				</ListItem>
-				<div className={ 'ui-body-sidebar-plugins' }>
+				<div className={ 'plugins-list' }>
+					<div className={ 'ui-body-sidebar-list' }>
 
-					{ keys.map( ( item, index ) => {
-						const plugin = plugins[ item ];
-						const match = isMatched( plugin.Name );
-						const checked = -1 < state.checked.indexOf(
-							item ) && isMatched( plugin.Name );
-						return (
-							<>
-								{ match &&
-								<ListItem
-									name={ plugin.Name }
-									id={ item }
-									version={ plugin.Version }
-									checked={ checked }
-									callback={ checkItem }
-								/>
-								}
-							</>
-						);
-					} ) }
+						{ keys.map( ( item, index ) => {
+							const plugin = plugins[ item ];
+							const match = isMatched( plugin.Name );
+							const checked = -1 < state.checked.indexOf(
+								item ) && isMatched( plugin.Name );
+							return (
+								<>
+									{ match &&
+									<ListItem
+										name={ plugin.Name }
+										id={ item }
+										version={ plugin.Version }
+										checked={ checked }
+										callback={ checkItem }
+									/>
+									}
+								</>
+							);
+						} ) }
+					</div>
 				</div>
 			</Panel>
 		</div>

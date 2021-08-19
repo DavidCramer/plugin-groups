@@ -9,14 +9,51 @@
 	.subsubsub {
 		float: none;
 	}
+
+	.group-list {
+		display: block;
+		border: 1px solid $color_light_gray;
+		background-color: $color_white;
+		margin: 10px 0;
+		padding: 0 12px;
+
+		.group-link {
+			display: inline-block;
+			margin: 0;
+
+			a {
+				display: inline-block;
+				padding: 20px 0 15px;
+				margin: 0 10px;
+				color: $color_blue_gray;
+				text-decoration: none;
+				border-bottom: 5px solid transparent;
+
+				&:hover {
+					color: $color_link_blue;
+					border-bottom: 5px solid $color_light_gray;
+				}
+
+				&.current {
+					color: $color_dark_blue_gray;
+					border-bottom: 5px solid $color_blue_gray;
+				}
+			}
+
+			.count {
+				color: $color_blue_gray;
+			}
+		}
+	}
 }
 
 .ui {
 
+
 	&-keyword {
 		border: 1px solid $color_light_gray;
 		border-radius: 7px;
-		margin-left: 6px;
+		margin: 6px 6px 6px 0;
 		padding: 3px 6px;
 		display: inline-flex;
 		flex-direction: row;
@@ -31,7 +68,6 @@
 		display: flex;
 		align-items: center;
 		padding-left: 20px;
-		margin-bottom: 20px;
 		background-color: $color_brand_green;
 		box-shadow: 0 1px 1px $color_shadow_light;
 
@@ -56,6 +92,28 @@
 			&:focus {
 				opacity: 0.4;
 			}
+
+			input[type=file] {
+				width: 0;
+			}
+		}
+	}
+
+	&-navigation {
+		display: flex;
+		background-color: $color_dark_green;
+		margin: 0 0 20px;
+		color: $color_white;
+		cursor: pointer;
+
+		&-link {
+			padding: 8px 20px;
+			margin: 0;
+
+			&:hover, &.active {
+				background-color: $color_brand_green;
+			}
+
 		}
 	}
 
@@ -63,20 +121,33 @@
 		display: flex;
 
 		&-sidebar {
-			min-width: 400px;
 			width: 400px;
+			overflow-x: hidden;
 			padding: 0 20px 20px;
-			.search{
+
+			.search {
 				width: 100%;
 				margin: 6px 0;
 			}
+
 			.button {
 				display: flex;
 				align-items: center;
+				justify-content: space-between;
+
+				.dashicons {
+					margin: 0 4px 0 0;
+				}
 			}
 
 			&.wide {
-				width: 800px;
+				width: 500px;
+				max-width: 500px;
+			}
+
+			&.narrow {
+				width: 200px;
+				min-width: 200px;
 			}
 
 			h3 {
@@ -84,32 +155,60 @@
 			}
 
 			&-list {
-				display: flex;
-				flex-direction: column;
 
-				li {
+				.plugins-list & {
+					max-height: 500px;
+					overflow-y: auto;
+				}
+
+				&-item {
 					margin-bottom: 0;
 					border: 1px solid transparent;
 					border-bottom-color: $color_light_gray;
 					margin-top: -1px;
-					padding-top: 1px;
+					overflow-x: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+
+					&.list-control {
+						align-items: center;
+
+						label {
+							font-weight: bolder;
+						}
+					}
 
 					&.active {
 						background: $color_white;
 						border-color: $color_brand_green;
 					}
-				}
 
-
-				&-item {
 					display: flex;
 					justify-content: space-between;
 					padding: 0.6em 8px;
+
+					@media only screen and (max-width: 1380px) {
+						.plugins-list & {
+							flex-direction: column;
+
+							.button {
+								margin: 8px 0;
+							}
+						}
+					}
 
 					&:hover {
 						&:not(.active) {
 							background-color: $color_white_hover;
 						}
+					}
+
+					span {
+
+					}
+
+					label {
+
 					}
 
 					&-title {
@@ -121,29 +220,15 @@
 					}
 
 					&-edit {
-						border-top: 1px solid $color_brand_green;
+						border: 1px solid $color_brand_green;
+						border-top: 0;
 						padding: 10px 20px 20px;
+						background: $color_white;
 					}
 
-					&-keywords {
-
+					&-section {
+						margin-bottom: 20px;
 					}
-				}
-			}
-
-			&-plugins {
-				display: flex;
-				max-height: 500px;
-				overflow-y: auto;
-				flex-direction: column;
-
-				&-item {
-					display: flex;
-					justify-content: space-between;
-					align-items: center;
-					padding: 8px;
-					border-bottom: 1px solid $color_light_gray;
-
 				}
 			}
 		}
@@ -158,8 +243,7 @@
 
 			&-title {
 				border: 1px transparent;
-				padding: 6px;
-				margin: -7px;
+				margin-left: 7px;
 				font-size: inherit;
 
 				&:focus {
@@ -172,11 +256,9 @@
 			}
 
 			&-plugins {
-				display: flex;
+
 				max-height: 500px;
 				overflow-y: auto;
-				flex-direction: column;
-				margin-bottom: 20px;
 
 				&-item {
 					display: flex;
@@ -190,9 +272,7 @@
 	}
 
 	&-panel {
-		& & {
-
-		}
+		margin-bottom: 20px;
 
 		&-header {
 			display: flex;

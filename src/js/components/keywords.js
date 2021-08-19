@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import Panel from './_panel';
 
 function KeyWordsList( { group, removeKeyword } ) {
 	const { id, keywords } = group;
@@ -24,28 +25,29 @@ export default function PluginGroupKeywords( props ) {
 		const value = event.target.value.trim();
 		if ( 'Enter' === event.key || ',' === event.key ) {
 			event.preventDefault();
-			if( event.target.dataset.keywords && 0 < value.length ){
-				event.stopPropagation();
+			event.stopPropagation();
+			if ( event.target.dataset.keywords && 0 < value.length ) {
 				addKeyword( group.id, value );
 				event.target.value = '';
 			}
 		}
 	};
 	return (
-		<div className={ 'ui-body-sidebar-list-item-keywords' }>
-			<strong>Keywords:</strong>
-			<KeyWordsList
-				group={ group }
-				removeKeyword={ removeKeyword }
-				addKeyword={ addKeyword }
-			/>
-			<hr/>
-			<input
-				className={ 'regular-text' }
-				type={ 'text' }
-				placeholder={ __( 'Add keyword' ) }
-				data-keywords={ true }
-				onKeyDown={ handleKeyword }/>
+		<div className={ 'ui-body-sidebar-list-item-section' }>
+			<Panel title={ __( 'Keywords', props.slug ) } >
+				<KeyWordsList
+					group={ group }
+					removeKeyword={ removeKeyword }
+					addKeyword={ addKeyword }
+				/>
+				<hr/>
+				<input
+					className={ 'regular-text' }
+					type={ 'text' }
+					placeholder={ __( 'Add keyword' ) }
+					data-keywords={ true }
+					onKeyDown={ handleKeyword }/>
+			</Panel>
 		</div>
 	);
 }

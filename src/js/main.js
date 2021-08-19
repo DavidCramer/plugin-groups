@@ -6,6 +6,9 @@ const PluginGroups = {
 		if ( ! plgData.groups ) {
 			plgData.groups = {};
 		}
+		if ( ! plgData.selectedPresets ) {
+			plgData.selectedPresets = [];
+		}
 
 		plgData.activeGroup = false;
 		UI.init( plgData );

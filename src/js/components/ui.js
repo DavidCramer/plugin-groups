@@ -1,21 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import PluginGroupHeader from './header';
 import PluginGroupList from './group-list';
 import PluginsList from './plugins-list';
+import Presets from './presets';
+import Settings from './settings';
 
 function PluginGroupApp( data ) {
 
 	const [ config, setConfig ] = React.useState( data );
+	const [ tab, setTab ] = React.useState( 1 );
 
 	const generateID = () => {
-		const s = [];
-		for ( let i = 0; i < 6; i++ ) {
-			s[ i ] = Math.floor(
-				Math.random() * 0x10 );
-		}
-		return 'nd' + s.join( '' );
+		return 'pgxxxxx'.replace( /x/g, function( c ) {
+			var r = Math.random() * 16 | 0,
+				v = c === 'x' ? r : ( r & 0x3 | 0x8 );
+			return v.toString( 16 );
+		} );
 	};
 	const getConf = () => {
 		return { ...config };
@@ -24,12 +26,16 @@ function PluginGroupApp( data ) {
 		setConfig( { ...config, ...update } );
 	};
 	const selectGroup = ( id ) => {
+
 		selectGroups( [ id ] );
 	};
 	const selectGroups = ( ids, type ) => {
 		const newConf = getConf();
 		ids.forEach( ( id ) => {
-			const selected = type ? ! type : newConf.groups[ id ].selected;
+			if ( null === id ) {
+				return;
+			}
+			const selected = typeof type !== 'undefined' ? ! type : newConf.groups[ id ].selected;
 			newConf.groups[ id ].selected = ! selected;
 			if ( selected ) {
 				delete newConf.groups[ id ].open;
@@ -74,9 +80,12 @@ function PluginGroupApp( data ) {
 
 	const deleteGroups = ( ids, ask ) => {
 		const newConf = getConf();
-		if (  ask && ! confirm( __( ' Are you sure you want to delete all' +
-			' selected' +
-			' groups?' ) ) ) {
+		if ( ask && ! confirm(
+			_n(
+				'Delete the selected group?', 'Delete the selected groups',
+				ids.length, config.slug
+			)
+		) ) {
 			return;
 		}
 		ids.forEach( ( id ) => {
@@ -123,16 +132,27 @@ function PluginGroupApp( data ) {
 	};
 
 	const removePlugin = ( id, plugin ) => {
+		removePlugins( id, [ plugin ] );
+	};
+
+	const removePlugins = ( id, plugins ) => {
 		const newConf = getConf();
-		const index = config.groups[ id ].plugins.indexOf( plugin );
-		if ( -1 < index ) {
-			newConf.groups[ id ].plugins.splice( index, 1 );
-		}
+		plugins.map( plugin => {
+			const index = config.groups[ id ].plugins.indexOf( plugin );
+			if ( -1 < index ) {
+				newConf.groups[ id ].plugins.splice( index, 1 );
+			}
+		} );
+
 		setConfig( newConf );
 	};
 	const handleSave = () => {
 		const newConf = getConf();
-		const data = JSON.stringify( newConf.groups );
+		const { groups, selectedPresets } = newConf;
+		const data = JSON.stringify( {
+			groups,
+			selectedPresets,
+		} );
 		newConf.saving = true;
 		fetch( config.saveURL, {
 			method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -146,6 +166,30 @@ function PluginGroupApp( data ) {
 			setConfig( config );
 		} );
 		setConfig( newConf );
+	};
+
+	const handleExport = () => {
+
+		const stamp = JSON.stringify( new Date() )
+			.replace( /"/g, '-' )
+			.replace( /:/g, '-' )
+			.split( '.' )[ 0 ];
+		const blob = new Blob(
+			[ JSON.stringify( config.groups ) ], { type: 'application/json' } );
+		const url = URL.createObjectURL( blob );
+		// Create a link element
+		const link = document.createElement( 'a' );
+
+		// Set link's href to point to the Blob URL
+		link.href = url;
+		link.download = 'plugin-groups-export' + stamp + '.json';
+		link.dispatchEvent(
+			new MouseEvent( 'click', {
+				bubbles: true,
+				cancelable: true,
+				view: window
+			} )
+		);
 	};
 
 	const hasName = ( id ) => {
@@ -163,8 +207,9 @@ function PluginGroupApp( data ) {
 		ids.forEach( ( id ) => {
 			if ( newConf.groups[ id ].edit && hasName( id ) ) {
 				delete newConf.groups[ id ].edit;
-				delete newConf.groups[ id ].selected;
-				delete newConf.groups[ id ].open;
+				if ( ! newConf.groups[ id ].open ) {
+					delete newConf.groups[ id ].selected;
+				}
 				delete newConf.groups[ id ].focus;
 				delete newConf.groups[ id ].temp;
 				delete newConf.groups[ id ].prevName;
@@ -189,7 +234,10 @@ function PluginGroupApp( data ) {
 		if ( editing.length ) {
 			const newFocus = document.querySelector(
 				'[data-edit=' + editing.shift() + ']' );
-			newFocus.focus();
+
+			if ( newFocus ) {
+				newFocus.focus();
+			}
 		}
 	};
 	const newTempGroup = () => {
@@ -239,8 +287,16 @@ function PluginGroupApp( data ) {
 		} else if ( 'ArrowLeft' === event.key ) {
 			openGroups( getSelected(), false );
 		} else if ( 'ArrowUp' === event.key ) {
+			event.preventDefault();
+			if ( ! event.shiftKey ) {
+				selectGroups( getList(), false );
+			}
 			selectPrev();
 		} else if ( 'ArrowDown' === event.key ) {
+			event.preventDefault();
+			if ( ! event.shiftKey ) {
+				selectGroups( getList(), false );
+			}
 			selectNext();
 		} else if ( 'Enter' === event.key && event.target.dataset.edit ) {
 			editGroup( event.target.dataset.edit );
@@ -290,12 +346,62 @@ function PluginGroupApp( data ) {
 		setConfig( newConf );
 	};
 
+	const togglePreset = ( id ) => {
+		const newConf = getConf();
+		if ( ! newConf.selectedPresets ) {
+			newConf.selectedPresets = [];
+		}
+		const index = newConf.selectedPresets.indexOf( id );
+		if ( -1 === index ) {
+			newConf.selectedPresets.push( id );
+		} else {
+			newConf.selectedPresets.splice( index, 1 );
+		}
+		setConfig( newConf );
+	};
+
+	const convertLegacyData = ( oldData ) => {
+		const newData = {};
+		Object.keys( oldData.group ).map( ( id ) => {
+			const group = oldData.group[ id ];
+			newData[ id ] = {
+				id: id,
+				name: group.config.group_name,
+				plugins: group.config.plugins ? group.config.plugins : [],
+				keywords: group.config.keywords.length ? group.config.keywords.split(
+					' ' ) : [],
+			};
+		} );
+		return newData;
+	};
+	const handleImport = ( event ) => {
+
+		const reader = new FileReader();
+		reader.addEventListener( 'loadend', ( event ) => {
+			let data = JSON.parse( event.target.result );
+			if ( data ) {
+				if ( data[ 'plugin-groups-setup' ] ) {
+					data = convertLegacyData( data );
+				}
+				const newConf = getConf();
+				newConf.groups = data;
+				setConfig( newConf );
+			}
+
+		} );
+		reader.readAsText( event.target.files[ 0 ] );
+	};
+
 	React.useEffect( () => {
 		window.addEventListener( 'keydown', keyNavHandler );
 		return () => {
 			window.removeEventListener( 'keydown', keyNavHandler );
 		};
 	} );
+
+	const navTab = ( tab ) => {
+		setTab( tab );
+	};
 
 	const actions = {
 		selectGroup,
@@ -313,29 +419,48 @@ function PluginGroupApp( data ) {
 		openGroup,
 		selectGroups,
 		getSelected,
+		handleExport,
+		handleImport,
+		togglePreset,
+		removePlugins,
+		navTab,
+		tab,
 	};
 	return (
 		<div className={ config.slug }>
-			<PluginGroupHeader handleSave={ handleSave } { ...config } />
-			<div className={ 'ui-body' }>
-				<PluginsList { ...config } { ...actions } />
-				<PluginGroupList
-					{ ...config }
-					{ ...actions }
-				/>
-			</div>
+			{ 1 === tab &&
+			<>
+				<PluginGroupHeader { ...actions } { ...config } />
+				<div className={ 'ui-body' }>
+					<PluginsList { ...config } { ...actions } />
+					<PluginGroupList
+						{ ...config }
+						{ ...actions }
+					/>
+					<Presets { ...config } { ...actions } />
+				</div>
+			</>
+			}
+			{ 2 === tab &&
+			<>
+				<PluginGroupHeader { ...actions } { ...config } />
+				<Settings { ...actions } { ...config } />
+			</>
+			}
 		</div>
 	);
 }
 
 
-const UI = {
-	init( data ) {
-		ReactDOM.render(
-			<PluginGroupApp { ...data } />,
-			document.getElementById( 'plg-app' )
-		);
+const UI =
+	{
+		init( data ) {
+			ReactDOM.render(
+				<PluginGroupApp { ...data } />,
+				document.getElementById( 'plg-app' )
+			);
+		}
 	}
-};
+;
 
 export default UI;

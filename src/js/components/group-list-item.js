@@ -17,16 +17,13 @@ export default function GroupListItem( props ) {
 		event.stopPropagation();
 		editGroup( id );
 	};
-
+	const active = selected ? 'active' : '';
 	return (
-		<li
-			className={ selected ? 'active' : '' }
-			id={ index }
-		>
-			<div className={ 'ui-body-sidebar-list-item' }>
+		<>
+			<div className={ 'ui-body-sidebar-list-item ' + active }>
 
+				{ ! edit &&
 				<>
-					{ ! edit &&
 					<span>
 						<input type={ 'checkbox' } checked={ selected } onClick={ ( event ) => selectGroup(
 							id ) }/>
@@ -35,27 +32,31 @@ export default function GroupListItem( props ) {
 							{ name }
 						</span>
 					</span>
-					}
-					{ edit &&
-					<GroupNameInput
-						temp={ temp }
-						name={ name }
-						id={ id }
-						changeName={ changeName }
-						editGroup={ editGroup }
-						focus={ focus }
-					/>
-					}
 					<span className={ 'ui-body-sidebar-list-item-icons' }>
+						<span
+							className="dashicons dashicons-edit"
+							onClick={ () => editGroup( id ) }
+						></span>
 						{ plugins.length }
 					</span>
 				</>
-				
+				}
+				{ edit &&
+				<GroupNameInput
+					temp={ temp }
+					name={ name }
+					id={ id }
+					changeName={ changeName }
+					editGroup={ editGroup }
+					focus={ focus }
+				/>
+				}
+
 
 			</div>
 			{ ! temp && open &&
 			<PluginGroupEdit group={ group } { ...props } />
 			}
-		</li>
+		</>
 	);
 }

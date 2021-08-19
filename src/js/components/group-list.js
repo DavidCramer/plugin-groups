@@ -17,7 +17,7 @@ export default function PluginGroupList( props ) {
 	return (
 		<div className={ 'ui-body-sidebar wide' }>
 			<Panel title={ __( 'Groups' ) }>
-				<ul className={ 'ui-body-sidebar-list' }>
+				<div className={ 'ui-body-sidebar-list' }>
 					{ 0 !== getList().length &&
 					<>
 
@@ -31,6 +31,7 @@ export default function PluginGroupList( props ) {
 								);
 							} }
 							checked={ checked }
+							className={'list-control'}
 						>
 							<button disabled={ ! getSelected().length }
 							        type={ 'button' }
@@ -52,7 +53,7 @@ export default function PluginGroupList( props ) {
 						{ __( 'No groups' ) }
 					</div>
 					}
-				</ul>
+				</div>
 			</Panel>
 			<button type={ 'button' }
 			        className={ 'button' }

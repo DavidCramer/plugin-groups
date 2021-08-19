@@ -112,16 +112,61 @@ class Plugin_Groups {
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'rest_api_init', array( $this, 'register_route' ) );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_filter( 'views_plugins', array( $this, 'add_groups' ), PHP_INT_MAX );
 		add_filter( 'all_plugins', array( $this, 'filter_status' ) );
+		add_filter( 'show_advanced_plugins', array( $this, 'filter_shown_status' ), 10, 2 );
+		add_filter( 'site_transient_update_plugins', array( $this, 'alter_update_plugins' ) );
 		add_action( 'pre_current_active_plugins', array( $this, 'render_group_navigation' ) );
+	}
+
+	/**
+	 * Remove plugins from the update available.
+	 *
+	 * @param object $data The data object.
+	 *
+	 * @return object
+	 */
+	public function alter_update_plugins( $data ) {
+
+		if ( $this->current_group ) {
+			$keys = array_keys( $this->groups[ $this->current_group ] );
+			foreach ( $data->response as $key => $plugin ) {
+				if ( ! in_array( $key, $keys, true ) ) {
+					unset( $data->response[ $key ] );
+				}
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Remove status that are not relevant.
+	 *
+	 * @param bool   $show   Flag to show.
+	 * @param string $status The current status
+	 *
+	 * @return bool
+	 */
+	public function filter_shown_status( $show, $status ) {
+
+		static $removes = array(
+			'mustuse',
+			'dropins',
+		);
+		if ( $this->current_group && in_array( $status, $removes, true ) ) {
+			$show = false;
+		}
+
+		return $show;
 	}
 
 	/**
 	 * Render the Group navigation.
 	 */
 	public function render_group_navigation() {
+
 		$parts   = array();
 		$parts[] = $this->make_all_tag();
 		foreach ( $this->config['groups'] as $key => $group ) {
@@ -129,8 +174,9 @@ class Plugin_Groups {
 				$parts[] = $this->make_group_tag( $group );
 			}
 		}
+		// @todo: Add modern styles.
 		$groups    = implode( " |\n", $parts );
-		$group_set = Utils::build_tag( 'ul', array( 'class' => 'subsubsub' ), $groups );
+		$group_set = Utils::build_tag( 'ul', array( 'class' => array( 'subsubsub' ) ), $groups );
 		$html      = Utils::build_tag( 'div', array( 'class' => self::$slug ), $group_set );
 		if ( 1 < count( $parts ) ) {
 			echo wp_kses( $html, wp_kses_allowed_html( 'post' ) );
@@ -138,6 +184,7 @@ class Plugin_Groups {
 	}
 
 	public function filter_status( $plugins ) {
+
 		global $status;
 
 		$this->current_status = $status;
@@ -181,16 +228,24 @@ class Plugin_Groups {
 			);
 			$counter = Utils::build_tag( 'span', array( 'class' => 'count' ), " ({$total})" );
 		}
+		$li_atts   = array(
+			'class' => array(
+				'group-link',
+				$group['id'],
+			),
+		);
 		$link_atts = array(
 			'href' => $url,
 		);
 		if ( $group['id'] === $this->current_group ) {
+			$li_atts['class'][]        = 'current';
 			$link_atts['class']        = 'current';
 			$link_atts['aria-current'] = 'page';
 		}
+
 		$link = Utils::build_tag( 'a', $link_atts, $group['name'] . $counter );
 
-		return Utils::build_tag( 'li', array( 'class' => $group['id'] ), $link );
+		return Utils::build_tag( 'li', $li_atts, $link );
 	}
 
 	/**
@@ -199,6 +254,7 @@ class Plugin_Groups {
 	 * @return string
 	 */
 	protected function make_all_tag() {
+
 		$current_url = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
 		$url         = self_admin_url( 'plugins.php' );
 		if ( $current_url ) {
@@ -214,7 +270,7 @@ class Plugin_Groups {
 		}
 		$link = Utils::build_tag( 'a', $link_atts, __( 'All Groups', self::$slug ) );
 
-		return Utils::build_tag( 'li', array( 'class' => '__allgroups' ), $link );
+		return Utils::build_tag( 'li', array( 'class' => array( 'group-link', '__allgroups' ) ), $link );
 	}
 
 	/**
@@ -256,7 +312,8 @@ class Plugin_Groups {
 	/**
 	 * Register REST Endpoint for saving config.
 	 */
-	public function register_route() {
+	public function register_routes() {
+
 		register_rest_route(
 			self::$slug,
 			'save',
@@ -264,11 +321,44 @@ class Plugin_Groups {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'args'                => array(),
 				'callback'            => array( $this, 'save_config' ),
-				'permission_callback' => function () {
+				'permission_callback' => function() {
+
 					return current_user_can( 'manage_options' );
 				},
 			)
 		);
+		register_rest_route(
+			self::$slug,
+			'export',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'args'                => array(),
+				'callback'            => array( $this, 'export_config' ),
+				'permission_callback' => array( $this, 'validate_export' ),
+			)
+		);
+	}
+
+	/**
+	 * Validate Export.
+	 */
+	public function validate_export( \WP_REST_Request $request ) {
+
+		$valid = wp_verify_nonce( $request->get_param( 'nonce' ), 'group_export' );
+		var_dump( $valid );
+
+		return wp_verify_nonce( $request->get_param( 'nonce' ), 'group_export' );
+	}
+
+	/**
+	 * Export the current config.
+	 */
+	public function export_config() {
+
+		header( 'Content-Type: application/json' );
+		header( 'Content-Disposition: attachment; filename="plugin-groups-export.json"' );
+		echo wp_json_encode( $this->config );
+		exit;
 	}
 
 	/**
@@ -279,9 +369,11 @@ class Plugin_Groups {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function save_config( \WP_REST_Request $request ) {
-		$data                   = $request->get_json_params();
-		$this->config['groups'] = $data;
-		$success                = update_option( self::CONFIG_KEY, $this->config );
+
+		$data                            = $request->get_json_params();
+		$this->config['groups']          = $data['groups'];
+		$this->config['selectedPresets'] = $data['selectedPresets'];
+		$success                         = update_option( self::CONFIG_KEY, $this->config );
 
 		return rest_ensure_response( array( 'success' => $success ) );
 	}
@@ -329,6 +421,7 @@ class Plugin_Groups {
 	 * Get the plugin version
 	 */
 	public function version() {
+
 		return $this->version;
 	}
 
@@ -336,6 +429,7 @@ class Plugin_Groups {
 	 * Check plugin_groups version to allow 3rd party implementations to update or upgrade.
 	 */
 	protected function check_version() {
+
 		$previous_version = get_option( self::VERSION_KEY, 0.0 );
 		$new_version      = $this->version();
 		if ( version_compare( $previous_version, $new_version, '<' ) ) {
@@ -359,6 +453,7 @@ class Plugin_Groups {
 	 * @return array
 	 */
 	protected function convert_legacy_groups( $data ) {
+
 		$groups = array();
 		foreach ( $data['group'] as $group ) {
 			$keywords                = explode( "\n", $group['config']['keywords'] );
@@ -381,6 +476,7 @@ class Plugin_Groups {
 	 * Initialise plugin_groups.
 	 */
 	public function plugin_groups_init() {
+
 		// Check version.
 		$this->check_version();
 
@@ -399,6 +495,7 @@ class Plugin_Groups {
 	 * Hook into admin_init.
 	 */
 	public function admin_init() {
+
 		if ( ! empty( $_POST['plugin-group-config'] ) ) {
 			$data = stripslashes( $_POST['plugin-group-config'] );
 			$data = json_decode( $data, true );
@@ -414,6 +511,7 @@ class Plugin_Groups {
 	 * Hook into the admin_menu.
 	 */
 	public function admin_menu() {
+
 		add_submenu_page( 'plugins.php', __( 'Plugin Groups', self::$slug ), __( 'Plugin Groups', self::$slug ), 'manage_options', 'plugin-groups', array( $this, 'render_admin' ), 50 );
 	}
 
@@ -421,32 +519,57 @@ class Plugin_Groups {
 	 * Enqueue assets where needed.
 	 */
 	public function enqueue_assets() {
+
 		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 		if ( $page && self::$slug === $page ) {
 			wp_enqueue_script( self::$slug );
 			wp_enqueue_style( self::$slug );
 
-			// Prep data.
-			$data              = $this->config;
-			$data['saveURL']   = rest_url( self::$slug . '/save' );
-			$data['restNonce'] = wp_create_nonce( 'wp_rest' );
-
-			// Add plugins.
-			$data['plugins'] = get_plugins();
-
-			// Remove groups if empty so that the script can init the correct object.
-			if ( empty( $data['groups'] ) ) {
-				unset( $data['groups'] );
-			}
-			// Add config data.
-			wp_add_inline_script( self::$slug, 'var plgData = ' . wp_json_encode( $data ), 'before' );
+			$this->prep_config();
 		}
+	}
+
+	/**
+	 * Prepare the config data for output to the admin UI.
+	 */
+	protected function prep_config() {
+
+		// Prep config data.
+		$data              = $this->config;
+		$data['saveURL']   = rest_url( self::$slug . '/save' );
+		$data['exportURL'] = add_query_arg( 'nonce', wp_create_nonce( 'group_export' ), rest_url( self::$slug . '/export' ) );
+		$data['restNonce'] = wp_create_nonce( 'wp_rest' );
+
+		// Add plugins.
+		$data['plugins'] = get_plugins();
+
+		// Add roles.
+		$plugin_roles = array();
+		foreach ( wp_roles()->role_objects as $role ) {
+			if ( isset( $role->capabilities['activate_plugins'] ) && true === $role->capabilities['activate_plugins'] ) {
+				$plugin_roles[] = $role->name;
+			}
+		}
+		$role_args     = array(
+			'role__in' => $plugin_roles,
+		);
+		$users         = get_users( $role_args );
+		$data['roles'] = $plugin_roles;
+		$data['users'] = $users;
+
+		// Remove groups if empty so that the script can init the correct object.
+		if ( empty( $data['groups'] ) ) {
+			unset( $data['groups'] );
+		}
+		// Add config data.
+		wp_add_inline_script( self::$slug, 'var plgData = ' . wp_json_encode( $data ), 'before' );
 	}
 
 	/**
 	 * Load the UI config.
 	 */
 	protected function load_config() {
+
 		$this->config               = get_option( self::CONFIG_KEY );
 		$this->config['pluginName'] = $this->plugin_name;
 		$this->config['version']    = $this->version;
@@ -486,6 +609,7 @@ class Plugin_Groups {
 	 * Render the admin page.
 	 */
 	public function render_admin() {
+
 		include PLGGRP_PATH . 'includes/main.php';
 	}
 
@@ -495,6 +619,7 @@ class Plugin_Groups {
 	 * @return Plugin_Groups
 	 */
 	public static function get_instance() {
+
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
