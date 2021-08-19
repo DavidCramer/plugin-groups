@@ -93,6 +93,7 @@ class Plugin_Groups {
 	 * Initiate the plugin_groups object.
 	 */
 	public function __construct() {
+
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugin            = get_file_data( PLGGRP_CORE, array( 'Plugin Name', 'Version', 'Text Domain' ), 'plugin' );
 		$this->plugin_name = array_shift( $plugin );
@@ -108,13 +109,14 @@ class Plugin_Groups {
 	 * Setup and register WordPress hooks.
 	 */
 	protected function setup_hooks() {
+
 		add_action( 'init', array( $this, 'plugin_groups_init' ), PHP_INT_MAX ); // Always the last thing to init.
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_filter( 'views_plugins', array( $this, 'add_groups' ), PHP_INT_MAX );
-		add_filter( 'all_plugins', array( $this, 'filter_status' ) );
+		add_filter( 'all_plugins', array( $this, 'catch_selected_group' ) );
 		add_filter( 'show_advanced_plugins', array( $this, 'filter_shown_status' ), 10, 2 );
 		add_filter( 'site_transient_update_plugins', array( $this, 'alter_update_plugins' ) );
 		add_action( 'pre_current_active_plugins', array( $this, 'render_group_navigation' ) );
@@ -183,7 +185,14 @@ class Plugin_Groups {
 		}
 	}
 
-	public function filter_status( $plugins ) {
+	/**
+	 * Catch the selected group.
+	 *
+	 * @param array $plugins List of plugins.
+	 *
+	 * @return array
+	 */
+	public function catch_selected_group( $plugins ) {
 
 		global $status;
 
@@ -327,38 +336,6 @@ class Plugin_Groups {
 				},
 			)
 		);
-		register_rest_route(
-			self::$slug,
-			'export',
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'args'                => array(),
-				'callback'            => array( $this, 'export_config' ),
-				'permission_callback' => array( $this, 'validate_export' ),
-			)
-		);
-	}
-
-	/**
-	 * Validate Export.
-	 */
-	public function validate_export( \WP_REST_Request $request ) {
-
-		$valid = wp_verify_nonce( $request->get_param( 'nonce' ), 'group_export' );
-		var_dump( $valid );
-
-		return wp_verify_nonce( $request->get_param( 'nonce' ), 'group_export' );
-	}
-
-	/**
-	 * Export the current config.
-	 */
-	public function export_config() {
-
-		header( 'Content-Type: application/json' );
-		header( 'Content-Disposition: attachment; filename="plugin-groups-export.json"' );
-		echo wp_json_encode( $this->config );
-		exit;
 	}
 
 	/**
