@@ -270,8 +270,6 @@ class Plugin_Groups {
 		if ( ! empty( $this->groups ) ) {
 			wp_enqueue_style( self::$slug . '-navbar' );
 		}
-		// Hide legacy.
-		unset( $plugins[ basename( PLGGRP_PATH ) . '/plugincore.php' ] );
 
 		return $plugins;
 	}
