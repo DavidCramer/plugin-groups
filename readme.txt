@@ -4,7 +4,7 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 5.3
 Tested up to: 5.8
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,8 +38,10 @@ Not yet, still working on it and will be out asap!
 
 
 == Changelog ==
+= 2.0.1 =
+- Fixed an error where on upgrade and have no presets, UI broke :(
 
-= 2.2.0 =
+= 2.0.0 =
 - Completely rewritten from scratch for modern browsers and modern WordPress.
 
 = 1.2.1 =
