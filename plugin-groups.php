@@ -3,7 +3,7 @@
  * Plugin Name: Plugin Groups
  * Plugin URI: https://cramer.co.za
  * Description: Organize Plugins in groups
- * Version: 2.0.0
+ * Version: 2.0.0 beta
  * Author: David Cramer
  * Author URI: https://cramer.co.za
  * Text Domain: plugin-groups
@@ -20,6 +20,9 @@ define( 'PLGGRP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PLGGRP_CORE', __FILE__ );
 define( 'PLGGRP_URL', plugin_dir_url( __FILE__ ) );
 define( 'PLGGRP_SLUG', 'plugin-groups' );
+//legacy
+define( 'PLORG_BETA', basename( __DIR__ ) . '/' . basename( __FILE__ ) );
+define( 'PLORG_PLUGIN', basename( __DIR__ ) . '/plugincore.php' );
 
 if ( ! version_compare( PHP_VERSION, '5.6', '>=' ) ) {
 	if ( is_admin() ) {

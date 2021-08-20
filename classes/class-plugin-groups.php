@@ -5,7 +5,7 @@
  * @package plugin_groups
  */
 
-use Plugin_Groups\Utils;
+namespace Plugin_Groups;
 
 /**
  * Plugin_Groups Class.
@@ -110,6 +110,8 @@ class Plugin_Groups {
 	 */
 	protected function setup_hooks() {
 
+		// Load plugin text domain
+		add_action( 'init', array( $this, 'load_text_domain' ) );
 		add_action( 'init', array( $this, 'plugin_groups_init' ), PHP_INT_MAX ); // Always the last thing to init.
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -123,6 +125,14 @@ class Plugin_Groups {
 		add_action( 'pre_current_active_plugins', array( $this, 'render_group_navigation' ) );
 		add_filter( 'bulk_actions-plugins', array( $this, 'bulk_actions' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_item' ), 100 );
+	}
+
+	/**
+	 * Load the plugin text domain for translation.
+	 */
+	public function load_text_domain() {
+
+		load_plugin_textdomain( self::$slug, false, basename( PLGGRP_PATH ) . '/languages' );
 	}
 
 	/**
@@ -218,7 +228,7 @@ class Plugin_Groups {
 		$html[] = '<option value="' . esc_url( $this->get_nav_url() ) . '" ' . ( ! empty( $this->current_group ) ? 'selected="selected"' : '' ) . '>' . __( 'All groups', self::$slug ) . '</option>';
 
 		foreach ( $this->groups as $key => $plugins ) {
-			$group = $this->config['groups'][ $key ];
+			$group    = $this->config['groups'][ $key ];
 			$selected = '';
 			if ( $this->current_group === $key ) {
 				$selected = ' selected="selected"';
@@ -260,6 +270,8 @@ class Plugin_Groups {
 		if ( ! empty( $this->groups ) ) {
 			wp_enqueue_style( self::$slug . '-navbar' );
 		}
+		// Hide legacy.
+		unset( $plugins[ basename( PLGGRP_PATH ) . '/plugincore.php' ] );
 
 		return $plugins;
 	}
@@ -542,7 +554,7 @@ class Plugin_Groups {
 		$parts  = explode( '\\', strtolower( str_replace( '_', '-', $class ) ) );
 		$core   = array_shift( $parts );
 		$self   = strtolower( str_replace( '_', '-', __CLASS__ ) );
-		if ( $core === $self ) {
+		if ( $core === self::$slug ) {
 			$name    = 'class-' . strtolower( array_pop( $parts ) ) . '.php';
 			$parts[] = $name;
 			$path    = PLGGRP_PATH . 'classes/' . implode( '/', $parts );
@@ -615,11 +627,25 @@ class Plugin_Groups {
 		return $config;
 	}
 
+	protected function check_legacy() {
+
+		$legacy = filter_input( INPUT_GET, 'reactivate-legacy', FILTER_SANITIZE_STRING );
+		if ( $legacy ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			deactivate_plugins( PLORG_BETA );
+			activate_plugin( PLORG_PLUGIN );
+			wp_safe_redirect( self_admin_url( 'plugins.php?page=plugin_groups' ) );
+			exit;
+		}
+	}
+
 	/**
 	 * Initialise plugin_groups.
 	 */
 	public function plugin_groups_init() {
 
+		// Check legacy redirect.
+		$this->check_legacy();
 		// Check version.
 		$this->check_version();
 
@@ -718,7 +744,7 @@ class Plugin_Groups {
 		// Prep config data.
 		$data              = $this->config;
 		$data['saveURL']   = rest_url( self::$slug . '/save' );
-		$data['exportURL'] = add_query_arg( 'nonce', wp_create_nonce( 'group_export' ), rest_url( self::$slug . '/export' ) );
+		$data['legacyURL'] = add_query_arg( 'reactivate-legacy', true, $this->get_nav_url( 'dashboard' ) );
 		$data['restNonce'] = wp_create_nonce( 'wp_rest' );
 
 		// Add plugins.

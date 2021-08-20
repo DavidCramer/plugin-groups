@@ -4,6 +4,9 @@ import '../css/navbar.scss';
 
 const PluginGroups = {
 	init() {
+
+		// Clean up the save lock.
+		window.localStorage.removeItem( '_plgUnsaved' );
 		if ( ! plgData.groups ) {
 			plgData.groups = {};
 		}

@@ -8,6 +8,8 @@
  * @copyright 2021/08/15 David Cramer
  */
 
+namespace Plugin_Groups;
+
 /**
  * Activate the plugin core.
  */
@@ -17,4 +19,4 @@ function activate_plugin_groups() {
 	Plugin_Groups::get_instance();
 }
 
-add_action( 'plugins_loaded', 'activate_plugin_groups' );
+add_action( 'plugins_loaded', 'Plugin_Groups\activate_plugin_groups' );
