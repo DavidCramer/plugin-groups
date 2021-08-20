@@ -7,6 +7,7 @@
 		padding       : 8px;
 		margin-bottom : 20px;
 		margin-top    : 8px;
+		overflow      : hidden;
 
 		label {
 			font-weight : bolder;
@@ -32,11 +33,13 @@
 	}
 
 	.groups-modern {
-		display          : block;
-		border           : 1px solid $color_light_gray;
-		background-color : $color_white;
-		margin           : 10px 0;
-		padding          : 0 12px;
+		display            : block;
+		border             : 1px solid $color_light_gray;
+		border-left-color  : $color_white;
+		border-right-color : $color_white;
+		background-color   : $color_white;
+		margin             : 10px -20px;
+		padding            : 0 12px;
 
 		li {
 			display : inline-block;

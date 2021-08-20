@@ -22,7 +22,6 @@ export default function PluginGroupHeader( props ) {
 				<span className={ 'ui-header-version' }>
 				{ version }
 			</span>
-				<a className={'button button-primary'} href={ props.legacyURL } >{__('Return to v1.2.3 Legacy')}</a>
 
 				<button
 					className={ 'button button-primary' }
