@@ -126,10 +126,12 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 				}
 			}
 		}
-		foreach ( $plugin_groups['group'] as $group_key => $group ) {
-			$key = '_' . sanitize_key( $group['config']['group_name'] );
-			if ( $status === $key ) {
-				$return = true;
+		if ( ! empty( $plugin_groups['group'] ) ) {
+			foreach ( $plugin_groups['group'] as $group_key => $group ) {
+				$key = '_' . sanitize_key( $group['config']['group_name'] );
+				if ( $status === $key ) {
+					$return = true;
+				}
 			}
 		}
 
@@ -142,17 +144,30 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 * @since 0.0.1
 	 */
 	public function bulk_actions( $actions ) {
+		global $plugins, $status;
 
 		$plugin_groups  = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		$current_status = filter_input( INPUT_GET, 'plugin_status', FILTER_SANITIZE_STRING );
-		if ( $this->is_group( $current_status ) ) {
-			$actions['_remove_group'] = __( 'Remove Group' );
-		}
-		$actions['_add_to_new_group'] = __( 'New Group' );
-		foreach ( $plugin_groups['group'] as $key => $group ) {
-			$actions[ $key ] = __( 'Add to ' ) . $group['config']['group_name'];
+		if ( ! empty( $plugin_groups['group'] ) ) {
+			foreach ( $plugin_groups['group'] as $key => $group ) {
+				$groupname = '_' . sanitize_key( $group['config']['group_name'] );
+				if ( $status !== $groupname ) {
+					$actions[ $key ] = __( 'Add to group: ' ) . $group['config']['group_name'];
+				}
+			}
 		}
 
+		$actions['_add_to_new_group'] = __( 'Add to New Group' );
+
+		// prepare a list of group showed plugins belongs to
+		if ( ! empty( $plugin_groups['group'] ) ) {
+			foreach ( $plugin_groups['group'] as $key => $group ) {
+				$groupname = '_' . sanitize_key( $group['config']['group_name'] );
+				if ( $status === $groupname ) {
+					$actions[ "removefrom_" . $key ] = __( 'Remove from group: ' ) . $group['config']['group_name'];
+				}
+			}
+		}
 		return $actions;
 	}
 
@@ -163,24 +178,70 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 */
 	public function bulk_action_handler( $sendback, $action, $plugins ) {
 
+		$add = 1;
+		$remove = 0;
+		if ( strpos($action , "removefrom_") === 0 ) {
+			$action = substr( $action, strlen( "removefrom_" ) );
+			$remove = 1;
+			$add = 0;
+		}
 
-		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
-		if ( ! empty( $plugin_groups['group'][ $action ] ) ) {
+		if ( $remove === 1 ) {
+			// remove from existing group
+			$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+			if ( ! empty( $plugin_groups['group'][ $action ] ) ) {
+				foreach ( $plugins as $plugin ) {
+					if ( in_array( $plugin, $plugin_groups['group'][ $action ]['config']['plugins'], true ) ) {
+						$key = array_search( $plugin, $plugin_groups['group'][ $action ]['config']['plugins']  );
+						if ($key !== false) {
+							unset( $plugin_groups['group'][ $action ]['config']['plugins'][ $key ] );
+						}
+					}
 
-			foreach ( $plugins as $plugin ) {
-				if ( ! in_array( $plugin, $plugin_groups['group'][ $action ]['config']['plugins'], true ) ) {
-					$plugin_groups['group'][ $action ]['config']['plugins'][] = $plugin;
 				}
 			}
 			Plugin_Groups_Options::update( $plugin_groups );
 			$key      = '_' . sanitize_key( $plugin_groups['group'][ $action ]['config']['group_name'] );
 			$sendback = admin_url( 'plugins.php?plugin_status=' . $key );
-
 		}
+
+		if ( $add === 1 ) {
+			// add to exiting group
+			$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
+			if ( ! empty( $plugin_groups['group'][ $action ] ) ) {
+				foreach ( $plugins as $plugin ) {
+					if ( isset( $plugin_groups['group'][ $action ]['config']['plugins'] ) ) {
+						if ( ! in_array( $plugin, $plugin_groups['group'][ $action ]['config']['plugins'], true ) ) {
+							$plugin_groups['group'][ $action ]['config']['plugins'][] = $plugin;
+						}
+					}
+
+				}
+			}
+			Plugin_Groups_Options::update( $plugin_groups );
+			$key      = '_' . sanitize_key( $plugin_groups['group'][ $action ]['config']['group_name'] );
+			$sendback = admin_url( 'plugins.php?plugin_status=' . $key );
+		}
+
 		if ( '_add_to_new_group' === $action ) {
 
 			$group_id                            = uniqid( 'nd' );
 			$new_name                            = filter_input( INPUT_POST, 'new_group', FILTER_SANITIZE_STRING );
+
+			// check does the group with same name already exists
+			// and if does, rename new group to contain unique id
+			$oldgroup = null;
+			if ( ! empty( $plugin_groups['group'] ) ) {
+				foreach ( $plugin_groups['group'] as $group_key => $group ) {
+					if ( $new_name === $group['config']['group_name'] ) {
+						$oldgroup = $group_key;
+					}
+				}
+			}
+			if ( $oldgroup ) {
+				$new_name = $new_name . "_" . $group_id;
+			}
+
 			$plugin_groups['group'][ $group_id ] = array(
 				'_id'         => $group_id,
 				'_node_point' => 'group.' . $group_id,
@@ -254,7 +315,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			return;
 		}
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -286,7 +347,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function filter_addons_do_filter_addons( $a ) {
 		global $plugins, $status;
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -336,6 +397,19 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// create a list of ungrouped plugins
+		$ungrouped = $plugins['all'];
+		foreach ( $plugins as $plugingroup => $plugin ) {
+			if ( strpos($plugingroup , "_") === 0 ) {
+			    foreach ( $plugins[$plugingroup] as $pluginname => $plugindata ) {
+				    unset( $ungrouped[$pluginname] );
+			    }
+			}
+		}
+		foreach ( $ungrouped as $pluginname => $plugindata ) {
+			$plugins[ '_ungrouped-plugins' ][ $pluginname ] = $plugindata;
+		}
+
 		return $a;
 	}
 
@@ -348,7 +422,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function filter_addons_filter_addons( $views ) {
 		global $status, $plugins;
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -364,7 +438,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 
 				$key = '_' . sanitize_key( $group['config']['group_name'] );
 				if ( empty( $plugins[ $key ] ) ) {
-					$views[ $key ] = $group['config']['group_name'] . ' <span class="count">(0)</span>';
+					$views[ $key ] = "<a href='?page=plugin_groups'>" . $group['config']['group_name'] . ' <span class="count">(0)</span></a>';
 					continue;
 				}
 				$count = 0;
@@ -385,6 +459,29 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 			}
 		}
 
+		// count a number of plugins that are not grouped in any of our groups
+		$ungrouped = $plugins['all'];
+		foreach ( $plugins as $plugingroup => $plugin ) {
+			if ( $this->is_group( $plugingroup ) ) {
+				foreach ( $plugins[$plugingroup] as $pluginname => $plugindata ) {
+					unset( $ungrouped[ $pluginname ] );
+				}
+			}
+		}
+		$count = count( $ungrouped );
+
+		// we keep extra '-' in $key, so that user can have its own group named 'Ungrouped Plugins', if they like so. This one is internal group.
+		$key = '_ungrouped-plugins';
+
+		// remove existing '_ungrouped-plugins' group from the list
+		unset( $views[ $key ] ) ;
+
+		$class = "";
+		if ( $status == $key ) {
+			$class = 'current';
+		}
+		$views[ $key ] = '<a class="' . $class . '" href="plugins.php?plugin_status=' . $key . '">' . __("Ungrouped") . ' <span class="count">(' . $count . ')</span></a>';
+
 		return $views;
 	}
 
@@ -397,7 +494,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function prepare_filter_addons( $plugins ) {
 		global $wp_list_table, $status;
 
-		// work on plugins list 
+		// work on plugins list
 		$plugin_groups = Plugin_Groups_Options::get_single( 'plugin_groups' );
 		if ( ! empty( $plugin_groups['presets'] ) ) {
 			$presets = $this->apply_preset_groups( $plugin_groups['presets'] );
@@ -416,6 +513,11 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 					break;
 				}
 			}
+		}
+
+		// if we are at the tab of Ungrouped plugins, stay there
+		if ( isset( $_REQUEST['plugin_status'] ) && $_REQUEST['plugin_status'] === '_ungrouped-plugins' ) {
+			$status = '_ungrouped-plugins';
 		}
 
 		return $plugins;
@@ -566,7 +668,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	public function add_settings_pages() {
 		// This page will be under "Settings"
 
-		$this->plugin_screen_hook_suffix['plugin_groups'] = add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Groups', $this->plugin_slug ), $this->capability, 'plugin_groups', array(
+		$this->plugin_screen_hook_suffix['plugin_groups'] = add_submenu_page( 'plugins.php', __( 'Plugin Groups', $this->plugin_slug ), __( 'Plugin Groups', $this->plugin_slug ), $this->capability, 'plugin_groups', array(
 			$this,
 			'create_admin_page',
 		) );
@@ -583,7 +685,7 @@ class Plugin_Groups_Settings extends Plugin_Groups {
 	 * @since 0.0.1
 	 */
 	public function create_admin_page() {
-		// Set class property        
+		// Set class property
 		$screen = get_current_screen();
 		$base   = array_search( $screen->id, $this->plugin_screen_hook_suffix );
 

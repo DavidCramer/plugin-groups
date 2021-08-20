@@ -41,7 +41,6 @@ class Plugin_Groups {
 	 */
 	protected $plugin_screen_hook_suffix = null;
 
-
 	protected $capability = 'manage_options';
 	protected $multisite = '';
 
@@ -59,15 +58,19 @@ class Plugin_Groups {
 
 		// Activate plugin when new blog is added
 		add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );
+		// Replace scripts.
 
+		add_action( 'wp_default_scripts', array( $this, 'replace_scripts' ), - 1 );
 		// Load admin style sheet and JavaScript.
-		add_action( 'admin_enqueue_scripts', array(
-			$this,
-			'enqueue_admin_stylescripts',
-		) );
+		add_action(
+			'admin_enqueue_scripts',
+			array(
+				$this,
+				'enqueue_admin_stylescripts',
+			)
+		);
 
 	}
-
 
 	/**
 	 * Return an instance of this class.
@@ -97,6 +100,93 @@ class Plugin_Groups {
 	}
 
 	/**
+	 * Migrate compat WP 5.6 +
+	 *
+	 * @since 1.2.2
+	 */
+	public function replace_scripts( $scripts ) {
+		$ver = get_bloginfo( 'version' );
+		if ( ! version_compare( '5.6', $ver, '<=' ) ) {
+			return;
+		}
+
+		$assets_url = PLORG_URL . '/assets/js/';
+		self::set_script( $scripts, 'jquery-migrate', $assets_url . 'jquery-migrate/jquery-migrate-1.4.1-wp.js', array(), '1.4.1-wp' );
+		self::set_script( $scripts, 'jquery-core', $assets_url . 'jquery/jquery-1.12.4-wp.js', array(), '1.12.4-wp' );
+		self::set_script( $scripts, 'jquery', false, array( 'jquery-core', 'jquery-migrate' ), '1.12.4-wp' );
+
+		// All the jQuery UI stuff comes here.
+		self::set_script( $scripts, 'jquery-ui-core', $assets_url . 'jquery-ui/core.min.js', array( 'jquery' ), '1.11.4-wp', 1 );
+		self::set_script( $scripts, 'jquery-effects-core', $assets_url . 'jquery-ui/effect.min.js', array( 'jquery' ), '1.11.4-wp', 1 );
+		self::set_script( $scripts, 'jquery-ui-autocomplete', $assets_url . 'jquery-ui/autocomplete.min.js', array( 'jquery-ui-menu', 'wp-a11y' ), '1.11.4-wp', 1 );
+		self::set_script( $scripts, 'jquery-ui-menu', $assets_url . 'jquery-ui/menu.min.js', array( 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-position' ), '1.11.4-wp', 1 );
+		self::set_script( $scripts, 'jquery-ui-sortable', $assets_url . 'jquery-ui/sortable.min.js', array( 'jquery-ui-mouse' ), '1.11.4-wp', 1 );
+		self::set_script( $scripts, 'jquery-ui-widget', $assets_url . 'jquery-ui/widget.min.js', array( 'jquery' ), '1.11.4-wp', 1 );
+
+	}
+
+	/**
+	 * Pre-register scripts on 'wp_default_scripts' action, they won't be overwritten by $wp_scripts->add().
+	 *
+	 * @since  1.2.2
+	 */
+	private static function set_script( $scripts, $handle, $src, $deps = array(), $ver = false, $in_footer = false ) {
+		$script = $scripts->query( $handle, 'registered' );
+
+		if ( $script ) {
+			// If already added
+			$script->src  = $src;
+			$script->deps = $deps;
+			$script->ver  = $ver;
+			$script->args = $in_footer;
+
+			unset( $script->extra['group'] );
+
+			if ( $in_footer ) {
+				$script->add_data( 'group', 1 );
+			}
+		} else {
+			// Add the script
+			if ( $in_footer ) {
+				$scripts->add( $handle, $src, $deps, $ver, 1 );
+			} else {
+				$scripts->add( $handle, $src, $deps, $ver );
+			}
+		}
+	}
+
+	/**
+	 * Check if we're in the plugins screen.
+	 *
+	 * @since 1.2.2
+	 * @return bool
+	 */
+	public static function is_plugin_group_screen() {
+		$return = false;
+		if ( PLORG_SLUG === self::current_page() ) {
+			$return = true;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Get the name of the current admin page query_var.
+	 *
+	 * @since 1.2.2
+	 * @return string|null
+	 */
+	public static function current_page() {
+		$return = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		if ( is_null( $return ) && function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			$return = $screen->base;
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Register and enqueue admin-specific style sheet.
 	 *
 	 * @since 0.0.1
@@ -104,14 +194,7 @@ class Plugin_Groups {
 	 */
 	public function enqueue_admin_stylescripts() {
 
-		$screen = get_current_screen();
-
-		if ( ! is_object( $screen ) ) {
-			return;
-		}
-
-
-		if ( false !== strpos( $screen->base, 'plugin_groups' ) ) {
+		if ( self::is_plugin_group_screen() ) {
 
 			wp_enqueue_style( 'plugin_groups-core-style', PLORG_URL . '/assets/css/styles.css' );
 			wp_enqueue_style( 'plugin_groups-baldrick-modals', PLORG_URL . '/assets/css/modals.css' );
@@ -125,27 +208,9 @@ class Plugin_Groups {
 			wp_enqueue_script( 'plugin_groups-select2-script', PLORG_URL . 'assets/js/select2.min.js', array( 'jquery' ), false, true );
 		}
 
-		if ( 'plugins' === $screen->id ) {
+		if ( 'plugins' === self::current_page() ) {
 			wp_enqueue_script( 'plugin_groups-bulk', PLORG_URL . '/assets/js/bulk.js', array( 'jquery' ), false );
 			wp_enqueue_style( 'plugin_groups-editor', PLORG_URL . 'assets/css/edit.css' );
 		}
-
 	}
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

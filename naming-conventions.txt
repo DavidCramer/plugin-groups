@@ -1,6 +1,0 @@
-Plugin Name -- Plugin Groups
-Text domain -- plugin-groups
-Function prefix -- plorg
-Class prefix -- {{Core_Prefix}}
-Root namespace -- Plugin_Groups
-Hook Prefix -- plorg
