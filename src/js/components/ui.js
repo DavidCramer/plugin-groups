@@ -9,9 +9,14 @@ import Settings from './settings';
 
 function PluginGroupApp( data ) {
 
-	const [ config, setConfig ] = React.useState( data );
+	const unsavedKey = '_plgUnsaved';
+	const [ config, setConfigState ] = React.useState( data );
 	const [ tab, setTab ] = React.useState( 1 );
 
+	const setConfig = ( newConfig ) => {
+		window.localStorage.setItem( unsavedKey, true );
+		setConfigState( newConfig );
+	};
 	const generateID = () => {
 		return 'pgxxxxx'.replace( /x/g, function( c ) {
 			var r = Math.random() * 16 | 0,
@@ -67,7 +72,8 @@ function PluginGroupApp( data ) {
 		const newConf = getConf();
 		if ( ! reset && ! newConf.groups[ id ].prevName ) {
 			newConf.groups[ id ].prevName = newConf.groups[ id ].name;
-		} else if ( reset ) {
+		}
+		else if ( reset ) {
 			name = newConf.groups[ id ].prevName ? newConf.groups[ id ].prevName : newConf.groups[ id ].name;
 			delete newConf.groups[ id ].prevName;
 			delete newConf.groups[ id ].edit;
@@ -148,10 +154,11 @@ function PluginGroupApp( data ) {
 	};
 	const handleSave = () => {
 		const newConf = getConf();
-		const { groups, selectedPresets } = newConf;
+		const { groups, selectedPresets, params } = newConf;
 		const data = JSON.stringify( {
 			groups,
 			selectedPresets,
+			params,
 		} );
 		newConf.saving = true;
 		fetch( config.saveURL, {
@@ -164,6 +171,7 @@ function PluginGroupApp( data ) {
 		} ).then( response => response.json() ).then( ( data ) => {
 			newConf.saving = false;
 			setConfig( config );
+			window.localStorage.removeItem( unsavedKey );
 		} );
 		setConfig( newConf );
 	};
@@ -171,9 +179,9 @@ function PluginGroupApp( data ) {
 	const handleExport = () => {
 
 		const stamp = JSON.stringify( new Date() )
-			.replace( /"/g, '-' )
-			.replace( /:/g, '-' )
-			.split( '.' )[ 0 ];
+		                  .replace( /"/g, '-' )
+		                  .replace( /:/g, '-' )
+		                  .split( '.' )[ 0 ];
 		const blob = new Blob(
 			[ JSON.stringify( config.groups ) ], { type: 'application/json' } );
 		const url = URL.createObjectURL( blob );
@@ -213,7 +221,8 @@ function PluginGroupApp( data ) {
 				delete newConf.groups[ id ].focus;
 				delete newConf.groups[ id ].temp;
 				delete newConf.groups[ id ].prevName;
-			} else {
+			}
+			else {
 
 				newConf.groups[ id ].edit = true;
 				if ( ! focused ) {
@@ -284,46 +293,56 @@ function PluginGroupApp( data ) {
 
 		if ( 'ArrowRight' === event.key ) {
 			openGroups( getSelected(), true );
-		} else if ( 'ArrowLeft' === event.key ) {
+		}
+		else if ( 'ArrowLeft' === event.key ) {
 			openGroups( getSelected(), false );
-		} else if ( 'ArrowUp' === event.key ) {
+		}
+		else if ( 'ArrowUp' === event.key ) {
 			event.preventDefault();
 			if ( ! event.shiftKey ) {
 				selectGroups( getList(), false );
 			}
 			selectPrev();
-		} else if ( 'ArrowDown' === event.key ) {
+		}
+		else if ( 'ArrowDown' === event.key ) {
 			event.preventDefault();
 			if ( ! event.shiftKey ) {
 				selectGroups( getList(), false );
 			}
 			selectNext();
-		} else if ( 'Enter' === event.key && event.target.dataset.edit ) {
+		}
+		else if ( 'Enter' === event.key && event.target.dataset.edit ) {
 			editGroup( event.target.dataset.edit );
-		} else if ( 'Enter' === event.key ) {
+		}
+		else if ( 'Enter' === event.key ) {
 			event.stopPropagation();
 			event.preventDefault();
 			editGroups( getSelected() );
-		} else if ( '/' === event.key ) {
+		}
+		else if ( '/' === event.key ) {
 			event.preventDefault();
 			event.stopPropagation();
 			newTempGroup( event );
-		} else if ( 'Escape' === event.key ) {
+		}
+		else if ( 'Escape' === event.key ) {
 			const id = event.path[ 0 ].dataset.edit;
 			if ( config.groups[ id ] ) {
 				if ( isTemp( id ) ) {
 					deleteGroup( id );
-				} else {
+				}
+				else {
 					changeName( id, '', true );
 					maybeFocus();
 				}
 			}
-		} else if ( 'Delete' === event.key ) {
+		}
+		else if ( 'Delete' === event.key ) {
 			const selected = getSelected();
 			if ( selected.length ) {
 				deleteGroups( selected, true );
 			}
-		} else if ( 's' === event.key && event.metaKey ) {
+		}
+		else if ( 's' === event.key && event.metaKey ) {
 			event.preventDefault();
 			handleSave();
 		}
@@ -354,7 +373,8 @@ function PluginGroupApp( data ) {
 		const index = newConf.selectedPresets.indexOf( id );
 		if ( -1 === index ) {
 			newConf.selectedPresets.push( id );
-		} else {
+		}
+		else {
 			newConf.selectedPresets.splice( index, 1 );
 		}
 		setConfig( newConf );
@@ -372,6 +392,7 @@ function PluginGroupApp( data ) {
 					' ' ) : [],
 			};
 		} );
+		console.log( oldData );
 		return newData;
 	};
 	const handleImport = ( event ) => {
@@ -392,6 +413,10 @@ function PluginGroupApp( data ) {
 		reader.readAsText( event.target.files[ 0 ] );
 	};
 
+	const checkSaved = () => {
+
+	};
+
 	React.useEffect( () => {
 		window.addEventListener( 'keydown', keyNavHandler );
 		return () => {
@@ -403,6 +428,14 @@ function PluginGroupApp( data ) {
 		setTab( tab );
 	};
 
+	const setParam = ( param, value ) => {
+		const newConf = getConf();
+		if ( ! newConf.params[ param ] ) {
+			newConf.params[ param ] = null;
+		}
+		newConf.params[ param ] = value;
+		setConfig( newConf );
+	};
 	const actions = {
 		selectGroup,
 		createGroup,
@@ -425,6 +458,7 @@ function PluginGroupApp( data ) {
 		removePlugins,
 		navTab,
 		tab,
+		setParam,
 	};
 	return (
 		<div className={ config.slug }>
@@ -450,7 +484,6 @@ function PluginGroupApp( data ) {
 		</div>
 	);
 }
-
 
 const UI =
 	{

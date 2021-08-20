@@ -15,6 +15,7 @@ const pluginGroups = {
 	...defaultConfig,
 	entry: {
 		"plugin-groups": './src/js/main.js',
+		"plugin-groups-navbar": './src/css/navbar.scss',
 	},
 	output: {
 		path: path.resolve( process.cwd(), 'js' ),

@@ -22,8 +22,13 @@ export default function PluginGroupHeader( props ) {
 				<span className={ 'ui-header-version' }>
 				{ version }
 			</span>
-				<button className={ 'button button-primary' } type={ 'button' } onClick={ handleSave }>
-					{ saving ? 'Saving' : 'Save Settings' }
+				<button
+					className={ 'button button-primary' }
+					type={ 'button' }
+					onClick={ handleSave }
+					disabled={ saving }
+				>
+					{ __( 'Save Settings', props.slug ) }
 				</button>
 				<button className={ 'button button-primary' } type={ 'button' } onClick={ handleExport }>
 					{ 'Export' }

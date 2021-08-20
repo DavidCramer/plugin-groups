@@ -31,7 +31,7 @@ export default function PluginGroupList( props ) {
 								);
 							} }
 							checked={ checked }
-							className={'list-control'}
+							className={ 'list-control' }
 						>
 							<button disabled={ ! getSelected().length }
 							        type={ 'button' }
@@ -50,7 +50,7 @@ export default function PluginGroupList( props ) {
 					}
 					{ 0 === getList().length &&
 					<div className={ 'description' }>
-						{ __( 'No groups' ) }
+						<span className="ui-body-edit-plugins-item">{ __( 'No groups created', props.slug ) }</span>
 					</div>
 					}
 				</div>
@@ -59,7 +59,7 @@ export default function PluginGroupList( props ) {
 			        className={ 'button' }
 			        onClick={ () => createGroup( '', true ) }>
 				<span className="dashicons dashicons-plus-alt"/>
-				{ __( 'New Group' ) }
+				{ __( 'Create new group', props.slug ) }
 			</button>
 		</div>
 	);

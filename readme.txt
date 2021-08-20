@@ -2,9 +2,9 @@
 Contributors: Desertsnowman, dlcramer
 Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
-Requires at least: 3.9
-Tested up to: 5.6
-Stable tag: 1.2.2
+Requires at least: 5.3
+Tested up to: 5.8
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,9 +31,13 @@ Not yet, still working on it and will be out asap!
 
 1. Easy to use UI for creating and managing filter groups.
 2. The filter groups added to the Plugin Page.
-2. Presets makes common plugins easier
+3. Presets makes common plugins easier
+
 
 == Changelog ==
+
+= 2.2.0 =
+- Completely rewritten from scratch for modern browsers and modern WordPress.
 
 = 1.2.1 =
 - WordPress 5.6 compatibility.

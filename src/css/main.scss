@@ -1,52 +1,10 @@
 @import "variables";
 
-
 .plugin-groups {
 	&-main > & {
-		margin-left: -20px;
-	}
-
-	.subsubsub {
-		float: none;
-	}
-
-	.group-list {
-		display: block;
-		border: 1px solid $color_light_gray;
-		background-color: $color_white;
-		margin: 10px 0;
-		padding: 0 12px;
-
-		.group-link {
-			display: inline-block;
-			margin: 0;
-
-			a {
-				display: inline-block;
-				padding: 20px 0 15px;
-				margin: 0 10px;
-				color: $color_blue_gray;
-				text-decoration: none;
-				border-bottom: 5px solid transparent;
-
-				&:hover {
-					color: $color_link_blue;
-					border-bottom: 5px solid $color_light_gray;
-				}
-
-				&.current {
-					color: $color_dark_blue_gray;
-					border-bottom: 5px solid $color_blue_gray;
-				}
-			}
-
-			.count {
-				color: $color_blue_gray;
-			}
-		}
+		margin-left : -20px;
 	}
 }
-
 .ui {
 
 
@@ -143,6 +101,11 @@
 			&.wide {
 				width: 500px;
 				max-width: 500px;
+			}
+
+			&.full {
+				width: auto;
+				max-width: 100%;
 			}
 
 			&.narrow {

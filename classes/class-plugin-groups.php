@@ -116,10 +116,13 @@ class Plugin_Groups {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_filter( 'views_plugins', array( $this, 'add_groups' ), PHP_INT_MAX );
+		add_filter( 'views_plugins-network', array( $this, 'add_groups' ) );
 		add_filter( 'all_plugins', array( $this, 'catch_selected_group' ) );
 		add_filter( 'show_advanced_plugins', array( $this, 'filter_shown_status' ), 10, 2 );
 		add_filter( 'site_transient_update_plugins', array( $this, 'alter_update_plugins' ) );
 		add_action( 'pre_current_active_plugins', array( $this, 'render_group_navigation' ) );
+		add_filter( 'bulk_actions-plugins', array( $this, 'bulk_actions' ) );
+		add_action( 'admin_bar_menu', array( $this, 'admin_bar_item' ), 100 );
 	}
 
 	/**
@@ -153,12 +156,17 @@ class Plugin_Groups {
 	 */
 	public function filter_shown_status( $show, $status ) {
 
+		global $plugins;
+
 		static $removes = array(
 			'mustuse',
 			'dropins',
 		);
 		if ( $this->current_group && in_array( $status, $removes, true ) ) {
 			$show = false;
+		}
+		if ( true === $this->config['params']['legacyGrouping'] ) {
+			$plugins += $this->groups;
 		}
 
 		return $show;
@@ -169,20 +177,62 @@ class Plugin_Groups {
 	 */
 	public function render_group_navigation() {
 
-		$parts   = array();
-		$parts[] = $this->make_all_tag();
-		foreach ( $this->config['groups'] as $key => $group ) {
-			if ( isset( $this->groups[ $key ] ) ) {
-				$parts[] = $this->make_group_tag( $group );
+		// Use new group system.
+		if ( true !== $this->config['params']['legacyGrouping'] && 'groups-dropdown' !== $this->config['params']['navStyle'] ) {
+			$parts   = array();
+			$parts[] = $this->make_all_tag();
+			foreach ( $this->groups as $key => $plugins ) {
+				$parts[] = $this->make_group_tag( $key );
+			}
+
+			$groups    = implode( "", $parts );
+			$group_set = Utils::build_tag( 'ul', array( 'class' => array( $this->config['params']['navStyle'] ) ), $groups );
+			$html      = Utils::build_tag( 'div', array( 'class' => self::$slug ), $group_set );
+			if ( 1 < count( $parts ) ) {
+				echo wp_kses( $html, wp_kses_allowed_html( 'post' ) );
 			}
 		}
-		// @todo: Add modern styles.
-		$groups    = implode( " |\n", $parts );
-		$group_set = Utils::build_tag( 'ul', array( 'class' => array( 'subsubsub' ) ), $groups );
-		$html      = Utils::build_tag( 'div', array( 'class' => self::$slug ), $group_set );
-		if ( 1 < count( $parts ) ) {
-			echo wp_kses( $html, wp_kses_allowed_html( 'post' ) );
+	}
+
+	public function bulk_actions( $actions ) {
+
+		if ( true !== $this->config['params']['legacyGrouping'] && 'groups-dropdown' === $this->config['params']['navStyle'] ) {
+			$this->dropdown_navigation();
 		}
+
+		return $actions;
+	}
+
+	/**
+	 * Render a dropdown navigation.
+	 *
+	 * @param bool $echo Optional flag to echo the field or return the string.
+	 *
+	 * @return void|string
+	 */
+	public function dropdown_navigation( $echo = true ) {
+
+		$html   = array();
+		$html[] = '<label for="bulk-action-selector-groups" class="screen-reader-text">' . __( 'All groups', self::$slug ) . '</label>';
+		$html[] = '<select id="bulk-action-selector-groups" onChange="window.location = this.value">';
+		$html[] = '<option value="' . esc_url( $this->get_nav_url() ) . '" ' . ( ! empty( $this->current_group ) ? 'selected="selected"' : '' ) . '>' . __( 'All groups', self::$slug ) . '</option>';
+
+		foreach ( $this->groups as $key => $plugins ) {
+			$group = $this->config['groups'][ $key ];
+			$selected = '';
+			if ( $this->current_group === $key ) {
+				$selected = ' selected="selected"';
+			}
+
+			$html[] = "\t" . '<option value="' . esc_url( $this->get_nav_url( $key ) ) . '"' . $selected . '>' . $group['name'] . ' (' . count( $plugins ) . ')</option>' . "\n";
+		}
+
+		$html[] = "</select>\n";
+		$html   = implode( $html );
+		if ( false === $echo ) {
+			return $html;
+		}
+		echo $html;
 	}
 
 	/**
@@ -206,35 +256,63 @@ class Plugin_Groups {
 			$this->current_nav_path .= ' | ' . $this->config['groups'][ $selected_group ]['name'];
 		}
 
-		// Add our styles.
-		wp_enqueue_style( self::$slug );
+		// Add our styles if we have groups;
+		if ( ! empty( $this->groups ) ) {
+			wp_enqueue_style( self::$slug . '-navbar' );
+		}
 
 		return $plugins;
 	}
 
 	/**
-	 * Make a group tag.
+	 * Get a url link for group navigation.
 	 *
-	 * @param array $group The Groups config structure.
+	 * @param null|string $id The group ID or null for all.
 	 *
 	 * @return string
 	 */
-	protected function make_group_tag( $group ) {
+	protected function get_nav_url( $id = null ) {
 
-		$id      = $group['id'];
+		$url = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
+		if ( ! $url || false === strpos( 'plugins.php', $url ) ) {
+			// Just in case.
+			$url = self_admin_url( 'plugins.php' );
+		}
+		if ( null === $id ) {
+			// Null id is for the 'All groups'.
+			return remove_query_arg( self::$slug, $url );
+		}
+
+		// If no plugins get a link back to admin.
+		if ( empty( $this->groups[ $id ] ) ) {
+			return add_query_arg( 'page', self::$slug, $url );
+		}
+
+		return add_query_arg(
+			array(
+				'plugin_status' => $this->current_status,
+				self::$slug     => $id,
+
+			),
+			$url
+		);
+	}
+
+	/**
+	 * Make a group tag.
+	 *
+	 * @param string $id The Group ID.
+	 *
+	 * @return string
+	 */
+	protected function make_group_tag( $id ) {
+
+		$group   = $this->config['groups'][ $id ] ? $this->config['groups'][ $id ] : $this->make_preset( $id );
 		$total   = count( $this->groups[ $id ] );
-		$url     = add_query_arg( 'page', self::$slug, 'plugins.php' );
 		$counter = '';
 
 		if ( ! empty( $total ) ) {
-			$url     = add_query_arg(
-				array(
-					'plugin_status' => $this->current_status,
-					self::$slug     => $id,
 
-				),
-				'plugins.php'
-			);
 			$counter = Utils::build_tag( 'span', array( 'class' => 'count' ), " ({$total})" );
 		}
 		$li_atts   = array(
@@ -244,7 +322,7 @@ class Plugin_Groups {
 			),
 		);
 		$link_atts = array(
-			'href' => $url,
+			'href' => $this->get_nav_url( $id ),
 		);
 		if ( $group['id'] === $this->current_group ) {
 			$li_atts['class'][]        = 'current';
@@ -258,20 +336,89 @@ class Plugin_Groups {
 	}
 
 	/**
+	 *
+	 * @param string $id The group ID to make a preset for.
+	 */
+	public function make_preset( $id ) {
+
+		var_dump( $id );
+		$group = array(
+			'id'   => $id,
+			'name' => $this->config['preset'],
+		);
+	}
+
+	/**
+	 * Load presets into groups for built-in and filtered presets.
+	 *
+	 * @return array
+	 */
+	protected function load_presets() {
+
+		$groups = array(
+			'WooCommerce'            => array( 'WooCommerce' ),
+			'Easy Digital Downloads' => array( 'Easy Digital Downloads' ),
+			'Ninja Forms'            => array( 'Ninja Forms' ),
+			'Gravity Forms'          => array( 'Gravity Forms' ),
+			'WPForms'                => array( 'WPForms' ),
+			'E-Commerce'             => array(
+				'WooCommerce',
+				'Easy Digital Downloads',
+			),
+			'Forms'                  => array(
+				'Ninja Forms',
+				'Gravity Forms',
+				'WPForms',
+				'Formidable Forms',
+			),
+			'SEO'                    => array(
+				'All in One SEO',
+				'Yoast SEO',
+			),
+			// @todo: Add more categories for presets.
+		);
+
+		/**
+		 * Filter the presets (legacy)
+		 *
+		 * @deprecated 2.0.0
+		 */
+		$groups = apply_filters( 'plugin-groups-get-presets', $groups );
+
+		/**
+		 * Filter preset plugin groups.
+		 *
+		 * @hook    get_preset_plugin_groups
+		 * @since   2.0.0
+		 *
+		 * @param $groups {array}   The preset groups.
+		 *
+		 * @return  array
+		 */
+		$presets                       = apply_filters( 'get_preset_plugin_groups', $groups );
+		$this->config['preset_groups'] = array();
+		foreach ( $presets as $name => $keywords ) {
+			$id                                   = sanitize_title( $name );
+			$this->config['preset_groups'][ $id ] = array(
+				'id'       => $id,
+				'name'     => $name,
+				'plugins'  => array(),
+				'keywords' => $keywords,
+			);
+		}
+
+		return array_keys( $groups );
+	}
+
+	/**
 	 * Make all link tag.
 	 *
 	 * @return string
 	 */
 	protected function make_all_tag() {
 
-		$current_url = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
-		$url         = self_admin_url( 'plugins.php' );
-		if ( $current_url ) {
-			$url = $current_url;
-		}
-		$url       = remove_query_arg( self::$slug, $url );
 		$link_atts = array(
-			'href' => $url,
+			'href' => $this->get_nav_url(),
 		);
 		if ( empty( $this->current_group ) ) {
 			$link_atts['class']        = 'current';
@@ -285,7 +432,9 @@ class Plugin_Groups {
 	/**
 	 * Add new filter view
 	 *
-	 * @return array|Views with added groups
+	 * @param array $views The list of nav tags for plugin statuses.
+	 *
+	 * @return array
 	 */
 	public function add_groups( $views ) {
 
@@ -302,6 +451,16 @@ class Plugin_Groups {
 				}
 			}
 		}
+
+		// Legacy.
+		if ( true === $this->config['params']['legacyGrouping'] ) {
+			foreach ( $this->groups as $key => $plugins ) {
+				if ( isset( $views[ $key ] ) ) {
+					$views[ $key ] = $this->make_group_tag( $key );
+				}
+			}
+		}
+
 		// @todo: Make method.
 		if ( ! empty( $this->current_nav_path ) ) {
 			$append = array(
@@ -350,6 +509,7 @@ class Plugin_Groups {
 		$data                            = $request->get_json_params();
 		$this->config['groups']          = $data['groups'];
 		$this->config['selectedPresets'] = $data['selectedPresets'];
+		$this->config['params']          = $data['params'];
 		$success                         = update_option( self::CONFIG_KEY, $this->config );
 
 		return rest_ensure_response( array( 'success' => $success ) );
@@ -411,9 +571,11 @@ class Plugin_Groups {
 		$new_version      = $this->version();
 		if ( version_compare( $previous_version, $new_version, '<' ) ) {
 			if ( version_compare( $previous_version, '2.0.0', '<' ) ) {
-				$data       = get_option( 'plugin_groups_plugin_groups', array() );
-				$new_config = $this->convert_legacy_groups( $data );
-				update_option( self::CONFIG_KEY, $new_config );
+				$data = get_option( 'plugin_groups_plugin_groups', array() );
+				if ( ! empty( $data ) ) {
+					$new_config = $this->convert_legacy_groups( $data );
+					update_option( self::CONFIG_KEY, $new_config );
+				}
 			}
 			// Allow for updating.
 			do_action( "_plugin_groups_version_upgrade", $previous_version, $new_version );
@@ -443,10 +605,14 @@ class Plugin_Groups {
 			$groups[ $group['_id'] ] = $new_group;
 		}
 
-		return array(
-			'groups'  => $groups,
-			'presets' => $data['presets'],
-		);
+		// Set up the new config.
+		$config                             = $this->get_default_config();
+		$config['groups']                   = $groups;
+		$config['selectedPresets']          = $data['presets'];
+		$config['params']['legacyGrouping'] = true;
+		$config['params']['navStyle']       = 'subsubsub';
+
+		return $config;
 	}
 
 	/**
@@ -482,6 +648,7 @@ class Plugin_Groups {
 		$asset = include PLGGRP_PATH . 'js/' . self::$slug . '.asset.php';
 		wp_register_script( self::$slug, PLGGRP_URL . 'js/' . self::$slug . '.js', $asset['dependencies'], $asset['version'], true );
 		wp_register_style( self::$slug, PLGGRP_URL . 'css/' . self::$slug . '.css', array(), $asset['version'] );
+		wp_register_style( self::$slug . '-navbar', PLGGRP_URL . 'css/' . self::$slug . '-navbar.css', array(), $asset['version'] );
 	}
 
 	/**
@@ -490,6 +657,43 @@ class Plugin_Groups {
 	public function admin_menu() {
 
 		add_submenu_page( 'plugins.php', __( 'Plugin Groups', self::$slug ), __( 'Plugin Groups', self::$slug ), 'manage_options', 'plugin-groups', array( $this, 'render_admin' ), 50 );
+	}
+
+	/**
+	 * Add Groups to the admin bar.
+	 *
+	 * @param WP_Admin_Bar $admin_bar
+	 */
+	public function admin_bar_item( $admin_bar ) {
+
+		if ( ! $this->config['params']['menuGroups'] || ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
+		$groups = array(
+			'parent' => array(
+				'id'    => self::$slug,
+				'title' => $this->plugin_name,
+				'href'  => $this->get_nav_url( 'dashboard' ),
+				'meta'  => array(
+					'title' => $this->plugin_name,
+				),
+			),
+		);
+
+		foreach ( $this->groups as $key => $plugins ) {
+			$group          = $this->config['groups'][ $key ];
+			$groups[ $key ] = array(
+				'id'     => $key,
+				'parent' => self::$slug,
+				'title'  => $group['name'] . ' (' . count( $plugins ) . ')',
+				'href'   => $this->get_nav_url( $key ),
+			);
+		}
+
+		foreach ( $groups as $option ) {
+			$admin_bar->add_menu( $option );
+		}
 	}
 
 	/**
@@ -520,26 +724,34 @@ class Plugin_Groups {
 		// Add plugins.
 		$data['plugins'] = get_plugins();
 
-		// Add roles.
-		$plugin_roles = array();
-		foreach ( wp_roles()->role_objects as $role ) {
-			if ( isset( $role->capabilities['activate_plugins'] ) && true === $role->capabilities['activate_plugins'] ) {
-				$plugin_roles[] = $role->name;
-			}
-		}
-		$role_args     = array(
-			'role__in' => $plugin_roles,
-		);
-		$users         = get_users( $role_args );
-		$data['roles'] = $plugin_roles;
-		$data['users'] = $users;
+		// Remove presets from groups for admin.
+		$data['groups'] = array_diff_key( $data['groups'], $this->config['preset_groups'] );
 
-		// Remove groups if empty so that the script can init the correct object.
+		// Remove empty groups to allow JS to init them.
 		if ( empty( $data['groups'] ) ) {
 			unset( $data['groups'] );
 		}
+
 		// Add config data.
 		wp_add_inline_script( self::$slug, 'var plgData = ' . wp_json_encode( $data ), 'before' );
+	}
+
+	/**
+	 * Get the default config.
+	 *
+	 * @return array
+	 */
+	protected function get_default_config() {
+
+		return array(
+			'groups'          => array(),
+			'selectedPresets' => array(),
+			'params'          => array(
+				'legacyGrouping' => false,
+				'navStyle'       => 'subsubsub',
+				'menuGroups'     => false,
+			),
+		);
 	}
 
 	/**
@@ -547,37 +759,83 @@ class Plugin_Groups {
 	 */
 	protected function load_config() {
 
-		$this->config               = get_option( self::CONFIG_KEY );
+		// Load the config.
+		$this->config               = get_option( self::CONFIG_KEY, $this->get_default_config() );
 		$this->config['pluginName'] = $this->plugin_name;
 		$this->config['version']    = $this->version;
 		$this->config['slug']       = self::$slug;
 
-		$plugins = get_plugins();
+		// Load the presets.
+		$this->config['presets'] = $this->load_presets();
 
-		if ( ! empty( $this->config['groups'] ) ) {
-			foreach ( $this->config['groups'] as $group ) {
-				foreach ( $group['plugins'] as $plugin ) {
-					if ( isset( $plugins[ $plugin ] ) ) {
-						$this->groups[ $group['id'] ][ $plugin ] = $plugins[ $plugin ];
-					}
+		// Populate groups with plugins.
+		array_map( array( $this, 'populate_plugins' ), $this->config['groups'] );
+		// register selected presets.
+		if ( ! empty( $this->config['selectedPresets'] ) ) {
+			array_map( array( $this, 'register_preset' ), $this->config['selectedPresets'] );
+		}
+
+		// Populate groups with keywords.
+		array_map( array( $this, 'populate_keywords' ), array_keys( $this->config['groups'] ) );
+	}
+
+	/**
+	 * Register a preset.
+	 *
+	 * @param string $preset The preset name to register.
+	 */
+	protected function register_preset( $preset ) {
+
+		$key = sanitize_title( $preset );
+		if ( isset( $this->config['preset_groups'][ $key ] ) ) {
+			$this->config['groups'][ $key ] = $this->config['preset_groups'][ $key ];
+		}
+	}
+
+	/**
+	 * Populate a group with selected plugins.
+	 *
+	 * @param array $group The group array.
+	 */
+	protected function populate_plugins( $group ) {
+
+		static $plugins;
+		if ( ! $plugins ) {
+			$plugins = get_plugins();
+		}
+		foreach ( $group['plugins'] as $plugin ) {
+			if ( isset( $plugins[ $plugin ] ) ) {
+				$this->groups[ $group['id'] ][ $plugin ] = $plugins[ $plugin ];
+			}
+		}
+	}
+
+	/**
+	 * Populate a group from keywords.
+	 *
+	 * @param string $id The group ID.
+	 */
+	protected function populate_keywords( $id ) {
+
+		if ( ! isset( $this->config['groups'][ $id ] ) || empty( $this->config['groups'][ $id ]['keywords'] ) ) {
+			return;
+		}
+		$keywords = array_map( 'strtolower', $this->config['groups'][ $id ]['keywords'] );
+		$plugins  = get_plugins();
+		foreach ( $plugins as $plugin_key => $plugin_data ) {
+			if ( isset( $this->groups[ $id ][ $plugin_key ] ) ) {
+				continue;
+			}
+			$plugin_string = strtolower( implode( ' ', $plugin_data ) );
+			$matched       = array_filter(
+				$keywords,
+				function( $keyword ) use ( $plugin_string ) {
+
+					return false !== strpos( $plugin_string, $keyword );
 				}
-				if ( empty( $group['keywords'] ) ) {
-					continue;
-				}
-				// @todo: move to own method.
-				foreach ( $plugins as $plugin_key => $plugin_data ) {
-					if ( isset( $this->groups[ $group['id'] ][ $plugin_key ] ) ) {
-						continue;
-					}
-					foreach ( $group['keywords'] as $keyword ) {
-						foreach ( $plugin_data as $details ) {
-							if ( false !== strpos( strtolower( $details ), strtolower( $keyword ) ) ) {
-								$this->groups[ $group['id'] ][ $plugin_key ] = $plugin_data;
-								break;
-							}
-						}
-					}
-				}
+			);
+			if ( ! empty( $matched ) ) {
+				$this->groups[ $id ][ $plugin_key ] = $plugin_data;
 			}
 		}
 	}
