@@ -29,9 +29,12 @@ Not yet, still working on it and will be out asap!
 
 == Screenshots ==
 
-1. Easy to use UI for creating and managing filter groups.
-2. The filter groups added to the Plugin Page.
-3. Presets makes common plugins easier
+1. New groups menu above the plugin status, enables navigating status within groups.
+2. New styles give a different feel to the groups navigation.
+3. Dropdown navigation instead of a menu to cut space.
+4. Admin menu mode to make access to groups from anywhere.
+5. Completely redesigned admin.
+6. Bulk edit / create groups to speed up creation.
 
 
 == Changelog ==
