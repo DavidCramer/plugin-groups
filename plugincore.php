@@ -1,45 +1,39 @@
 <?php
-/**
- * @package   Plugin_Groups
- * @author    David Cramer <david@digilab.co.za>
- * @license   GPL-2.0+
- * @link      https://cramer.co.za
- * @copyright 2018 David Cramer <david@digilab.co.za>
- *
- * @wordpress-plugin
+/*
  * Plugin Name: Plugin Groups
- * Plugin URI:  https://cramer.co.za
- * Description: Organize plugins in the Plugins Admin Page by creating groups and filter types.
- * Version:     1.2.3
- * Author:      David Cramer <david@digilab.co.za>
- * Author URI:  https://cramer.co.za/
+ * Plugin URI: https://cramer.co.za
+ * Description: Organize Plugins in groups
+ * Version: 2.0.0
+ * Author: David Cramer
+ * Author URI: https://cramer.co.za
  * Text Domain: plugin-groups
- * License:     GPL-2.0+
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
- * Domain Path: /languages
- * Network:     true
- */
+ * License: GPL2+
+*/
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( ! is_admin() ) {
-	return;
+// Constants.
+define( 'PLGGRP_PATH', plugin_dir_path( __FILE__ ) );
+define( 'PLGGRP_CORE', __FILE__ );
+define( 'PLGGRP_URL', plugin_dir_url( __FILE__ ) );
+define( 'PLGGRP_SLUG', 'plugin-groups' );
+//legacy
+define( 'PLORG_BETA', basename( __DIR__ ) . '/' . basename( __FILE__ ) );
+define( 'PLORG_PLUGIN', basename( __DIR__ ) . '/plugincore.php' );
+
+if ( ! version_compare( PHP_VERSION, '5.6', '>=' ) ) {
+	if ( is_admin() ) {
+		add_action( 'admin_notices', 'plugin_groups_php_ver' );
+	}
+} else {
+	// Includes Plugin_Groups and starts instance.
+	include_once PLGGRP_PATH . 'bootstrap.php';
 }
 
-define( 'PLORG_PATH', plugin_dir_path( __FILE__ ) );
-define( 'PLORG_PLUGIN', basename( __DIR__ ) . '/' . basename( __FILE__ ) );
-define( 'PLORG_BETA', basename( __DIR__ ) . '/plugin-groups.php' );
-define( 'PLORG_URL', plugin_dir_url( __FILE__ ) );
-define( 'PLORG_VER', '1.2.3' );
-define( 'PLORG_SLUG', 'plugin_groups' );
-
-// load internals
-require_once( PLORG_PATH . 'legacy/class-plugin-groups.php' );
-require_once( PLORG_PATH . 'legacy/class-options.php' );
-require_once( PLORG_PATH . 'legacy/class-settings.php' );
-
-// Load instance
-add_action( 'plugins_loaded', array( 'Plugin_Groups', 'get_instance' ) );
+function plugin_groups_php_ver() {
+	$message = __( 'Plugin Groups requires PHP version 5.6 or later. We strongly recommend PHP 5.6 or later for security and performance reasons.', 'plugin-groups' );
+	echo sprintf( '<div id="plugin_groups_error" class="error notice notice-error"><p>%s</p></div>', esc_html( $message ) );
+}

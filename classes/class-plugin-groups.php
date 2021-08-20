@@ -627,25 +627,11 @@ class Plugin_Groups {
 		return $config;
 	}
 
-	protected function check_legacy() {
-
-		$legacy = filter_input( INPUT_GET, 'reactivate-legacy', FILTER_SANITIZE_STRING );
-		if ( $legacy ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-			deactivate_plugins( PLORG_BETA );
-			activate_plugin( PLORG_PLUGIN );
-			wp_safe_redirect( self_admin_url( 'plugins.php?page=plugin_groups' ) );
-			exit;
-		}
-	}
-
 	/**
 	 * Initialise plugin_groups.
 	 */
 	public function plugin_groups_init() {
 
-		// Check legacy redirect.
-		$this->check_legacy();
 		// Check version.
 		$this->check_version();
 
