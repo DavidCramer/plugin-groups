@@ -11,13 +11,13 @@ if ( !$_tests_dir ) $_tests_dir = '/tmp/wordpress-tests-lib';
 require_once $_tests_dir . '/includes/functions.php';
 
 function _manually_load_plugin() {
-	require dirname( __FILE__ ) . '/../plugincore.php';
+	require dirname( __FILE__ ) . '/../plugin-groups.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require $_tests_dir . '/includes/bootstrap.php';
 
-activate_plugin( 'cy_plugin_groups/plugincore.php' );
+activate_plugin( 'plugin-groups/plugin-groups.php' );
 
 echo "Installing Plugin Groups...\n";
 

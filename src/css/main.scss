@@ -1,0 +1,277 @@
+@import "variables";
+
+.plugin-groups {
+	&-main > & {
+		margin-left : -20px;
+	}
+}
+.ui {
+
+	&-keyword {
+		border: 1px solid $color_light_gray;
+		border-radius: 7px;
+		margin: 6px 6px 6px 0;
+		padding: 3px 6px;
+		display: inline-flex;
+		flex-direction: row;
+		justify-content: space-between;
+
+		label {
+			margin-left: 3px;
+		}
+	}
+
+	&-header {
+		display: flex;
+		align-items: center;
+		padding-left: 20px;
+		background-color: $color_brand_green;
+		box-shadow: 0 1px 1px $color_shadow_light;
+
+		h2 {
+			margin: 0;
+			padding: 1em 1em 1em 0;
+			color: $color_white;
+			text-shadow: 0 1px 1px $color_shadow;
+		}
+
+		&-version {
+			font-size: 0.8em;
+			color: $color_white;
+		}
+		&-multisite{
+			margin: 0 8px 0 12px;
+		}
+
+		.button {
+			background-color: $color_dark_green;
+			border-color: $color_brand_green;
+			box-shadow: none;
+			margin-left: 20px;
+
+			&:focus {
+				opacity: 0.4;
+			}
+
+			input[type=file] {
+				width: 0;
+			}
+		}
+	}
+
+	&-navigation {
+		display: flex;
+		background-color: $color_dark_green;
+		margin: 0 0 20px;
+		color: $color_white;
+		cursor: pointer;
+
+		&-link {
+			padding: 8px 20px;
+			margin: 0;
+
+			&:hover, &.active {
+				background-color: $color_brand_green;
+			}
+
+		}
+	}
+
+	&-body {
+		display: flex;
+		.keywords-input{
+			width: 100%;
+		}
+		&-sidebar {
+			width: 400px;
+			overflow-x: hidden;
+			padding: 0 20px 20px;
+
+			.search {
+				width: 100%;
+				margin: 6px 0;
+			}
+
+			.button {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+
+				.dashicons {
+					margin: 0 4px;
+				}
+			}
+
+			&.wide {
+				width: 500px;
+				max-width: 500px;
+			}
+
+			&.full {
+				width: auto;
+				max-width: 100%;
+			}
+
+			&.narrow {
+				width: 200px;
+				min-width: 200px;
+			}
+
+			h3 {
+				margin: 0 0 10px;
+			}
+
+			&-list {
+
+				.plugins-list & {
+					max-height: 500px;
+					overflow-y: auto;
+				}
+
+				&-item {
+					margin-bottom: 0;
+					border: 1px solid transparent;
+					border-bottom-color: $color_light_gray;
+					margin-top: -1px;
+
+
+					&.list-control {
+						align-items: center;
+
+						label {
+							font-weight: bolder;
+						}
+					}
+
+					&.active {
+						background: $color_white;
+						border-color: $color_brand_green;
+					}
+
+					display: flex;
+					justify-content: space-between;
+					padding: 0.6em 8px;
+
+					@media only screen and (max-width: 1150px) {
+						&.list-control{
+							.button {
+								.text{
+									display: none;
+								}
+								margin: 8px 0 12px;
+							}
+							label{
+								overflow: auto;
+							}
+
+						}
+					}
+
+					&:hover {
+						&:not(.active) {
+							background-color: $color_white_hover;
+						}
+					}
+
+					span {
+
+					}
+
+					label, .version {
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+					}
+					.version{
+						color: $color_blue_gray;
+						@media only screen and (max-width: 1150px) {
+							display: none;
+						}
+					}
+					&-title {
+						cursor: pointer;
+					}
+
+					&-icons {
+						cursor: pointer;
+					}
+
+					&-edit {
+						border: 1px solid $color_brand_green;
+						border-top: 0;
+						padding: 10px 20px 20px;
+						background: $color_white;
+					}
+
+					&-section {
+						margin-bottom: 20px;
+					}
+				}
+			}
+		}
+
+		&-edit {
+			margin: 0 20px;
+			width: 100%;
+
+			h3 {
+				margin: 0 0 10px;
+			}
+
+			&-title {
+				border: 1px transparent;
+				margin-left: 7px;
+				font-size: inherit;
+
+				&:focus {
+					box-shadow: 0 0 0;
+				}
+
+				&:focus-visible {
+					outline: 0;
+				}
+			}
+
+			&-plugins {
+
+				max-height: 500px;
+				overflow-y: auto;
+
+				&-item {
+					display: flex;
+					justify-content: space-between;
+					padding: 9px 8px 8px;
+					border: 1px solid $color_light_gray;
+					margin-top: -1px;
+				}
+			}
+		}
+	}
+
+	&-panel {
+		margin-bottom: 20px;
+
+		&-header {
+			display: flex;
+			justify-content: space-between;
+			border-bottom: 1px solid $color_brand_green;
+
+			&.collapsible {
+				cursor: pointer;
+			}
+
+			h3 {
+				font-size: 1rem;
+			}
+		}
+
+		& & &-header {
+			padding: 6px;
+
+			h3 {
+				font-size: 0.8rem;
+				margin: 0;
+			}
+		}
+	}
+}

@@ -1,216 +1,1005 @@
 <?php
 /**
- * Plugin Groups.
+ * Core class for Plugin Groups.
  *
- * @package   Plugin_Groups
- * @author    David Cramer <david@digilab.co.za>
- * @license   GPL-2.0+
- * @link
- * @copyright 2015 David Cramer <david@digilab.co.za>
+ * @package plugin_groups
  */
 
+namespace Plugin_Groups;
+
 /**
- * Plugin class.
- *
- * @package Plugin_Groups
- * @author  David Cramer <david@digilab.co.za>
+ * Plugin_Groups Class.
  */
 class Plugin_Groups {
 
 	/**
-	 * The slug for this plugin
+	 * The single instance of the class.
 	 *
-	 * @since 0.0.1
-	 * @var      string
-	 */
-	protected $plugin_slug = 'plugin-groups';
-
-	/**
-	 * Holds class isntance
-	 *
-	 * @since 0.0.1
-	 * @var      object|Plugin_Groups
+	 * @var Plugin_Groups
 	 */
 	protected static $instance = null;
 
 	/**
-	 * Holds the option screen prefix
+	 * Holds the version of the plugin.
 	 *
-	 * @since 0.0.1
-	 * @var      string
+	 * @var string
 	 */
-	protected $plugin_screen_hook_suffix = null;
-
-	protected $capability = 'manage_options';
-	protected $multisite = '';
+	protected $version;
 
 	/**
-	 * Initialize the plugin by setting localization, filters, and
-	 * administration functions.
+	 * Holds the plugin name.
 	 *
-	 * @since  0.0.1
-	 * @access private
+	 * @var string
 	 */
-	private function __construct() {
+	protected $plugin_name;
 
-		// Load plugin text domain
-		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+	/**
+	 * Holds the plugin config.
+	 *
+	 * @var array
+	 */
+	protected $config = array();
 
-		// Activate plugin when new blog is added
-		add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );
-		// Replace scripts.
+	/**
+	 * Holds the Groups.
+	 *
+	 * @var array
+	 */
+	protected $groups = array();
 
-		add_action( 'wp_default_scripts', array( $this, 'replace_scripts' ), - 1 );
-		// Load admin style sheet and JavaScript.
-		add_action(
-			'admin_enqueue_scripts',
-			array(
-				$this,
-				'enqueue_admin_stylescripts',
-			)
-		);
+	/**
+	 * Holds the menu slug.
+	 *
+	 * @var string
+	 */
+	public static $slug = 'plugin-groups';
 
+	/**
+	 * Holds the current group.
+	 *
+	 * @var string
+	 */
+	protected $current_group;
+
+	/**
+	 * Holds the current status.
+	 *
+	 * @var string
+	 */
+	protected $current_status;
+
+	/**
+	 * Holds the current group and status path.
+	 *
+	 * @var string
+	 */
+	protected $current_nav_path;
+
+	/**
+	 * Hold the record of the plugins current version for upgrade.
+	 *
+	 * @var string
+	 */
+	const VERSION_KEY = '_plugin_groups_version';
+
+	/**
+	 * Hold the config storage key.
+	 *
+	 * @var string
+	 */
+	const CONFIG_KEY = '_plugin_groups_config';
+
+	/**
+	 * Initiate the plugin_groups object.
+	 */
+	public function __construct() {
+
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$plugin            = get_plugin_data( PLGGRP_CORE );
+		$this->plugin_name = $plugin['Name'];
+		$this->version     = $plugin['Version'];
+
+		spl_autoload_register( array( $this, 'autoload_class' ), true, false );
+
+		// Start hooks.
+		$this->setup_hooks();
 	}
 
 	/**
-	 * Return an instance of this class.
-	 *
-	 * @since 0.0.1
-	 * @return    object|Plugin_Groups    A single instance of this class.
+	 * Setup and register WordPress hooks.
 	 */
-	public static function get_instance() {
+	protected function setup_hooks() {
 
-		// If the single instance hasn't been set, set it now.
-		if ( null == self::$instance ) {
-			self::$instance = new self;
-		}
-
-		return self::$instance;
+		// Load plugin text domain
+		add_action( 'init', array( $this, 'load_text_domain' ) );
+		add_action( 'init', array( $this, 'plugin_groups_init' ), PHP_INT_MAX ); // Always the last thing to init.
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		add_filter( 'views_plugins', array( $this, 'add_groups' ), PHP_INT_MAX );
+		add_filter( 'views_plugins-network', array( $this, 'add_groups' ), PHP_INT_MAX );
+		add_filter( 'all_plugins', array( $this, 'catch_selected_group' ) );
+		add_filter( 'show_advanced_plugins', array( $this, 'filter_shown_status' ), 10, 2 );
+		add_filter( 'site_transient_update_plugins', array( $this, 'alter_update_plugins' ) );
+		add_action( 'pre_current_active_plugins', array( $this, 'render_group_navigation' ) );
+		add_filter( 'bulk_actions-plugins', array( $this, 'bulk_actions' ) );
+		add_action( 'admin_bar_menu', array( $this, 'admin_bar_item' ), 100 );
 	}
 
 	/**
 	 * Load the plugin text domain for translation.
-	 *
-	 * @since 0.0.1
 	 */
-	public function load_plugin_textdomain() {
+	public function load_text_domain() {
 
-		load_plugin_textdomain( $this->plugin_slug, false, basename( PLORG_PATH ) . '/languages' );
-
+		load_plugin_textdomain( self::$slug, false, basename( PLGGRP_PATH ) . '/languages' );
 	}
 
 	/**
-	 * Migrate compat WP 5.6 +
+	 * Remove plugins from the update available.
 	 *
-	 * @since 1.2.2
+	 * @param object $data The data object.
+	 *
+	 * @return object
 	 */
-	public function replace_scripts( $scripts ) {
-		$ver = get_bloginfo( 'version' );
-		if ( ! version_compare( '5.6', $ver, '<=' ) || ! self::is_plugin_group_screen() ) {
+	public function alter_update_plugins( $data ) {
+
+		if ( $this->current_group ) {
+			$keys = array_keys( $this->groups[ $this->current_group ] );
+			foreach ( $data->response as $key => $plugin ) {
+				if ( ! in_array( $key, $keys, true ) ) {
+					unset( $data->response[ $key ] );
+				}
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Remove status that are not relevant.
+	 *
+	 * @param bool   $show   Flag to show.
+	 * @param string $status The current status
+	 *
+	 * @return bool
+	 */
+	public function filter_shown_status( $show, $status ) {
+
+		global $plugins;
+
+		static $removes = array(
+			'mustuse',
+			'dropins',
+		);
+		if ( $this->current_group && in_array( $status, $removes, true ) ) {
+			$show = false;
+		}
+		if ( true === $this->config['params']['legacyGrouping'] ) {
+			$plugins += $this->groups;
+		}
+
+		return $show;
+	}
+
+	/**
+	 * Render the Group navigation.
+	 */
+	public function render_group_navigation() {
+
+		// Use new group system.
+		if ( true !== $this->config['params']['legacyGrouping'] && 'groups-dropdown' !== $this->config['params']['navStyle'] ) {
+			$parts   = array();
+			$parts[] = $this->make_all_tag();
+			foreach ( $this->groups as $key => $plugins ) {
+				$parts[] = $this->make_group_tag( $key );
+			}
+
+			$groups    = implode( "", $parts );
+			$group_set = Utils::build_tag( 'ul', array( 'class' => array( $this->config['params']['navStyle'] ) ), $groups );
+			$html      = Utils::build_tag( 'div', array( 'class' => self::$slug ), $group_set );
+			if ( 1 < count( $parts ) ) {
+				echo wp_kses( $html, wp_kses_allowed_html( 'post' ) );
+			}
+		}
+	}
+
+	/**
+	 * Add dropdown navigation on bulk actions.
+	 *
+	 * @param array $actions Unchanged actions.
+	 *
+	 * @return array
+	 */
+	public function bulk_actions( $actions ) {
+
+		if ( true !== $this->config['params']['legacyGrouping'] && 'groups-dropdown' === $this->config['params']['navStyle'] ) {
+			$this->dropdown_navigation();
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Render a dropdown navigation.
+	 *
+	 * @param bool $echo Optional flag to echo the field or return the string.
+	 *
+	 * @return void|string
+	 */
+	public function dropdown_navigation( $echo = true ) {
+
+		$html   = array();
+		$html[] = '<label for="bulk-action-selector-groups" class="screen-reader-text">' . __( 'All groups', self::$slug ) . '</label>';
+		$html[] = '<select id="bulk-action-selector-groups" onChange="window.location = this.value">';
+		$html[] = '<option value="' . esc_url( $this->get_nav_url() ) . '" ' . ( ! empty( $this->current_group ) ? 'selected="selected"' : '' ) . '>' . __( 'All groups', self::$slug ) . '</option>';
+
+		foreach ( $this->groups as $key => $plugins ) {
+			$group    = $this->config['groups'][ $key ];
+			$selected = '';
+			if ( $this->current_group === $key ) {
+				$selected = ' selected="selected"';
+			}
+
+			$html[] = "\t" . '<option value="' . esc_url( $this->get_nav_url( $key ) ) . '"' . $selected . '>' . $group['name'] . ' (' . count( $plugins ) . ')</option>' . "\n";
+		}
+
+		$html[] = "</select>\n";
+		$html   = implode( $html );
+		if ( false === $echo ) {
+			return $html;
+		}
+		echo $html;
+	}
+
+	/**
+	 * Catch the selected group.
+	 *
+	 * @param array $plugins List of plugins.
+	 *
+	 * @return array
+	 */
+	public function catch_selected_group( $plugins ) {
+
+		global $status;
+
+		$this->current_status = $status;
+		$selected_group       = filter_input( INPUT_GET, self::$slug, FILTER_SANITIZE_STRING );
+		if ( $selected_group && isset( $this->groups[ $selected_group ] ) ) {
+			$this->current_group = $selected_group;
+			$plugins             = $this->groups[ $selected_group ];
+
+			// Add selection path.
+			$this->current_nav_path .= ' | ' . $this->config['groups'][ $selected_group ]['name'];
+		}
+
+		// Add our styles if we have groups;
+		if ( ! empty( $this->groups ) ) {
+			wp_enqueue_style( self::$slug . '-navbar' );
+		}
+
+		return $plugins;
+	}
+
+	/**
+	 * Get a url link for group navigation.
+	 *
+	 * @param null|string $id The group ID or null for all.
+	 *
+	 * @return string
+	 */
+	protected function get_nav_url( $id = null ) {
+
+		$url = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
+		if ( ! $url || false === strpos( 'plugins.php', $url ) ) {
+			// Just in case.
+			$url = self_admin_url( 'plugins.php' );
+		}
+		if ( null === $id ) {
+			// Null id is for the 'All groups'.
+			return remove_query_arg( self::$slug, $url );
+		}
+
+		// If no plugins get a link back to admin.
+		if ( empty( $this->groups[ $id ] ) ) {
+			return add_query_arg( 'page', self::$slug, $url );
+		}
+
+		return add_query_arg(
+			array(
+				'plugin_status' => $this->current_status,
+				self::$slug     => $id,
+
+			),
+			$url
+		);
+	}
+
+	/**
+	 * Make a group tag.
+	 *
+	 * @param string $id The Group ID.
+	 *
+	 * @return string
+	 */
+	protected function make_group_tag( $id ) {
+
+		$group   = $this->config['groups'][ $id ] ? $this->config['groups'][ $id ] : $this->make_preset( $id );
+		$total   = count( $this->groups[ $id ] );
+		$counter = '';
+
+		if ( ! empty( $total ) ) {
+
+			$counter = Utils::build_tag( 'span', array( 'class' => 'count' ), " ({$total})" );
+		}
+		$li_atts   = array(
+			'class' => array(
+				'group-link',
+				$group['id'],
+			),
+		);
+		$link_atts = array(
+			'href' => $this->get_nav_url( $id ),
+		);
+		if ( $group['id'] === $this->current_group ) {
+			$li_atts['class'][]        = 'current';
+			$link_atts['class']        = 'current';
+			$link_atts['aria-current'] = 'page';
+		}
+
+		$link = Utils::build_tag( 'a', $link_atts, $group['name'] . $counter );
+
+		return Utils::build_tag( 'li', $li_atts, $link );
+	}
+
+	/**
+	 *
+	 * @param string $id The group ID to make a preset for.
+	 */
+	public function make_preset( $id ) {
+
+		var_dump( $id );
+		$group = array(
+			'id'   => $id,
+			'name' => $this->config['preset'],
+		);
+	}
+
+	/**
+	 * Load presets into groups for built-in and filtered presets.
+	 *
+	 * @return array
+	 */
+	protected function load_presets() {
+
+		$groups = array(
+			'WooCommerce'            => array( 'WooCommerce' ),
+			'Easy Digital Downloads' => array( 'Easy Digital Downloads' ),
+			'Ninja Forms'            => array( 'Ninja Forms' ),
+			'Gravity Forms'          => array( 'Gravity Forms' ),
+			'WPForms'                => array( 'WPForms' ),
+			'E-Commerce'             => array(
+				'WooCommerce',
+				'Easy Digital Downloads',
+			),
+			'Forms'                  => array(
+				'Ninja Forms',
+				'Gravity Forms',
+				'WPForms',
+				'Formidable Forms',
+			),
+			'SEO'                    => array(
+				'All in One SEO',
+				'Yoast SEO',
+			),
+			// @todo: Add more categories for presets.
+		);
+
+		/**
+		 * Filter the presets (legacy)
+		 *
+		 * @deprecated 2.0.0
+		 */
+		$groups = apply_filters( 'plugin-groups-get-presets', $groups );
+
+		/**
+		 * Filter preset plugin groups.
+		 *
+		 * @hook    get_preset_plugin_groups
+		 * @since   2.0.0
+		 *
+		 * @param $groups {array}   The preset groups.
+		 *
+		 * @return  array
+		 */
+		$presets       = apply_filters( 'get_preset_plugin_groups', $groups );
+		$preset_groups = array();
+		foreach ( $presets as $name => $keywords ) {
+			$id                   = sanitize_title( $name );
+			$preset_groups[ $id ] = array(
+				'id'       => $id,
+				'name'     => $name,
+				'plugins'  => array(),
+				'keywords' => $keywords,
+			);
+		}
+
+		return array(
+			'preset_groups' => $preset_groups,
+			'presets'       => array_keys( $groups ),
+		);
+	}
+
+	/**
+	 * Make all link tag.
+	 *
+	 * @return string
+	 */
+	protected function make_all_tag() {
+
+		$link_atts = array(
+			'href' => $this->get_nav_url(),
+		);
+		if ( empty( $this->current_group ) ) {
+			$link_atts['class']        = 'current';
+			$link_atts['aria-current'] = 'page';
+		}
+		$link = Utils::build_tag( 'a', $link_atts, __( 'All Groups', self::$slug ) );
+
+		return Utils::build_tag( 'li', array( 'class' => array( 'group-link', '__allgroups' ) ), $link );
+	}
+
+	/**
+	 * Add new filter view
+	 *
+	 * @param array $views The list of nav tags for plugin statuses.
+	 *
+	 * @return array
+	 */
+	public function add_groups( $views ) {
+
+		foreach ( $views as &$tag ) {
+			if ( preg_match( '/<a([^>]*?)>{1}/', $tag, $found ) ) {
+				$atts = Utils::get_tag_attributes( $found[1] );
+				$url  = add_query_arg( self::$slug, $this->current_group, $atts['href'] );
+				$tag  = str_replace( $atts['href'], $url, $tag );
+				wp_parse_str( wp_parse_url( $atts['href'], PHP_URL_QUERY ), $query );
+				if ( isset( $query['plugin_status'] ) && $query['plugin_status'] === $this->current_status ) {
+					$names = explode( ' ', wp_kses( $tag, array() ) );
+					array_pop( $names );
+					$this->current_nav_path .= ' | ' . implode( ' ', $names );
+				}
+			}
+		}
+
+		// Legacy.
+		if ( true === $this->config['params']['legacyGrouping'] ) {
+			foreach ( $this->groups as $key => $plugins ) {
+				$views[ $key ] = $this->make_group_tag( $key );
+			}
+		}
+
+		// @todo: Make method.
+		if ( ! empty( $this->current_nav_path ) ) {
+			$append = array(
+				'name' => $this->current_nav_path,
+			);
+			wp_add_inline_script(
+				'wp-util',
+				'var appendHead = ' . wp_json_encode(
+					$append
+				) . '; var pluginsHead = document.getElementsByClassName(\'wp-heading-inline\' );if( pluginsHead.length ) {pluginsHead[0].innerText += appendHead.name}'
+			);
+		}
+
+		return $views;
+	}
+
+	/**
+	 * Register REST Endpoint for saving config.
+	 */
+	public function register_routes() {
+
+		register_rest_route(
+			self::$slug,
+			'save',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'args'                => array(),
+				'callback'            => array( $this, 'rest_save_config' ),
+				'permission_callback' => function( \WP_REST_Request $request ) {
+
+					if ( is_multisite() ) {
+						$data = $request->get_json_params();
+						$can  = current_user_can_for_blog( $data['siteID'], 'manage_options' );
+					} else {
+						$can = current_user_can( 'manage_options' );
+					}
+
+					return $can;
+				},
+			)
+		);
+
+		register_rest_route(
+			self::$slug,
+			'load',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'args'                => array(),
+				'callback'            => array( $this, 'rest_load_config' ),
+				'permission_callback' => function( \WP_REST_Request $request ) {
+
+					$id = $request->get_param( 'siteID' );
+
+					return current_user_can_for_blog( $id, 'manage_options' );
+				},
+			)
+		);
+	}
+
+	/**
+	 * Load a config for a specific site.
+	 *
+	 * @param \WP_REST_Request $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function rest_load_config( \WP_REST_Request $request ) {
+
+		$id   = $request->get_param( 'siteID' );
+		$json = $this->build_config_object( $id );
+
+		return rest_ensure_response( json_decode( $json ) );
+	}
+
+	/**
+	 * Save endpoint.
+	 *
+	 * @param \WP_REST_Request $request The request.
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function rest_save_config( \WP_REST_Request $request ) {
+
+		$data         = $request->get_json_params();
+		$this->config = wp_parse_args( $data, $this->config );
+		if ( is_multisite() ) {
+			$site_id = get_current_blog_id();
+			if ( ! empty( $data['siteID'] ) ) {
+				$site_id = $data['siteID'];
+				unset( $data['siteID'] );
+			}
+			if ( ! empty( $data['sitesEnabled'] ) ) {
+				// Ensure we have the same types.
+				$data['sitesEnabled'] = array_map( 'intval', $data['sitesEnabled'] );
+			}
+			$success = update_network_option( $site_id, self::CONFIG_KEY, $this->config );
+		} else {
+			$success = update_option( self::CONFIG_KEY, $this->config );
+		}
+
+		return rest_ensure_response( array( 'success' => $success ) );
+	}
+
+	/**
+	 * Autoloader by Locating and finding classes via folder structure.
+	 *
+	 * @param string $class class name to be checked and autoloaded.
+	 */
+
+	function autoload_class( $class ) {
+
+		$class_location = self::locate_class_file( $class );
+		if ( $class_location ) {
+			include_once $class_location;
+		}
+	}
+
+	/**
+	 * Locates the path to a requested class name.
+	 *
+	 * @param string $class The class name to locate.
+	 *
+	 * @return string|null
+	 */
+	static public function locate_class_file( $class ) {
+
+		$return = null;
+		$parts  = explode( '\\', strtolower( str_replace( '_', '-', $class ) ) );
+		$core   = array_shift( $parts );
+		$self   = strtolower( str_replace( '_', '-', __CLASS__ ) );
+		if ( $core === self::$slug ) {
+			$name    = 'class-' . strtolower( array_pop( $parts ) ) . '.php';
+			$parts[] = $name;
+			$path    = PLGGRP_PATH . 'classes/' . implode( '/', $parts );
+			if ( file_exists( $path ) ) {
+				$return = $path;
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Get the plugin version
+	 */
+	public function version() {
+
+		return $this->version;
+	}
+
+	/**
+	 * Check plugin_groups version to allow 3rd party implementations to update or upgrade.
+	 */
+	protected function check_version() {
+
+		$previous_version = get_option( self::VERSION_KEY, 0.0 );
+		$new_version      = $this->version();
+		if ( version_compare( $previous_version, $new_version, '<' ) ) {
+			if ( version_compare( $previous_version, '2.0.0', '<' ) ) {
+				$data = get_option( 'plugin_groups_plugin_groups', array() );
+				if ( ! empty( $data ) ) {
+					$new_config = $this->convert_legacy_groups( $data );
+					update_option( self::CONFIG_KEY, $new_config );
+				}
+			}
+			// Allow for updating.
+			do_action( "_plugin_groups_version_upgrade", $previous_version, $new_version );
+			// Update version.
+			update_option( self::VERSION_KEY, $new_version, true );
+		}
+	}
+
+	/**
+	 * Convert legacy configs.
+	 *
+	 * @param array $data Array of previous version config.
+	 *
+	 * @return array
+	 */
+	protected function convert_legacy_groups( $data ) {
+
+		$groups = array();
+		foreach ( $data['group'] as $group ) {
+			$keywords                = explode( "\n", $group['config']['keywords'] );
+			$new_group               = array(
+				'id'       => $group['_id'],
+				'name'     => $group['config']['group_name'],
+				'plugins'  => isset( $group['config']['plugins'] ) ? $group['config']['plugins'] : array(),
+				'keywords' => array_filter( $keywords ),
+			);
+			$groups[ $group['_id'] ] = $new_group;
+		}
+
+		// Set up the new config.
+		$config                             = $this->get_default_config();
+		$config['groups']                   = $groups;
+		$config['selectedPresets']          = isset( $data['presets'] ) ? $data['presets'] : array();
+		$config['params']['legacyGrouping'] = true;
+		$config['params']['navStyle']       = 'subsubsub';
+
+		return $config;
+	}
+
+	/**
+	 * Initialise plugin_groups.
+	 */
+	public function plugin_groups_init() {
+
+		// Check version.
+		$this->check_version();
+
+		// Load config.
+		$this->set_config();
+
+		/**
+		 * Init the settings system
+		 *
+		 * @param Plugin_Groups ${slug} The core object.
+		 */
+		do_action( 'plugin_groups_init' );
+	}
+
+	/**
+	 * Hook into admin_init.
+	 */
+	public function admin_init() {
+
+		if ( ! empty( $_POST['plugin-group-config'] ) ) {
+			$data = stripslashes( $_POST['plugin-group-config'] );
+			$data = json_decode( $data, true );
+			update_option( Plugin_Groups::CONFIG_KEY, $data );
+			wp_safe_redirect( admin_url( 'plugins.php?page=plugin-groups' ) );
+		}
+		$asset = include PLGGRP_PATH . 'js/' . self::$slug . '.asset.php';
+		wp_register_script( self::$slug, PLGGRP_URL . 'js/' . self::$slug . '.js', $asset['dependencies'], $asset['version'], true );
+		wp_register_style( self::$slug, PLGGRP_URL . 'css/' . self::$slug . '.css', array(), $asset['version'] );
+		wp_register_style( self::$slug . '-navbar', PLGGRP_URL . 'css/' . self::$slug . '-navbar.css', array(), $asset['version'] );
+	}
+
+	/**
+	 * Hook into the admin_menu.
+	 */
+	public function admin_menu() {
+
+		if ( ! $this->network_active() || $this->site_enabled() || is_main_site() ) {
+			add_submenu_page( 'plugins.php', __( 'Plugin Groups', self::$slug ), __( 'Plugin Groups', self::$slug ), 'manage_options', 'plugin-groups', array( $this, 'render_admin' ), 50 );
+		}
+	}
+
+	/**
+	 * Check if the plugin is network activated.
+	 *
+	 * @return bool
+	 */
+	protected function network_active() {
+
+		return is_plugin_active_for_network( PLGGRP_SLUG );
+	}
+
+	/**
+	 * Check to see if the site is allowed to use this.
+	 *
+	 * @return bool
+	 */
+	protected function site_enabled() {
+
+		$site_id     = get_current_blog_id();
+		$main_config = get_network_option( get_main_site_id(), self::CONFIG_KEY, $this->get_default_config() );
+
+		return in_array( $site_id, $main_config['sitesEnabled'], true );
+	}
+
+	/**
+	 * Add Groups to the admin bar.
+	 *
+	 * @param WP_Admin_Bar $admin_bar
+	 */
+	public function admin_bar_item( $admin_bar ) {
+
+		if ( ! $this->config['params']['menuGroups'] || ! current_user_can( 'activate_plugins' ) ) {
 			return;
 		}
 
-		$assets_url = PLORG_URL . '/assets/js/';
-		self::set_script( $scripts, 'jquery-migrate', $assets_url . 'jquery-migrate/jquery-migrate-1.4.1-wp.js', array(), '1.4.1-wp' );
-		self::set_script( $scripts, 'jquery-core', $assets_url . 'jquery/jquery-1.12.4-wp.js', array(), '1.12.4-wp' );
-		self::set_script( $scripts, 'jquery', false, array( 'jquery-core', 'jquery-migrate' ), '1.12.4-wp' );
+		$groups = array(
+			'parent' => array(
+				'id'    => self::$slug,
+				'title' => $this->plugin_name,
+				'href'  => $this->get_nav_url( 'dashboard' ),
+				'meta'  => array(
+					'title' => $this->plugin_name,
+				),
+			),
+		);
 
-		// All the jQuery UI stuff comes here.
-		self::set_script( $scripts, 'jquery-ui-core', $assets_url . 'jquery-ui/core.min.js', array( 'jquery' ), '1.11.4-wp', 1 );
-		self::set_script( $scripts, 'jquery-effects-core', $assets_url . 'jquery-ui/effect.min.js', array( 'jquery' ), '1.11.4-wp', 1 );
-		self::set_script( $scripts, 'jquery-ui-autocomplete', $assets_url . 'jquery-ui/autocomplete.min.js', array( 'jquery-ui-menu', 'wp-a11y' ), '1.11.4-wp', 1 );
-		self::set_script( $scripts, 'jquery-ui-menu', $assets_url . 'jquery-ui/menu.min.js', array( 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-position' ), '1.11.4-wp', 1 );
-		self::set_script( $scripts, 'jquery-ui-sortable', $assets_url . 'jquery-ui/sortable.min.js', array( 'jquery-ui-mouse' ), '1.11.4-wp', 1 );
-		self::set_script( $scripts, 'jquery-ui-widget', $assets_url . 'jquery-ui/widget.min.js', array( 'jquery' ), '1.11.4-wp', 1 );
+		foreach ( $this->groups as $key => $plugins ) {
+			$group          = $this->config['groups'][ $key ];
+			$groups[ $key ] = array(
+				'id'     => $key,
+				'parent' => self::$slug,
+				'title'  => $group['name'] . ' (' . count( $plugins ) . ')',
+				'href'   => $this->get_nav_url( $key ),
+			);
+		}
 
+		foreach ( $groups as $option ) {
+			$admin_bar->add_menu( $option );
+		}
 	}
 
 	/**
-	 * Pre-register scripts on 'wp_default_scripts' action, they won't be overwritten by $wp_scripts->add().
-	 *
-	 * @since  1.2.2
+	 * Enqueue assets where needed.
 	 */
-	private static function set_script( $scripts, $handle, $src, $deps = array(), $ver = false, $in_footer = false ) {
-		$script = $scripts->query( $handle, 'registered' );
+	public function enqueue_assets() {
 
-		if ( $script ) {
-			// If already added
-			$script->src  = $src;
-			$script->deps = $deps;
-			$script->ver  = $ver;
-			$script->args = $in_footer;
+		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		if ( $page && self::$slug === $page ) {
+			wp_enqueue_script( self::$slug );
+			wp_enqueue_style( self::$slug );
 
-			unset( $script->extra['group'] );
+			$this->prep_config();
+		}
+	}
 
-			if ( $in_footer ) {
-				$script->add_data( 'group', 1 );
-			}
+	/**
+	 * Prepare the config data for output to the admin UI.
+	 */
+	protected function prep_config() {
+
+		$data = $this->build_config_object();
+
+		// Add config data.
+		wp_add_inline_script( self::$slug, 'var plgData = ' . $data, 'before' );
+	}
+
+	/**
+	 * Build the json config object.
+	 *
+	 * @param int|null $site_id The site to get config for, ir null for current.
+	 *
+	 * @return string
+	 */
+	protected function build_config_object( $site_id = null ) {
+
+		if ( null === $site_id ) {
+			$data = $this->config;
 		} else {
-			// Add the script
-			if ( $in_footer ) {
-				$scripts->add( $handle, $src, $deps, $ver, 1 );
-			} else {
-				$scripts->add( $handle, $src, $deps, $ver );
+			$data = $this->load_config( $site_id );
+		}
+		// Prep config data.
+		$data['saveURL']   = rest_url( self::$slug . '/save' );
+		$data['legacyURL'] = add_query_arg( 'reactivate-legacy', true, $this->get_nav_url( 'dashboard' ) );
+		$data['restNonce'] = wp_create_nonce( 'wp_rest' );
+		// Multisite.
+		if ( $this->network_active() && ( is_network_admin() || defined( 'REST_REQUEST' ) && true === REST_REQUEST ) ) {
+			$data['loadURL']  = rest_url( self::$slug . '/load' );
+			$data['sites']    = get_sites();
+			$data['mainSite'] = get_main_site_id();
+			if ( ! in_array( $data['mainSite'], $data['sitesEnabled'], true ) ) {
+				$data['sitesEnabled'][] = get_main_site_id();
+			}
+		}
+
+		// Add plugins.
+		$data['plugins'] = get_plugins();
+
+		// Remove presets from groups for admin.
+		$data['groups'] = array_diff_key( $data['groups'], $data['preset_groups'] );
+
+		return wp_json_encode( $data );
+	}
+
+	/**
+	 * Get the default config.
+	 *
+	 * @return array
+	 */
+	protected function get_default_config() {
+
+		return array(
+			'groups'          => array(),
+			'selectedPresets' => array(),
+			'params'          => array(
+				'legacyGrouping' => false,
+				'navStyle'       => 'subsubsub',
+				'menuGroups'     => false,
+			),
+
+			'sitesEnabled' => array(), // Used for multisite.
+		);
+	}
+
+	/**
+	 * Load the UI config.
+	 *
+	 * @param int|null $site_id The site ID to load. Null for current site.
+	 *
+	 * @return array;
+	 */
+	protected function load_config( $site_id = null ) {
+
+		// Load the config.
+		if ( is_multisite() ) {
+			if ( ! $site_id ) {
+				$site_id = get_current_blog_id();
+			}
+			$config           = get_network_option( $site_id, self::CONFIG_KEY, $this->get_default_config() );
+			$config['siteID'] = (int) $site_id;
+		} else {
+			$config = get_option( self::CONFIG_KEY, $this->get_default_config() );
+		}
+		$config['pluginName'] = $this->plugin_name;
+		$config['version']    = $this->version;
+		$config['slug']       = self::$slug;
+
+		// Load the presets.
+		$config += $this->load_presets();
+
+		return $config;
+	}
+
+	/**
+	 * Set the config.
+	 *
+	 * @param int|null $site_id The site ID to load. Null for current site.
+	 */
+	protected function set_config( $site_id = null ) {
+
+		$this->config = $this->load_config( $site_id );
+		// Populate groups with plugins.
+		array_map( array( $this, 'populate_plugins' ), $this->config['groups'] );
+		// register selected presets.
+
+		if ( ! empty( $this->config['selectedPresets'] ) ) {
+			array_map( array( $this, 'register_preset' ), $this->config['selectedPresets'] );
+		}
+
+		// Populate groups with keywords.
+		array_map( array( $this, 'populate_keywords' ), array_keys( $this->config['groups'] ) );
+	}
+
+	/**
+	 * Register a preset.
+	 *
+	 * @param string $preset The preset name to register.
+	 */
+	protected function register_preset( $preset ) {
+
+		$key = sanitize_title( $preset );
+		if ( isset( $this->config['preset_groups'][ $key ] ) ) {
+			$this->config['groups'][ $key ] = $this->config['preset_groups'][ $key ];
+		}
+	}
+
+	/**
+	 * Populate a group with selected plugins.
+	 *
+	 * @param array $group The group array.
+	 */
+	protected function populate_plugins( $group ) {
+
+		static $plugins;
+		if ( ! $plugins ) {
+			$plugins = get_plugins();
+		}
+		foreach ( $group['plugins'] as $plugin ) {
+			if ( isset( $plugins[ $plugin ] ) ) {
+				$this->groups[ $group['id'] ][ $plugin ] = $plugins[ $plugin ];
 			}
 		}
 	}
 
 	/**
-	 * Check if we're in the plugins screen.
+	 * Populate a group from keywords.
 	 *
-	 * @since 1.2.2
-	 * @return bool
+	 * @param string $id The group ID.
 	 */
-	public static function is_plugin_group_screen() {
-		$return = false;
-		if ( PLORG_SLUG === self::current_page() ) {
-			$return = true;
-		}
+	protected function populate_keywords( $id ) {
 
-		return $return;
+		if ( ! isset( $this->config['groups'][ $id ] ) || empty( $this->config['groups'][ $id ]['keywords'] ) ) {
+			return;
+		}
+		$keywords = array_map( 'strtolower', $this->config['groups'][ $id ]['keywords'] );
+		$plugins  = get_plugins();
+		foreach ( $plugins as $plugin_key => $plugin_data ) {
+			if ( isset( $this->groups[ $id ][ $plugin_key ] ) ) {
+				continue;
+			}
+			$plugin_string = strtolower( implode( ' ', $plugin_data ) );
+			$matched       = array_filter(
+				$keywords,
+				function( $keyword ) use ( $plugin_string ) {
+
+					return false !== strpos( $plugin_string, $keyword );
+				}
+			);
+			if ( ! empty( $matched ) ) {
+				$this->groups[ $id ][ $plugin_key ] = $plugin_data;
+			}
+		}
 	}
 
 	/**
-	 * Get the name of the current admin page query_var.
-	 *
-	 * @since 1.2.2
-	 * @return string|null
+	 * Render the admin page.
 	 */
-	public static function current_page() {
-		$return = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-		if ( is_null( $return ) && function_exists( 'get_current_screen' ) ) {
-			$screen = get_current_screen();
-			$return = $screen->base;
-		}
+	public function render_admin() {
 
-		return $return;
+		include PLGGRP_PATH . 'includes/main.php';
 	}
 
 	/**
-	 * Register and enqueue admin-specific style sheet.
+	 * Get the instance of the class.
 	 *
-	 * @since 0.0.1
-	 * @return    null
+	 * @return Plugin_Groups
 	 */
-	public function enqueue_admin_stylescripts() {
+	public static function get_instance() {
 
-		if ( self::is_plugin_group_screen() ) {
-
-			wp_enqueue_style( 'plugin_groups-core-style', PLORG_URL . '/assets/css/styles.css' );
-			wp_enqueue_style( 'plugin_groups-baldrick-modals', PLORG_URL . '/assets/css/modals.css' );
-			wp_enqueue_script( 'plugin_groups-wp-baldrick', PLORG_URL . '/assets/js/wp-baldrick-full.js', array( 'jquery' ), false, true );
-			wp_enqueue_script( 'jquery-ui-autocomplete' );
-			wp_enqueue_script( 'jquery-ui-sortable' );
-			wp_enqueue_script( 'plugin_groups-core-script', PLORG_URL . '/assets/js/scripts.js', array( 'plugin_groups-wp-baldrick' ), false );
-			wp_enqueue_style( 'wp-color-picker' );
-			wp_enqueue_script( 'wp-color-picker' );
-			wp_enqueue_style( 'plugin_groups-select2-style', PLORG_URL . 'assets/css/select2.css' );
-			wp_enqueue_script( 'plugin_groups-select2-script', PLORG_URL . 'assets/js/select2.min.js', array( 'jquery' ), false, true );
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
 		}
 
-		if ( 'plugins' === self::current_page() ) {
-			wp_enqueue_script( 'plugin_groups-bulk', PLORG_URL . '/assets/js/bulk.js', array( 'jquery' ), false );
-			wp_enqueue_style( 'plugin_groups-editor', PLORG_URL . 'assets/css/edit.css' );
-		}
+		return self::$instance;
 	}
 }

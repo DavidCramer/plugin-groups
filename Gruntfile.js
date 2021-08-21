@@ -4,11 +4,6 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg     : grunt.file.readJSON( 'package.json' ),
-        shell: {
-            composer: {
-                command: 'composer update'
-            }
-        },
         clean: {
             post_build: [
                 'build/'
@@ -30,17 +25,21 @@ module.exports = function (grunt) {
                 src: [
                     '**',
                     '!node_modules/**',
+                    '!bin/**',
+                    '!src/**',
                     '!releases',
                     '!releases/**',
                     '!.git/**',
                     '!Gruntfile.js',
                     '!package.json',
+                    '!package-lock.json',
                     '!.gitignore',
                     '!.gitmodules',
                     '!.gitattributes',
                     '!composer.lock',
                     '!naming-conventions.txt',
                     '!how-to-grunt.md',
+                    '!webpack.config.js',
                     '!.travis.yml',
                     '!.scrutinizer.yml',
                     '!phpunit.xml',
@@ -90,7 +89,7 @@ module.exports = function (grunt) {
                     allowEmpty: true
                 },
                 files: {
-                    src: [ 'package.json', 'plugin-groups.php', 'plugincore.php', 'releases/<%= pkg.name %>-<%= pkg.version %>.zip' ]
+                    src: [ 'package.json', 'plugin-groups.php', 'plugin-groups.php', 'releases/<%= pkg.name %>-<%= pkg.version %>.zip' ]
                 }
             }
         },
@@ -105,14 +104,11 @@ module.exports = function (grunt) {
         },
         replace: {
             core_file: {
-                src: [ 'plugincore.php' ],
+                src: [ 'plugin-groups.php' ],
                 overwrite: true,
                 replacements: [{
                     from: /Version:\s*(.*)/,
                     to: "Version: <%= pkg.version %>"
-                }, {
-                    from: /define\(\s*'PLORG_VER',\s*'(.*)'\s*\);/,
-                    to: "define( 'PLORG_VER', '<%= pkg.version %>' );"
                 }]
             }
         }
@@ -125,14 +121,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks( 'grunt-contrib-copy' );
     grunt.loadNpmTasks( 'grunt-git' );
     grunt.loadNpmTasks( 'grunt-text-replace' );
-    grunt.loadNpmTasks( 'grunt-shell');
-
-
-    //register default task
 
     //release tasks
     grunt.registerTask( 'version_number', [ 'replace:core_file' ] );
-    grunt.registerTask( 'pre_vcs', [ 'shell:composer', 'version_number', 'copy', 'compress' ] );
+    grunt.registerTask( 'pre_vcs', [ 'version_number', 'copy', 'compress' ] );
     grunt.registerTask( 'do_git', [ 'gitadd', 'gitcommit', 'gittag', 'gitpush' ] );
     grunt.registerTask( 'just_build', [  'copy', 'compress' ] );
 
