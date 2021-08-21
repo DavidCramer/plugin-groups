@@ -42,7 +42,7 @@ export default function PluginGroupKeywords( props ) {
 				/>
 				<hr/>
 				<input
-					className={ 'regular-text' }
+					className={ 'regular-text keywords-input' }
 					type={ 'text' }
 					placeholder={ __( 'Add keyword' ) }
 					data-keywords={ true }

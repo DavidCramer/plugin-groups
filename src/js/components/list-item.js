@@ -1,33 +1,41 @@
 import React from 'react';
 
 export default function ListItem( props ) {
-	const { name, version, id, callback, checked, bold, subname, className } = props;
+	const {
+		name,
+		version,
+		id,
+		callback,
+		checked,
+		bold,
+		subname,
+		className,
+		disabled
+	} = props;
 	const title = () => {
 		if ( bold ) {
 			return (
 				<strong>
 					{ name }
-					{
-						version &&
-						<>: { version }</>
-					}
 				</strong>
 			);
 		}
 		return (
 			<span>
 				{ name }
-				{
-					version &&
-					<>: { version }</>
-				}
 			</span>
 		);
 	};
+	const setClass = className ? className : '';
 	return (
-		<div className={ 'ui-body-sidebar-list-item ' + className }>
+		<div className={ 'ui-body-sidebar-list-item ' + setClass }>
 			<label>
-				<input type={ 'checkbox' } checked={ checked } value={ id } onChange={ callback }/>
+				<input type={ 'checkbox' }
+				       checked={ checked }
+				       value={ id }
+				       onChange={ callback }
+				       disabled={ disabled }
+				/>
 				<span>
 					{ title() }
 					{ subname &&
@@ -35,7 +43,12 @@ export default function ListItem( props ) {
 					}
 				</span>
 			</label>
-			{ props.children }
+			<span className={ 'children' }>
+				{ version &&
+				<span className={ 'version' }>{ version }</span>
+				}
+				{ props.children }
+			</span>
 		</div>
 	);
 }

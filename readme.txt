@@ -4,7 +4,7 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 5.3
 Tested up to: 5.8
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,6 +15,8 @@ Organize plugins in the Plugins Admin Page by creating groups and filter types
 If you have a lot of plugins installed, it can be difficult to manage them all. Now you can organize the plugins admin page by grouping your plugins by purpose. Each group will be displayed as a plugin status tabs in the plugins admin page, so you can easily filter which plugins you are viewing by group.
 
 A free plugin by [David Cramer](https://cramer.co.za).
+
+[Contribute to the development on GitHub](https://github.com/DavidCramer/plugin-groups)
 
 == Installation ==
 
@@ -38,6 +40,11 @@ Not yet, still working on it and will be out asap!
 
 
 == Changelog ==
+= 2.0.2 =
+- Fixed an error where the plugin couldn't read the plugin data (I hope).
+- Added, Multisite support. Multisite admins can now network active, manage each sites groups individually, or give full access to site to create their own groups.
+
+
 = 2.0.1 =
 - Fixed an error where on upgrade and have no presets, UI broke :(
 

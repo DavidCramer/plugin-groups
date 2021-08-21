@@ -40,7 +40,8 @@ export default function PluginGroupList( props ) {
 								        deleteGroups( getSelected(), true );
 							        } }
 							>
-								{ __( 'Delete selected', props.slug ) }
+								<span className={ 'text' }> { __( 'Delete selected', props.slug ) } </span>
+								<span className="dashicons dashicons-trash"/>
 							</button>
 						</ListItem>
 
@@ -58,7 +59,6 @@ export default function PluginGroupList( props ) {
 			<button type={ 'button' }
 			        className={ 'button' }
 			        onClick={ () => createGroup( '', true ) }>
-				<span className="dashicons dashicons-plus-alt"/>
 				{ __( 'Create new group', props.slug ) }
 			</button>
 		</div>

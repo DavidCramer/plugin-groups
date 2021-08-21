@@ -19,7 +19,7 @@ const PluginGroups = {
 };
 
 window.addEventListener( 'load', () => PluginGroups.init() );
-window.onbeforeunload = function( e ) {
+window.onbeforeunload = () => {
 	if ( window.localStorage.getItem( '_plgUnsaved' ) ) {
 		return false;
 	}

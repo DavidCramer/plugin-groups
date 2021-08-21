@@ -97,7 +97,7 @@ export default function PluginsList( props ) {
 					className={ 'list-control' }
 				>
 					<button className={ 'button' } type={ 'button' } onClick={ addSelected } disabled={ ! enabledButton }>
-						{ __( 'Send to Selected Groups' ) }
+						<span className={ 'text' }>{ __( 'Send to Selected Groups' ) }</span>
 						<span className="dashicons dashicons-arrow-right-alt2"></span>
 					</button>
 				</ListItem>

@@ -6,6 +6,7 @@ import PluginGroupList from './group-list';
 import PluginsList from './plugins-list';
 import Presets from './presets';
 import Settings from './settings';
+import Multisite from './multisite';
 
 function PluginGroupApp( data ) {
 
@@ -15,6 +16,9 @@ function PluginGroupApp( data ) {
 
 	const setConfig = ( newConfig ) => {
 		window.localStorage.setItem( unsavedKey, true );
+		if( newConfig.groups && newConfig.groups.constructor === Array ) {
+			newConfig.groups = {...newConfig.groups}
+		}
 		setConfigState( newConfig );
 	};
 	const generateID = () => {
@@ -154,11 +158,13 @@ function PluginGroupApp( data ) {
 	};
 	const handleSave = () => {
 		const newConf = getConf();
-		const { groups, selectedPresets, params } = newConf;
+		const { groups, selectedPresets, params, sitesEnabled, siteID } = newConf;
 		const data = JSON.stringify( {
 			groups,
 			selectedPresets,
 			params,
+			sitesEnabled,
+			siteID,
 		} );
 		newConf.saving = true;
 		fetch( config.saveURL, {
@@ -271,6 +277,7 @@ function PluginGroupApp( data ) {
 
 	const getGroupsBy = ( type ) => {
 		const groups = [];
+
 		Object.keys( config.groups ).forEach( ( id ) => {
 			if ( config.groups[ id ][ type ] ) {
 				groups.push( id );
@@ -392,7 +399,7 @@ function PluginGroupApp( data ) {
 					' ' ) : [],
 			};
 		} );
-		console.log( oldData );
+
 		return newData;
 	};
 	const handleImport = ( event ) => {
@@ -436,7 +443,25 @@ function PluginGroupApp( data ) {
 		newConf.params[ param ] = value;
 		setConfig( newConf );
 	};
+
+	const setSiteAccess = ( ids, access )=>{
+		const newConf = getConf();
+
+		ids.map( id =>{
+			const index = config.sitesEnabled.indexOf( id );
+			if( id === config.mainSite ){
+				return
+			}
+			if( true === access && -1 === index ){
+				newConf.sitesEnabled.push( id );
+			}else if ( false === access && -1 < index ){
+				newConf.sitesEnabled.splice( index, 1 );
+			}
+		});
+		setConfigState( newConf );
+	}
 	const actions = {
+		setConfig,
 		selectGroup,
 		createGroup,
 		deleteGroup,
@@ -459,6 +484,7 @@ function PluginGroupApp( data ) {
 		navTab,
 		tab,
 		setParam,
+		setSiteAccess,
 	};
 	return (
 		<div className={ config.slug }>
@@ -479,6 +505,17 @@ function PluginGroupApp( data ) {
 			<>
 				<PluginGroupHeader { ...actions } { ...config } />
 				<Settings { ...actions } { ...config } />
+			</>
+			}
+			{ 3 === tab &&
+			<>
+				<PluginGroupHeader { ...actions } { ...config } />
+				<Multisite { ...actions } { ...config } />
+			</>
+			}
+			{ 0 === tab &&
+			<>
+				<PluginGroupHeader { ...actions } { ...config } />
 			</>
 			}
 		</div>
