@@ -103,6 +103,9 @@ class Plugin_Groups {
 
 		// Start hooks.
 		$this->setup_hooks();
+
+		// Init the bulk actions.
+		new Bulk_Actions( $this );
 	}
 
 	/**
@@ -126,6 +129,56 @@ class Plugin_Groups {
 		add_action( 'pre_current_active_plugins', array( $this, 'render_group_navigation' ) );
 		add_filter( 'bulk_actions-plugins', array( $this, 'bulk_actions' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_item' ), 100 );
+		add_filter( 'self_admin_url', array( $this, 'append_group_to_self' ), 10, 3 );
+		add_filter( 'plugin_action_links', array( $this, 'append_group_to_actions' ) );
+	}
+
+	/**
+	 * Append the current group id to plugin action links to maintain selection on activation and deactivation of plugins.
+	 *
+	 * @param array $actions Array of action links.
+	 *
+	 * @return array
+	 */
+	public function append_group_to_actions( $actions ) {
+
+		if ( isset( $this->current_group ) ) {
+			foreach ( $actions as &$tag ) {
+				$parts = shortcode_parse_atts( $tag );
+				if ( isset( $parts['href'] ) ) {
+					$url = html_entity_decode( $parts['href'] );
+					$url = add_query_arg( self::$slug, $this->current_group, $url );
+
+					$tag = str_replace( $parts['href'], htmlentities( $url ), $tag );
+				}
+			}
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Append the group to redirect URLS after activation and deactivation of plugins.
+	 *
+	 * @param string $url  The url to append to.
+	 * @param string $path The path location.
+	 *
+	 * @return string
+	 */
+	public function append_group_to_self( $url, $path ) {
+
+		if ( 'plugins.php' === wp_parse_url( $path, PHP_URL_PATH ) ) {
+			if ( ! isset( $this->current_group ) ) {
+				// Init the current group if not set yet.
+				$this->catch_selected_group();
+			}
+			// If we found a group, then append it to the self URL on the plugins page to maintain groups in nav.
+			if ( isset( $this->current_group ) ) {
+				$url = add_query_arg( self::$slug, $this->current_group, $url );
+			}
+		}
+
+		return $url;
 	}
 
 	/**
@@ -260,7 +313,7 @@ class Plugin_Groups {
 	 *
 	 * @return array
 	 */
-	public function catch_selected_group( $plugins ) {
+	public function catch_selected_group( $plugins = array() ) {
 
 		global $status;
 
@@ -268,10 +321,12 @@ class Plugin_Groups {
 		$selected_group       = filter_input( INPUT_GET, self::$slug, FILTER_SANITIZE_STRING );
 		if ( $selected_group && isset( $this->groups[ $selected_group ] ) ) {
 			$this->current_group = $selected_group;
-			$plugins             = $this->groups[ $selected_group ];
+			if ( ! empty( $plugins ) ) {
+				$plugins = $this->groups[ $selected_group ];
 
-			// Add selection path.
-			$this->current_nav_path .= ' | ' . $this->config['groups'][ $selected_group ]['name'];
+				// Add selection path.
+				$this->current_nav_path .= ' | ' . $this->config['groups'][ $selected_group ]['name'];
+			}
 		}
 
 		// Add our styles if we have groups;
@@ -317,6 +372,30 @@ class Plugin_Groups {
 	}
 
 	/**
+	 * Get the current group.
+	 *
+	 * @return array|null
+	 */
+	public function get_current_group() {
+
+		if ( ! isset( $this->current_group ) ) {
+			$this->catch_selected_group();
+		}
+
+		return $this->current_group ? $this->config['groups'][ $this->current_group ] : null;
+	}
+
+	/**
+	 * Get the groups.
+	 *
+	 * @return array
+	 */
+	public function get_groups() {
+
+		return array_values( $this->config['groups'] );
+	}
+
+	/**
 	 * Make a group tag.
 	 *
 	 * @param string $id The Group ID.
@@ -325,7 +404,7 @@ class Plugin_Groups {
 	 */
 	protected function make_group_tag( $id ) {
 
-		$group   = $this->config['groups'][ $id ] ? $this->config['groups'][ $id ] : $this->make_preset( $id );
+		$group   = $this->config['groups'][ $id ];
 		$total   = count( $this->groups[ $id ] );
 		$counter = '';
 
@@ -351,19 +430,6 @@ class Plugin_Groups {
 		$link = Utils::build_tag( 'a', $link_atts, $group['name'] . $counter );
 
 		return Utils::build_tag( 'li', $li_atts, $link );
-	}
-
-	/**
-	 *
-	 * @param string $id The group ID to make a preset for.
-	 */
-	public function make_preset( $id ) {
-
-		var_dump( $id );
-		$group = array(
-			'id'   => $id,
-			'name' => $this->config['preset'],
-		);
 	}
 
 	/**
@@ -563,10 +629,9 @@ class Plugin_Groups {
 	 */
 	public function rest_save_config( \WP_REST_Request $request ) {
 
-		$data         = $request->get_json_params();
-		$this->config = wp_parse_args( $data, $this->config );
+		$data    = $request->get_json_params();
+		$site_id = get_current_blog_id();
 		if ( is_multisite() ) {
-			$site_id = get_current_blog_id();
 			if ( ! empty( $data['siteID'] ) ) {
 				$site_id = $data['siteID'];
 				unset( $data['siteID'] );
@@ -575,12 +640,33 @@ class Plugin_Groups {
 				// Ensure we have the same types.
 				$data['sitesEnabled'] = array_map( 'intval', $data['sitesEnabled'] );
 			}
+		}
+
+		$this->config = wp_parse_args( $data, $this->config );
+		$success      = $this->save_config( $site_id );
+
+		return rest_ensure_response( array( 'success' => $success ) );
+	}
+
+	/**
+	 * Save the current config.
+	 *
+	 * @param null|int $site_id The site ID to save for.
+	 *
+	 * @return bool
+	 */
+	protected function save_config( $site_id = null ) {
+
+		if ( is_multisite() ) {
+			if ( null === $site_id ) {
+				$site_id = get_current_blog_id();
+			}
 			$success = update_network_option( $site_id, self::CONFIG_KEY, $this->config );
 		} else {
 			$success = update_option( self::CONFIG_KEY, $this->config );
 		}
 
-		return rest_ensure_response( array( 'success' => $success ) );
+		return $success;
 	}
 
 	/**
@@ -915,9 +1001,6 @@ class Plugin_Groups {
 		if ( ! empty( $this->config['selectedPresets'] ) ) {
 			array_map( array( $this, 'register_preset' ), $this->config['selectedPresets'] );
 		}
-
-		// Populate groups with keywords.
-		array_map( array( $this, 'populate_keywords' ), array_keys( $this->config['groups'] ) );
 	}
 
 	/**
@@ -949,6 +1032,8 @@ class Plugin_Groups {
 				$this->groups[ $group['id'] ][ $plugin ] = $plugins[ $plugin ];
 			}
 		}
+		// Populate keywords now to keep ordering.
+		$this->populate_keywords( $group['id'] );
 	}
 
 	/**
@@ -979,6 +1064,72 @@ class Plugin_Groups {
 				$this->groups[ $id ][ $plugin_key ] = $plugin_data;
 			}
 		}
+	}
+
+	/**
+	 * Create a new Group.
+	 *
+	 * @param string $name         The group name to create.
+	 * @param array  $plugin_slugs Plugin slug or list of slugs to add to the group.
+	 *
+	 * @return string|bool
+	 */
+	public function create_group( $name, array $plugin_slugs = array() ) {
+
+		$success                           = false;
+		$new_id                            = Utils::generate_id();
+		$group                             = array(
+			'id'       => $new_id,
+			'keywords' => array(),
+			'name'     => trim( $name ),
+			'open'     => false,
+			'plugins'  => $plugin_slugs,
+		);
+		$this->config['groups'][ $new_id ] = $group;
+		if ( $this->save_config() ) {
+			$success = $new_id;
+		}
+
+		return $success;
+	}
+
+	/**
+	 * Add plugins to a group.
+	 *
+	 * @param string $group_id     The group ID to add plugin to.
+	 * @param array  $plugin_slugs Plugin slug or list of slugs to add to the group.
+	 *
+	 * @return bool
+	 */
+	public function add_to_group( $group_id, array $plugin_slugs ) {
+
+		$success = false;
+		if ( isset( $this->config['groups'][ $group_id ] ) ) {
+			$new_plugins                                    = array_merge( $this->config['groups'][ $group_id ]['plugins'], $plugin_slugs );
+			$this->config['groups'][ $group_id ]['plugins'] = array_unique( $new_plugins );
+			$success                                        = $this->save_config();
+		}
+
+		return $success;
+	}
+
+	/**
+	 * Remove Plugins from a group.
+	 *
+	 * @param string $group_id     The group ID to add plugin to.
+	 * @param array  $plugin_slugs Plugin slug or list of slugs to add to the group.
+	 *
+	 * @return bool
+	 */
+	public function remove_from_group( $group_id, array $plugin_slugs ) {
+
+		$success = false;
+		if ( isset( $this->config['groups'][ $group_id ] ) ) {
+			$this->config['groups'][ $group_id ]['plugins'] = array_diff( $this->config['groups'][ $group_id ]['plugins'], $plugin_slugs );
+			$success                                        = $this->save_config();
+		}
+
+		return $success;
 	}
 
 	/**

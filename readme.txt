@@ -4,7 +4,7 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 5.3
 Tested up to: 5.8
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@ Install the plugin through the WordPress Plugins Installer or upload the decompr
 
 = Does it support Multi-site? =
 
-Not yet, still working on it and will be out asap!
+Yes it does! It has full support from network admin being able to set groups for individual sites, to Giving sites, full access to manage themselves.
 
 == Screenshots ==
 
@@ -40,6 +40,11 @@ Not yet, still working on it and will be out asap!
 
 
 == Changelog ==
+= 2.0.3 =
+- Fixed an issue where activating a plugin in a group, you get redirected to all plugins.
+- Added Bulk actions to allow adding new groups, adding to groups, and removing from groups.
+- Added in sorting to the admin UI to allow ordering groups to you're liking.
+
 = 2.0.2 =
 - Fixed an error where the plugin couldn't read the plugin data (I hope).
 - Added, Multisite support. Multisite admins can now network active, manage each sites groups individually, or give full access to site to create their own groups.

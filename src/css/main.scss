@@ -128,6 +128,14 @@
 					overflow-y: auto;
 				}
 
+				.active-sort{
+					background-color: $color_brand_green;
+
+					div{
+						opacity: 0;
+					}
+				}
+
 				&-item {
 					margin-bottom: 0;
 					border: 1px solid transparent;
@@ -146,6 +154,12 @@
 					&.active {
 						background: $color_white;
 						border-color: $color_brand_green;
+					}
+					.sort-handle{
+						margin-left: -12px;
+						margin-right: 3px;
+						cursor: grab;
+						color: $color_brand_green;
 					}
 
 					display: flex;

@@ -1,8 +1,9 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import RenderList from './render-list';
 import Panel from './_panel';
 import ListItem from './list-item';
+import Sortable from 'sortablejs';
 
 export default function PluginGroupList( props ) {
 	const {
@@ -10,10 +11,32 @@ export default function PluginGroupList( props ) {
 		createGroup,
 		deleteGroups,
 		selectGroups,
-		getSelected
+		getSelected,
+		setOrder,
 	} = props;
 	const checked = getSelected().length === Object.keys(
 		props.groups ).length;
+
+	if ( 0 !== getList().length ) {
+		useEffect( () => {
+			const callback = () => {
+				const orders = sortable.toArray();
+				setOrder( orders );
+			};
+			const options = {
+				animation: 150,
+				ghostClass: 'active-sort',
+				handle: '.sort-handle',
+				direction: 'vertical',
+				onUpdate: function() {
+					callback();
+				},
+			};
+			const element = document.getElementById( 'plugin-groups-list' );
+			const sortable = Sortable.create( element, options );
+		} );
+	}
+
 	return (
 		<div className={ 'ui-body-sidebar wide' }>
 			<Panel title={ __( 'Groups' ) }>
@@ -44,9 +67,9 @@ export default function PluginGroupList( props ) {
 								<span className="dashicons dashicons-trash"/>
 							</button>
 						</ListItem>
-
-
-						<RenderList { ...props } />
+						<div id={ 'plugin-groups-list' }>
+							<RenderList { ...props } />
+						</div>
 					</>
 					}
 					{ 0 === getList().length &&

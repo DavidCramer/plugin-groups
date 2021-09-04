@@ -460,6 +460,19 @@ function PluginGroupApp( data ) {
 		});
 		setConfigState( newConf );
 	}
+
+
+	const setOrder = ( ids ) =>{
+		const newConf = getConf();
+		newConf.groups = {};
+		ids.forEach( id =>{
+			newConf.groups[ id ] = config.groups[id];
+		});
+
+		setConfigState( newConf );
+	}
+
+
 	const actions = {
 		setConfig,
 		selectGroup,
@@ -485,6 +498,7 @@ function PluginGroupApp( data ) {
 		tab,
 		setParam,
 		setSiteAccess,
+		setOrder,
 	};
 	return (
 		<div className={ config.slug }>

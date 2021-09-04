@@ -20,6 +20,7 @@ class Utils {
 	 * @return array
 	 */
 	public static function get_tag_attributes( $tag ) {
+
 		$tag    = strstr( $tag, ' ', false );
 		$tag    = trim( $tag, '> ' );
 		$args   = shortcode_parse_atts( $tag );
@@ -43,6 +44,7 @@ class Utils {
 	 * @return bool
 	 */
 	public static function is_void_element( $element ) {
+
 		$void_elements = array(
 			'area',
 			'base',
@@ -99,6 +101,7 @@ class Utils {
 	 * @return string
 	 */
 	public static function build_attributes( $attributes ) {
+
 		$parts = array();
 		foreach ( $attributes as $attribute => $value ) {
 			if ( is_array( $value ) ) {
@@ -112,6 +115,15 @@ class Utils {
 		}
 
 		return implode( ' ', $parts );
+	}
 
+	/**
+	 * Generate a new ID for a group.
+	 *
+	 * @return string
+	 */
+	public static function generate_id() {
+
+		return uniqid( 'nd' );
 	}
 }

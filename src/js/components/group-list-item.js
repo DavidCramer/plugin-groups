@@ -19,12 +19,12 @@ export default function GroupListItem( props ) {
 	};
 	const active = selected ? 'active' : '';
 	return (
-		<>
-			<div className={ 'ui-body-sidebar-list-item ' + active }>
-
+		<div key={id} data-id={id} >
+			<div className={ 'plugin-group ui-body-sidebar-list-item ' + active }>
 				{ ! edit &&
 				<>
 					<span>
+						<span className="sort-handle dashicons dashicons-menu"></span>
 						<input type={ 'checkbox' } checked={ selected } onClick={ ( event ) => selectGroup(
 							id ) }/>
 						<span className={ 'ui-body-sidebar-list-item-title' } onClick={ ( event ) => openGroup(
@@ -57,6 +57,6 @@ export default function GroupListItem( props ) {
 			{ ! temp && open &&
 			<PluginGroupEdit group={ group } { ...props } />
 			}
-		</>
+		</div>
 	);
 }

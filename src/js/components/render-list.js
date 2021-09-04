@@ -1,4 +1,3 @@
-import React from 'react';
 import GroupListItem from './group-list-item';
 
 export default function RenderList( props ) {

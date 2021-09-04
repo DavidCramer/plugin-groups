@@ -15,6 +15,7 @@ const pluginGroups = {
 	...defaultConfig,
 	entry: {
 		"plugin-groups": './src/js/main.js',
+		"bulk-handler": './src/js/bulk-handler.js',
 		"plugin-groups-navbar": './src/css/navbar.scss',
 	},
 	output: {

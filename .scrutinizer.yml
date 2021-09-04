@@ -11,5 +11,4 @@ build:
         analysis:
             tests:
                 override:
-                    - js-scrutinizer-run
                     - php-scrutinizer-run

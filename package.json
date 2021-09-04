@@ -1,6 +1,6 @@
 {
   "name": "plugin-groups",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Organize plugins by groups and filter types",
   "repository": {
     "type": "git",
@@ -37,6 +37,6 @@
     "postcss-loader": "^6.1.0",
     "mini-css-extract-plugin": "^1.6.0",
     "optimize-css-assets-webpack-plugin": "^6.0.0",
-    "sortablejs": "^1.13.0"
+    "sortablejs": "^1.14.0"
   }
 }
