@@ -16,6 +16,7 @@ const pluginGroups = {
 	entry: {
 		"plugin-groups": './src/js/main.js',
 		"bulk-handler": './src/js/bulk-handler.js',
+		"install": './src/js/install.js',
 		"plugin-groups-navbar": './src/css/navbar.scss',
 	},
 	output: {

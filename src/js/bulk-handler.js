@@ -75,3 +75,4 @@ const BulkHandler = {
 };
 
 window.addEventListener( 'load', () => BulkHandler.init() );
+export default BulkHandler;
