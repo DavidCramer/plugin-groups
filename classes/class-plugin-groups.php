@@ -106,6 +106,7 @@ class Plugin_Groups {
 
 		// Init the bulk actions.
 		new Bulk_Actions( $this );
+		new Extras( $this );
 	}
 
 	/**
@@ -603,6 +604,40 @@ class Plugin_Groups {
 				},
 			)
 		);
+
+		register_rest_route(
+			self::$slug,
+			'add',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'args'                => array(),
+				'callback'            => array( $this, 'rest_add_to_group' ),
+				'permission_callback' => function( \WP_REST_Request $request ) {
+
+					if ( is_multisite() ) {
+						$data = $request->get_json_params();
+						$can  = current_user_can_for_blog( $data['siteID'], 'manage_options' );
+					} else {
+						$can = current_user_can( 'manage_options' );
+					}
+
+					return $can;
+				},
+			)
+		);
+	}
+
+	public function rest_add_to_group( \WP_REST_Request $request ) {
+
+		$data = $request->get_json_params();
+
+		wp_parse_str( wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
+
+		$return = array(
+			'success' => $this->add_to_group( $data['id'], array( $query['plugin'] ) ),
+		);
+
+		return rest_ensure_response( $return );
 	}
 
 	/**
