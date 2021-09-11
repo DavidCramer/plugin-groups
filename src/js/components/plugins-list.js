@@ -83,7 +83,7 @@ export default function PluginsList( props ) {
 
 	return (
 		<div className={ 'ui-body-sidebar' }>
-			<Panel title={ __( 'Plugins', props.slug ) }>
+			<Panel key={'plist-panel'}  title={ __( 'Plugins', props.slug ) }>
 				<input className={ 'regular-text search' } placeholder={ __(
 					'Search',
 					props.slug
@@ -91,6 +91,7 @@ export default function PluginsList( props ) {
 				<ListItem
 					name={ __( 'Select all', props.slug ) }
 					id={ 'all' }
+					key={ '_master' }
 					callback={ ( event ) => checkAll( event.target.checked ) }
 					checked={ state.checkedAll }
 					bold={ true }
@@ -101,8 +102,8 @@ export default function PluginsList( props ) {
 						<span className="dashicons dashicons-arrow-right-alt2"></span>
 					</button>
 				</ListItem>
-				<div className={ 'plugins-list' }>
-					<div className={ 'ui-body-sidebar-list' }>
+				<div key={'plist'} className={ 'plugins-list' }>
+					<div key={'plist-main'}  className={ 'ui-body-sidebar-list' }>
 
 						{ keys.map( ( item, index ) => {
 							const plugin = plugins[ item ];
@@ -113,6 +114,7 @@ export default function PluginsList( props ) {
 								<>
 									{ match &&
 									<ListItem
+										key={ item }
 										name={ plugin.Name }
 										id={ item }
 										version={ plugin.Version }

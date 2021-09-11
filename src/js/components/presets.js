@@ -15,6 +15,7 @@ export default function Presets( props ) {
 
 					return (
 						<ListItem
+							key={ preset }
 							name={ preset }
 							id={ preset }
 							checked={ -1 < selectedPresets.indexOf(
