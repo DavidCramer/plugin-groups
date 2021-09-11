@@ -69,6 +69,13 @@ class Plugin_Groups {
 	protected $current_status;
 
 	/**
+	 * Holds a list of missing plugins.
+	 *
+	 * @var array
+	 */
+	protected $missing = array();
+
+	/**
 	 * Holds the current group and status path.
 	 *
 	 * @var string
@@ -106,6 +113,8 @@ class Plugin_Groups {
 
 		// Init the bulk actions.
 		new Bulk_Actions( $this );
+		new Extras( $this );
+		new Rest( $this );
 	}
 
 	/**
@@ -120,7 +129,6 @@ class Plugin_Groups {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_filter( 'views_plugins', array( $this, 'add_groups' ), PHP_INT_MAX );
 		add_filter( 'views_plugins-network', array( $this, 'add_groups' ), PHP_INT_MAX );
 		add_filter( 'all_plugins', array( $this, 'catch_selected_group' ) );
@@ -563,99 +571,13 @@ class Plugin_Groups {
 	}
 
 	/**
-	 * Register REST Endpoint for saving config.
-	 */
-	public function register_routes() {
-
-		register_rest_route(
-			self::$slug,
-			'save',
-			array(
-				'methods'             => \WP_REST_Server::CREATABLE,
-				'args'                => array(),
-				'callback'            => array( $this, 'rest_save_config' ),
-				'permission_callback' => function( \WP_REST_Request $request ) {
-
-					if ( is_multisite() ) {
-						$data = $request->get_json_params();
-						$can  = current_user_can_for_blog( $data['siteID'], 'manage_options' );
-					} else {
-						$can = current_user_can( 'manage_options' );
-					}
-
-					return $can;
-				},
-			)
-		);
-
-		register_rest_route(
-			self::$slug,
-			'load',
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'args'                => array(),
-				'callback'            => array( $this, 'rest_load_config' ),
-				'permission_callback' => function( \WP_REST_Request $request ) {
-
-					$id = $request->get_param( 'siteID' );
-
-					return current_user_can_for_blog( $id, 'manage_options' );
-				},
-			)
-		);
-	}
-
-	/**
-	 * Load a config for a specific site.
-	 *
-	 * @param \WP_REST_Request $request
-	 *
-	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
-	 */
-	public function rest_load_config( \WP_REST_Request $request ) {
-
-		$id   = $request->get_param( 'siteID' );
-		$json = $this->build_config_object( $id );
-
-		return rest_ensure_response( json_decode( $json ) );
-	}
-
-	/**
-	 * Save endpoint.
-	 *
-	 * @param \WP_REST_Request $request The request.
-	 *
-	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
-	 */
-	public function rest_save_config( \WP_REST_Request $request ) {
-
-		$data    = $request->get_json_params();
-		$site_id = get_current_blog_id();
-		if ( is_multisite() ) {
-			if ( ! empty( $data['siteID'] ) ) {
-				$site_id = $data['siteID'];
-				unset( $data['siteID'] );
-			}
-			if ( ! empty( $data['sitesEnabled'] ) ) {
-				// Ensure we have the same types.
-				$data['sitesEnabled'] = array_map( 'intval', $data['sitesEnabled'] );
-			}
-		}
-
-		$this->config = wp_parse_args( $data, $this->config );
-		$success      = $this->save_config( $site_id );
-
-		return rest_ensure_response( array( 'success' => $success ) );
-	}
-
-	/**
 	 * Save the current config.
 	 *
 	 * @param null|int $site_id The site ID to save for.
 	 *
 	 * @return bool
 	 */
-	protected function save_config( $site_id = null ) {
+	public function save_config( $site_id = null ) {
 
 		if ( is_multisite() ) {
 			if ( null === $site_id ) {
@@ -778,7 +700,8 @@ class Plugin_Groups {
 		$this->check_version();
 
 		// Load config.
-		$this->set_config();
+		$config = $this->load_config();
+		$this->set_config( $config );
 
 		/**
 		 * Init the settings system
@@ -907,7 +830,7 @@ class Plugin_Groups {
 	 *
 	 * @return string
 	 */
-	protected function build_config_object( $site_id = null ) {
+	public function build_config_object( $site_id = null ) {
 
 		if ( null === $site_id ) {
 			$data = $this->config;
@@ -964,7 +887,7 @@ class Plugin_Groups {
 	 *
 	 * @return array;
 	 */
-	protected function load_config( $site_id = null ) {
+	public function load_config( $site_id = null ) {
 
 		// Load the config.
 		if ( is_multisite() ) {
@@ -989,11 +912,12 @@ class Plugin_Groups {
 	/**
 	 * Set the config.
 	 *
+	 * @param array    $config  The config to set.
 	 * @param int|null $site_id The site ID to load. Null for current site.
 	 */
-	protected function set_config( $site_id = null ) {
+	public function set_config( $config, $site_id = null ) {
 
-		$this->config = $this->load_config( $site_id );
+		$this->config = $config;
 		// Populate groups with plugins.
 		array_map( array( $this, 'populate_plugins' ), $this->config['groups'] );
 		// register selected presets.
@@ -1028,9 +952,13 @@ class Plugin_Groups {
 			$plugins = get_plugins();
 		}
 		foreach ( $group['plugins'] as $plugin ) {
-			if ( isset( $plugins[ $plugin ] ) ) {
-				$this->groups[ $group['id'] ][ $plugin ] = $plugins[ $plugin ];
+			if ( ! isset( $plugins[ $plugin ] ) ) {
+				$this->missing[ $plugin ] = array(
+					'Version' => '0.0',
+				);
+				continue;
 			}
+			$this->groups[ $group['id'] ][ $plugin ] = $plugins[ $plugin ];
 		}
 		// Populate keywords now to keep ordering.
 		$this->populate_keywords( $group['id'] );

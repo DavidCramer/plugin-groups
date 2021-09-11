@@ -3,7 +3,7 @@
  * Plugin Name: Plugin Groups
  * Plugin URI: https://cramer.co.za
  * Description: Organize Plugins in groups
- * Version: 2.0.3
+ * Version: 2.0.4
  * Author: David Cramer
  * Author URI: https://cramer.co.za
  * Text Domain: plugin-groups

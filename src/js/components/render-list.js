@@ -11,6 +11,7 @@ export default function RenderList( props ) {
 		const group = groups[ item ];
 		return (
 			<GroupListItem
+				key={ item }
 				index={ index }
 				group={ group }
 				editing={ item === edit }
