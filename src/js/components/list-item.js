@@ -28,7 +28,7 @@ export default function ListItem( props ) {
 	};
 	const setClass = className ? className : '';
 	return (
-		<div className={ 'ui-body-sidebar-list-item ' + setClass }>
+		<div key={ id } className={ 'ui-body-sidebar-list-item ' + setClass }>
 			<label>
 				<input type={ 'checkbox' }
 				       checked={ checked }

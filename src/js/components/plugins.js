@@ -50,13 +50,18 @@ export default function PluginGroupPlugins( props ) {
 				</ListItem>
 				<div className={ 'ui-body-edit-plugins' }>
 					{ group.plugins.map( ( item, index ) => {
-						const plugin = plugins[ item ];
+						const plugin = plugins[ item ] ? plugins[ item ] : {
+							Name: item.split('/')[0],
+							Version: __('Missing', 'plugin-groups'),
+							missing: true,
+						};
 
 						return (
 							<ListItem name={ plugin.Name }
 							          version={ plugin.Version }
 							          checked={ -1 < selected.indexOf( item ) }
 							          id={ item }
+							          key={ item }
 							          callback={ handleCheck }
 							>
 								<label
