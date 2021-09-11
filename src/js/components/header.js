@@ -47,7 +47,7 @@ export default function PluginGroupHeader( props ) {
 					<button className={ 'button button-primary' } type={ 'button' } onClick={ handleExport }>
 						{ 'Export' }
 					</button>
-					<label className={ 'button button-primary' } type={ 'button' } onClick={ '' }>
+					<label className={ 'button button-primary' } type={ 'button' } >
 						{ 'Import' }
 						<input className={ 'importer-input' } type={ 'file' } onChange={ handleImport }/>
 					</label>
