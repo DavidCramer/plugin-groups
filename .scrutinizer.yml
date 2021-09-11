@@ -1,5 +1,7 @@
 filter:
     excluded_paths: [tests/*, bin/*, assets/*, languages/* ]
+    dependency_paths:
+        - wordpress/
 tools:
     external_code_coverage: false
     php_code_coverage: true
@@ -9,6 +11,9 @@ checks:
 build:
     nodes:
         analysis:
+            dependencies:
+                before:
+                    - composer require --dev johnpbloch/wordpress
             tests:
                 override:
                     - php-scrutinizer-run

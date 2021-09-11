@@ -4,7 +4,7 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 5.3
 Tested up to: 5.8
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,12 @@ Yes it does! It has full support from network admin being able to set groups for
 
 
 == Changelog ==
+
+= 2.0.4 =
+- Fixed an issue that if a plugin is removed, the group will cause the admin UI to crash.
+- Added "Add to group" when installing a plugin from the add plugin screen.
+- Cleaned up the code a bit.
+
 = 2.0.3 =
 - Fixed an issue where activating a plugin in a group, you get redirected to all plugins.
 - Added Bulk actions to allow adding new groups, adding to groups, and removing from groups.
@@ -48,7 +54,6 @@ Yes it does! It has full support from network admin being able to set groups for
 = 2.0.2 =
 - Fixed an error where the plugin couldn't read the plugin data (I hope).
 - Added, Multisite support. Multisite admins can now network active, manage each sites groups individually, or give full access to site to create their own groups.
-
 
 = 2.0.1 =
 - Fixed an error where on upgrade and have no presets, UI broke :(
