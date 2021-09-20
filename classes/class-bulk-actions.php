@@ -104,9 +104,9 @@ class Bulk_Actions {
 
 		$current_group = $this->plugin_groups->get_current_group();
 		if ( $current_group ) {
-			$actions['remove-from-group'] = sprintf( __( 'Remove from %s', 'plugins-groups' ), $current_group['name'] );
+			$actions['remove-from-group'] = sprintf( __( 'Remove from %s', 'plugin-groups' ), $current_group['name'] );
 		}
-		$actions['add-to-group'] = __( 'Add to group', 'plugins-groups' );
+		$actions['add-to-group'] = __( 'Add to group', 'plugin-groups' );
 
 		$this->enqueue_script();
 

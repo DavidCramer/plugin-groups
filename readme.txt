@@ -4,7 +4,7 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 5.3
 Tested up to: 5.8
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Yes it does! It has full support from network admin being able to set groups for
 
 
 == Changelog ==
+
+= 2.0.5 =
+- Fixed an issue that prevented translations from being added.
 
 = 2.0.4 =
 - Fixed an issue that if a plugin is removed, the group will cause the admin UI to crash.
