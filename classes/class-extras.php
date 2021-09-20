@@ -69,7 +69,7 @@ class Extras {
 		$newaction   = array();
 		$newaction[] = '<select disabled=disabled data-plugin="' . $plugin['slug'] . '" style="width:120px;">';
 		$newaction[] = '<option value="_select">';
-		$newaction[] = __( 'Add to group', 'plugins-groups' );
+		$newaction[] = __( 'Add to group', 'plugin-groups' );
 		$newaction[] = '</option>';
 		foreach ( $groups as $group ) {
 			$newaction[] = '<option value="' . $group['id'] . '">';

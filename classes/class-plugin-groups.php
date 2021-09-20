@@ -7,6 +7,8 @@
 
 namespace Plugin_Groups;
 
+use WP_Admin_Bar;
+
 /**
  * Plugin_Groups Class.
  */
@@ -123,7 +125,6 @@ class Plugin_Groups {
 	protected function setup_hooks() {
 
 		// Load plugin text domain
-		add_action( 'init', array( $this, 'load_text_domain' ) );
 		add_action( 'init', array( $this, 'plugin_groups_init' ), PHP_INT_MAX ); // Always the last thing to init.
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -187,14 +188,6 @@ class Plugin_Groups {
 		}
 
 		return $url;
-	}
-
-	/**
-	 * Load the plugin text domain for translation.
-	 */
-	public function load_text_domain() {
-
-		load_plugin_textdomain( self::$slug, false, basename( PLGGRP_PATH ) . '/languages' );
 	}
 
 	/**
@@ -807,7 +800,7 @@ class Plugin_Groups {
 		if ( $page && self::$slug === $page ) {
 			wp_enqueue_script( self::$slug );
 			wp_enqueue_style( self::$slug );
-
+			wp_set_script_translations(self::$slug, self::$slug );
 			$this->prep_config();
 		}
 	}
@@ -828,7 +821,7 @@ class Plugin_Groups {
 	 *
 	 * @param int|null $site_id The site to get config for, ir null for current.
 	 *
-	 * @return string
+	 * @return string|false
 	 */
 	public function build_config_object( $site_id = null ) {
 

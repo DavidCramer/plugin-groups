@@ -19,4 +19,4 @@ function activate_plugin_groups() {
 	Plugin_Groups::get_instance();
 }
 
-add_action( 'plugins_loaded', 'Plugin_Groups\activate_plugin_groups' );
+add_action( 'init', 'Plugin_Groups\activate_plugin_groups' );
