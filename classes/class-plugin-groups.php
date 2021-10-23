@@ -726,7 +726,7 @@ class Plugin_Groups {
 	 */
 	public function admin_menu() {
 
-		if ( ! $this->network_active() || $this->site_enabled() || is_main_site() ) {
+		if ( ! $this->network_active() || $this->site_enabled() || is_network_admin() ) {
 			add_submenu_page( 'plugins.php', __( 'Plugin Groups', self::$slug ), __( 'Plugin Groups', self::$slug ), 'manage_options', 'plugin-groups', array( $this, 'render_admin' ), 50 );
 		}
 	}
@@ -830,6 +830,7 @@ class Plugin_Groups {
 		} else {
 			$data = $this->load_config( $site_id );
 		}
+
 		// Prep config data.
 		$data['saveURL']   = rest_url( self::$slug . '/save' );
 		$data['legacyURL'] = add_query_arg( 'reactivate-legacy', true, $this->get_nav_url( 'dashboard' ) );
@@ -839,9 +840,6 @@ class Plugin_Groups {
 			$data['loadURL']  = rest_url( self::$slug . '/load' );
 			$data['sites']    = get_sites();
 			$data['mainSite'] = get_main_site_id();
-			if ( ! in_array( $data['mainSite'], $data['sitesEnabled'], true ) ) {
-				$data['sitesEnabled'][] = get_main_site_id();
-			}
 		}
 
 		// Add plugins.
@@ -895,6 +893,11 @@ class Plugin_Groups {
 		$config['pluginName'] = $this->plugin_name;
 		$config['version']    = $this->version;
 		$config['slug']       = self::$slug;
+
+		// Flag if network admin vs main site.
+		if( is_network_admin() && is_main_site() ){
+			$config['networkAdmin'] = true;
+		}
 
 		// Load the presets.
 		$config += $this->load_presets();
