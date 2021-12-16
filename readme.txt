@@ -4,7 +4,7 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 5.3
 Tested up to: 5.8
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,8 +38,13 @@ Yes it does! It has full support from network admin being able to set groups for
 5. Completely redesigned admin.
 6. Bulk edit / create groups to speed up creation.
 
-
 == Changelog ==
+
+= 2.0.6 =
+- [Multisite] You can now set the main sites group management access. This allows the Group management to be disabled on all site, and keeps it in network admin only, if wanted.
+- Added a little notice that settings are saved.
+- Added an "Ungrouped" toggle in settings, to filter out plugins that are not in a group yet.
+- Added a setting to enable an Ungrouped group in groups nav.
 
 = 2.0.5 =
 - Fixed an issue that prevented translations from being added.
