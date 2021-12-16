@@ -726,7 +726,7 @@ class Plugin_Groups {
 	 */
 	public function admin_menu() {
 
-		if ( ! $this->network_active() || $this->site_enabled() || is_main_site() ) {
+		if ( ! $this->network_active() || $this->site_enabled() || is_network_admin() ) {
 			add_submenu_page( 'plugins.php', __( 'Plugin Groups', self::$slug ), __( 'Plugin Groups', self::$slug ), 'manage_options', 'plugin-groups', array( $this, 'render_admin' ), 50 );
 		}
 	}
@@ -800,7 +800,7 @@ class Plugin_Groups {
 		if ( $page && self::$slug === $page ) {
 			wp_enqueue_script( self::$slug );
 			wp_enqueue_style( self::$slug );
-			wp_set_script_translations(self::$slug, self::$slug );
+			wp_set_script_translations( self::$slug, self::$slug );
 			$this->prep_config();
 		}
 	}
@@ -830,6 +830,7 @@ class Plugin_Groups {
 		} else {
 			$data = $this->load_config( $site_id );
 		}
+
 		// Prep config data.
 		$data['saveURL']   = rest_url( self::$slug . '/save' );
 		$data['legacyURL'] = add_query_arg( 'reactivate-legacy', true, $this->get_nav_url( 'dashboard' ) );
@@ -839,9 +840,6 @@ class Plugin_Groups {
 			$data['loadURL']  = rest_url( self::$slug . '/load' );
 			$data['sites']    = get_sites();
 			$data['mainSite'] = get_main_site_id();
-			if ( ! in_array( $data['mainSite'], $data['sitesEnabled'], true ) ) {
-				$data['sitesEnabled'][] = get_main_site_id();
-			}
 		}
 
 		// Add plugins.
@@ -849,6 +847,9 @@ class Plugin_Groups {
 
 		// Remove presets from groups for admin.
 		$data['groups'] = array_diff_key( $data['groups'], $data['preset_groups'] );
+
+		// Remove ungrouped.
+		unset( $data['groups']['__ungrouped'] );
 
 		return wp_json_encode( $data );
 	}
@@ -896,6 +897,11 @@ class Plugin_Groups {
 		$config['version']    = $this->version;
 		$config['slug']       = self::$slug;
 
+		// Flag if network admin vs main site.
+		if ( is_network_admin() && is_main_site() ) {
+			$config['networkAdmin'] = true;
+		}
+
 		// Load the presets.
 		$config += $this->load_presets();
 
@@ -911,13 +917,40 @@ class Plugin_Groups {
 	public function set_config( $config, $site_id = null ) {
 
 		$this->config = $config;
+		if ( ! empty( $this->config['params']['showUngrouped'] ) ) {
+			$ungrouped = $this->create_ungrouped();
+			if ( ! empty( $ungrouped['plugins'] ) ) {
+				$this->config['groups']['__ungrouped'] = $ungrouped;
+			}
+		}
 		// Populate groups with plugins.
 		array_map( array( $this, 'populate_plugins' ), $this->config['groups'] );
 		// register selected presets.
-
 		if ( ! empty( $this->config['selectedPresets'] ) ) {
 			array_map( array( $this, 'register_preset' ), $this->config['selectedPresets'] );
 		}
+	}
+
+	/**
+	 * Create the Ungrouped, group.
+	 *
+	 * @return array
+	 */
+	protected function create_ungrouped() {
+		$plugins   = array_keys( get_plugins() );
+		$new_group = array(
+			'id'      => '__ungrouped',
+			'name'    => __( 'Ungrouped', self::$slug ),
+			'plugins' => array(),
+		);
+		$grouped   = array();
+		foreach ( $this->config['groups'] as $group ) {
+			$grouped = array_merge( $grouped, $group['plugins'] );
+		}
+		$grouped              = array_unique( $grouped );
+		$new_group['plugins'] = array_diff( $plugins, $grouped );
+
+		return $new_group;
 	}
 
 	/**
@@ -976,7 +1009,7 @@ class Plugin_Groups {
 			$plugin_string = strtolower( implode( ' ', $plugin_data ) );
 			$matched       = array_filter(
 				$keywords,
-				function( $keyword ) use ( $plugin_string ) {
+				function ( $keyword ) use ( $plugin_string ) {
 
 					return false !== strpos( $plugin_string, $keyword );
 				}
