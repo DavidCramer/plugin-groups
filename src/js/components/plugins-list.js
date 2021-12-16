@@ -4,14 +4,15 @@ import React from 'react';
 import ListItem from './list-item';
 
 export default function PluginsList( props ) {
-	const { plugins, addPlugins } = props;
+	const { plugins, addPlugins, groups } = props;
 	const [ state, setState ] = React.useState( {
 		checkedAll: false,
 		search: '',
+		ungrouped: false,
 		checked: []
 	} );
 	const keys = Object.keys( plugins );
-
+	let grouped = [];
 	const updateChange = ( change ) => {
 		setState( { ...state, ...change } );
 	};
@@ -35,14 +36,22 @@ export default function PluginsList( props ) {
 		checked.checkedAll = checked.checked.length;
 		updateChange( checked );
 	};
+	for ( const group in groups ) {
+		grouped = grouped.concat( groups[ group ].plugins );
+	}
+
+	const showUngrouped = ( event ) => {
+		const newState = { ...state };
+		newState.ungrouped = event.target.checked;
+		updateChange( newState );
+	};
 
 	const checkItem = ( event ) => {
 		const newState = { ...state };
 		const index = newState.checked.indexOf( event.target.value );
 		if ( event.target.checked && -1 === index ) {
 			newState.checked.push( event.target.value );
-		}
-		else if ( ! event.target.checked && -1 < index ) {
+		} else if ( ! event.target.checked && -1 < index ) {
 			newState.checked.splice( index, 1 );
 		}
 		if ( newState.checked.length !== newState.checkedAll ) {
@@ -51,8 +60,7 @@ export default function PluginsList( props ) {
 		if ( newState.checked.length === keys.length ) {
 			checkAll( true );
 
-		}
-		else {
+		} else {
 			updateChange( newState );
 		}
 	};
@@ -83,11 +91,21 @@ export default function PluginsList( props ) {
 
 	return (
 		<div className={ 'ui-body-sidebar' }>
-			<Panel key={'plist-panel'}  title={ __( 'Plugins', props.slug ) }>
-				<input className={ 'regular-text search' } placeholder={ __(
-					'Search',
-					props.slug
-				) } type={ 'search' } onInput={ searchText } value={ state.search }/>
+			<Panel key={ 'plist-panel' } title={ __( 'Plugins', props.slug ) }>
+				<div style={ { display: 'flex' } }>
+					<input className={ 'regular-text search' } placeholder={ __(
+						'Search',
+						props.slug
+					) } type={ 'search' } onInput={ searchText } value={ state.search }/>
+					<label style={ { 'white-space': 'nowrap', padding: '12px 0 12px 12px' } }>
+						<input
+							type={ 'checkbox' }
+							checked={ state.ungrouped }
+							onChange={ showUngrouped }
+						/>
+						<strong>{ __( 'Ungrouped', props.slug ) }</strong>
+					</label>
+				</div>
 				<ListItem
 					name={ __( 'Select all', props.slug ) }
 					id={ 'all' }
@@ -102,14 +120,17 @@ export default function PluginsList( props ) {
 						<span className="dashicons dashicons-arrow-right-alt2"></span>
 					</button>
 				</ListItem>
-				<div key={'plist'} className={ 'plugins-list' }>
-					<div key={'plist-main'}  className={ 'ui-body-sidebar-list' }>
+				<div key={ 'plist' } className={ 'plugins-list' }>
+					<div key={ 'plist-main' } className={ 'ui-body-sidebar-list' }>
 
 						{ keys.map( ( item, index ) => {
 							const plugin = plugins[ item ];
 							const match = isMatched( plugin.Name );
 							const checked = -1 < state.checked.indexOf(
 								item ) && isMatched( plugin.Name );
+							if ( state.ungrouped && -1 !== grouped.indexOf( item ) ) {
+								return;
+							}
 							return (
 								<>
 									{ match &&
