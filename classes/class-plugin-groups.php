@@ -914,13 +914,40 @@ class Plugin_Groups {
 	public function set_config( $config, $site_id = null ) {
 
 		$this->config = $config;
+		if ( ! empty( $this->config['params']['showUngrouped'] ) ) {
+			$ungrouped = $this->create_ungrouped();
+			if ( ! empty( $ungrouped['plugins'] ) ) {
+				$this->config['groups']['__ungrouped'] = $ungrouped;
+			}
+		}
 		// Populate groups with plugins.
 		array_map( array( $this, 'populate_plugins' ), $this->config['groups'] );
 		// register selected presets.
-
 		if ( ! empty( $this->config['selectedPresets'] ) ) {
 			array_map( array( $this, 'register_preset' ), $this->config['selectedPresets'] );
 		}
+	}
+
+	/**
+	 * Create the Ungrouped, group.
+	 *
+	 * @return array
+	 */
+	protected function create_ungrouped() {
+		$plugins   = array_keys( get_plugins() );
+		$new_group = array(
+			'id'      => '__ungrouped',
+			'name'    => __( 'Ungrouped', self::$slug ),
+			'plugins' => array(),
+		);
+		$grouped   = array();
+		foreach ( $this->config['groups'] as $group ) {
+			$grouped = array_merge( $grouped, $group['plugins'] );
+		}
+		$grouped              = array_unique( $grouped );
+		$new_group['plugins'] = array_diff( $plugins, $grouped );
+
+		return $new_group;
 	}
 
 	/**
