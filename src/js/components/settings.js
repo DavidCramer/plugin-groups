@@ -22,6 +22,11 @@ export default function Settings( props ) {
 						checked={ params.menuGroups }
 						callback={ ( event ) => setParam( 'menuGroups', event.target.checked ) }
 					/>
+					<ListItem
+						name={ __( 'Show ungrouped items', props.slug ) }
+						checked={ params.showUngrouped }
+						callback={ ( event ) => setParam( 'showUngrouped', event.target.checked ) }
+					/>
 				</Panel>
 			</div>
 			{ ! params.legacyGrouping &&

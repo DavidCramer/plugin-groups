@@ -800,7 +800,7 @@ class Plugin_Groups {
 		if ( $page && self::$slug === $page ) {
 			wp_enqueue_script( self::$slug );
 			wp_enqueue_style( self::$slug );
-			wp_set_script_translations(self::$slug, self::$slug );
+			wp_set_script_translations( self::$slug, self::$slug );
 			$this->prep_config();
 		}
 	}
@@ -847,6 +847,9 @@ class Plugin_Groups {
 
 		// Remove presets from groups for admin.
 		$data['groups'] = array_diff_key( $data['groups'], $data['preset_groups'] );
+
+		// Remove ungrouped.
+		unset( $data['groups']['__ungrouped'] );
 
 		return wp_json_encode( $data );
 	}
@@ -895,7 +898,7 @@ class Plugin_Groups {
 		$config['slug']       = self::$slug;
 
 		// Flag if network admin vs main site.
-		if( is_network_admin() && is_main_site() ){
+		if ( is_network_admin() && is_main_site() ) {
 			$config['networkAdmin'] = true;
 		}
 
@@ -1006,7 +1009,7 @@ class Plugin_Groups {
 			$plugin_string = strtolower( implode( ' ', $plugin_data ) );
 			$matched       = array_filter(
 				$keywords,
-				function( $keyword ) use ( $plugin_string ) {
+				function ( $keyword ) use ( $plugin_string ) {
 
 					return false !== strpos( $plugin_string, $keyword );
 				}

@@ -5,7 +5,10 @@ export default function NavBar( props ) {
 
 	const { presets, className, setParam, params, styleName } = props;
 	const selected = params.navStyle && className === params.navStyle ? ' selected' : '';
-
+	const preview = [...presets ];
+	if( params.showUngrouped ){
+		preview.push( __( 'Ungrouped', props.slug ) );
+	}
 	return (
 		<div className={ 'plugin-groups nav-settings' + selected }
 		     onClick={ () => {
@@ -19,8 +22,8 @@ export default function NavBar( props ) {
 			{ 'groups-dropdown' !== className &&
 			<ul className={ className }>
 				{
-					presets.map( ( name, index ) => {
-						if ( 5 < index ) {
+					preview.map( ( name, index ) => {
+						if ( 5 < index && 'Ungrouped' !== name ) {
 							return;
 						}
 						return (
