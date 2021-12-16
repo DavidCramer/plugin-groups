@@ -1,7 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import Panel from './_panel';
 import ListItem from './list-item';
-import NavBar from './navigation/navbar';
 import React from 'react';
 
 export default function Multisite( props ) {
@@ -25,8 +24,7 @@ export default function Multisite( props ) {
 						return (
 							<ListItem
 								name={ site.domain }
-								checked={ props.mainSite === id || -1 < props.sitesEnabled.indexOf( id ) }
-								disabled={ props.mainSite === id }
+								checked={ -1 < props.sitesEnabled.indexOf( id ) }
 								callback={ ( event ) => setSiteAccess( [ id ], event.target.checked ) }
 							>
 								{ props.mainSite === id &&

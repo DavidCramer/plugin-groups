@@ -12,6 +12,7 @@ export default function PluginGroupHeader( props ) {
 		handleExport,
 		handleImport,
 		saving,
+		saved,
 		sites
 	} = props;
 
@@ -25,9 +26,9 @@ export default function PluginGroupHeader( props ) {
 				{ version }
 				</span>
 				{ 0 === tab &&
-					<span className={ 'ui-header-multisite' }>
+				<span className={ 'ui-header-multisite' }>
 						{ __( 'Loading site config.', props.slug ) }
-					</span>
+				</span>
 				}
 				{ 0 !== tab &&
 				<>
@@ -36,6 +37,11 @@ export default function PluginGroupHeader( props ) {
 						<MultiSiteSelector { ...props } />
 					</span>
 					}
+
+					<span className={ saved ? 'ui-saved-notice active' : 'ui-saved-notice' }>
+						<span className={ 'ui-saved-notice-panel' } >{ __( 'Settings Saved', 'plugin-groups' ) }</span>
+					</span>
+
 					<button
 						className={ 'button button-primary' }
 						type={ 'button' }
@@ -47,7 +53,7 @@ export default function PluginGroupHeader( props ) {
 					<button className={ 'button button-primary' } type={ 'button' } onClick={ handleExport }>
 						{ 'Export' }
 					</button>
-					<label className={ 'button button-primary' } type={ 'button' } >
+					<label className={ 'button button-primary' } type={ 'button' }>
 						{ 'Import' }
 						<input className={ 'importer-input' } type={ 'file' } onChange={ handleImport }/>
 					</label>

@@ -1,15 +1,18 @@
+import { __ } from '@wordpress/i18n';
+
 export default function NavBarDropdown( props ) {
 
-	const { presets, getList } = props;
-
+	const { presets, getList, params } = props;
+	const preview = [...presets ];
+	if( params.showUngrouped ){
+		preview.push( __( 'Ungrouped', props.slug ) );
+	}
 	return (
 		<div>
 			<select>
 				{
-					presets.map( ( name, index ) => {
-						if ( 5 < index ) {
-							return;
-						}
+					preview.map( ( name, index ) => {
+
 						return (
 							<option>
 								{ name } ({ index+1 })

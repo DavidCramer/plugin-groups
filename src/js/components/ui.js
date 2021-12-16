@@ -16,8 +16,8 @@ function PluginGroupApp( data ) {
 
 	const setConfig = ( newConfig ) => {
 		window.localStorage.setItem( unsavedKey, true );
-		if( newConfig.groups && newConfig.groups.constructor === Array ) {
-			newConfig.groups = {...newConfig.groups}
+		if ( newConfig.groups && newConfig.groups.constructor === Array ) {
+			newConfig.groups = { ...newConfig.groups };
 		}
 		setConfigState( newConfig );
 	};
@@ -158,7 +158,13 @@ function PluginGroupApp( data ) {
 	};
 	const handleSave = () => {
 		const newConf = getConf();
-		const { groups, selectedPresets, params, sitesEnabled, siteID } = newConf;
+		const {
+			groups,
+			selectedPresets,
+			params,
+			sitesEnabled,
+			siteID
+		} = newConf;
 		const data = JSON.stringify( {
 			groups,
 			selectedPresets,
@@ -175,8 +181,15 @@ function PluginGroupApp( data ) {
 			},
 			body: data
 		} ).then( response => response.json() ).then( ( data ) => {
-			newConf.saving = false;
-			setConfig( config );
+			const savedConf = getConf();
+			savedConf.saved = true;
+			setTimeout( () => {
+				const savedConf = getConf();
+				savedConf.saved = false;
+				setConfig( savedConf );
+				window.localStorage.removeItem( unsavedKey );
+			}, 3000 );
+			setConfig( savedConf );
 			window.localStorage.removeItem( unsavedKey );
 		} );
 		setConfig( newConf );
@@ -444,34 +457,30 @@ function PluginGroupApp( data ) {
 		setConfig( newConf );
 	};
 
-	const setSiteAccess = ( ids, access )=>{
+	const setSiteAccess = ( ids, access ) => {
 		const newConf = getConf();
 
-		ids.map( id =>{
+		ids.map( id => {
 			const index = config.sitesEnabled.indexOf( id );
-			if( id === config.mainSite ){
-				return
-			}
-			if( true === access && -1 === index ){
+			if ( true === access && -1 === index ) {
 				newConf.sitesEnabled.push( id );
-			}else if ( false === access && -1 < index ){
+			}
+			else if ( false === access && -1 < index ) {
 				newConf.sitesEnabled.splice( index, 1 );
 			}
-		});
+		} );
 		setConfigState( newConf );
-	}
+	};
 
-
-	const setOrder = ( ids ) =>{
+	const setOrder = ( ids ) => {
 		const newConf = getConf();
 		newConf.groups = {};
-		ids.forEach( id =>{
-			newConf.groups[ id ] = config.groups[id];
-		});
+		ids.forEach( id => {
+			newConf.groups[ id ] = config.groups[ id ];
+		} );
 
 		setConfigState( newConf );
-	}
-
+	};
 
 	const actions = {
 		setConfig,
