@@ -34,7 +34,7 @@ export default function PluginGroupKeywords( props ) {
 	};
 	return (
 		<div className={ 'ui-body-sidebar-list-item-section' }>
-			<Panel title={ __( 'Keywords', props.slug ) } >
+			<Panel title={ __( 'Keywords', 'plugin-groups' ) } >
 				<KeyWordsList
 					group={ group }
 					removeKeyword={ removeKeyword }

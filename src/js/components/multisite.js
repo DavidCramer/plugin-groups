@@ -23,12 +23,12 @@ export default function Multisite( props ) {
 						const id = parseInt( site.blog_id );
 						return (
 							<ListItem
-								name={ site.domain }
+								name={ `${ site.domain }${ site.path }` }
 								checked={ -1 < props.sitesEnabled.indexOf( id ) }
 								callback={ ( event ) => setSiteAccess( [ id ], event.target.checked ) }
 							>
 								{ props.mainSite === id &&
-								<span>{ __( 'Main Site', props.slug ) }</span>
+								<span>{ __( 'Main Site', 'plugin-groups' ) }</span>
 								}
 							</ListItem>
 						);

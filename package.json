@@ -1,6 +1,6 @@
 {
   "name": "plugin-groups",
-  "version": "2.0.6",
+  "version": "2.0.8",
   "description": "Organize plugins by groups and filter types",
   "repository": {
     "type": "git",
@@ -12,31 +12,23 @@
     "url": "https://github.com/DavidCramer/plugin-groups/issues"
   },
   "scripts": {
-    "build": "wp-scripts build",
-    "dev": "wp-scripts start"
+    "build": "npm-run-all build:*",
+    "build:assets": "wp-scripts build",
+    "build:pot": "composer make-pot",
+    "dev": "wp-scripts start",
+    "pack": "grunt",
+    "postinstall": "composer install"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^16.0.0",
-    "@wordpress/api-fetch": "^3.23.1",
-    "@wordpress/data": "^4.27.3",
-    "@wordpress/i18n": "^4.2.1",
-    "@wordpress/url": "^3.2.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "@wordpress/scripts": "^24.4.0",
+    "@wordpress/i18n": "^4.20.0",
     "grunt": "^1.4.1",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-compress": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
-    "grunt-git": "^1.0.14",
     "grunt-shell": "^3.0.1",
-    "grunt-text-replace": "^0.4.0",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^4.2.0",
-    "webpackbar": "^4.0.0",
-    "postcss-loader": "^6.1.0",
-    "mini-css-extract-plugin": "^1.6.0",
-    "optimize-css-assets-webpack-plugin": "^6.0.0",
-    "sortablejs": "^1.14.0"
+    "sortablejs": "^1.15.0",
+    "npm-run-all": "^4.1.5"
   }
 }

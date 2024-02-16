@@ -5,7 +5,7 @@ export default function NavBarDropdown( props ) {
 	const { presets, getList, params } = props;
 	const preview = [...presets ];
 	if( params.showUngrouped ){
-		preview.push( __( 'Ungrouped', props.slug ) );
+		preview.push( __( 'Ungrouped', 'plugin-groups' ) );
 	}
 	return (
 		<div>

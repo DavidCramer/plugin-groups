@@ -63,7 +63,7 @@ export default function PluginGroupList( props ) {
 								        deleteGroups( getSelected(), true );
 							        } }
 							>
-								<span className={ 'text' }> { __( 'Delete selected', props.slug ) } </span>
+								<span className={ 'text' }> { __( 'Delete selected', 'plugin-groups' ) } </span>
 								<span className="dashicons dashicons-trash"/>
 							</button>
 						</ListItem>
@@ -74,7 +74,7 @@ export default function PluginGroupList( props ) {
 					}
 					{ 0 === getList().length &&
 					<div className={ 'description' }>
-						<span className="ui-body-edit-plugins-item">{ __( 'No groups created', props.slug ) }</span>
+						<span className="ui-body-edit-plugins-item">{ __( 'No groups created', 'plugin-groups' ) }</span>
 					</div>
 					}
 				</div>
@@ -82,7 +82,7 @@ export default function PluginGroupList( props ) {
 			<button type={ 'button' }
 			        className={ 'button' }
 			        onClick={ () => createGroup( '', true ) }>
-				{ __( 'Create new group', props.slug ) }
+				{ __( 'Create new group', 'plugin-groups' ) }
 			</button>
 		</div>
 	);

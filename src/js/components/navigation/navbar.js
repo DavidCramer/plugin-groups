@@ -7,7 +7,7 @@ export default function NavBar( props ) {
 	const selected = params.navStyle && className === params.navStyle ? ' selected' : '';
 	const preview = [...presets ];
 	if( params.showUngrouped ){
-		preview.push( __( 'Ungrouped', props.slug ) );
+		preview.push( __( 'Ungrouped', 'plugin-groups' ) );
 	}
 	return (
 		<div className={ 'plugin-groups nav-settings' + selected }

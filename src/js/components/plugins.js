@@ -30,11 +30,11 @@ export default function PluginGroupPlugins( props ) {
 		setSelected( newSelection );
 	};
 	return (
-		<Panel title={ __( 'Grouped plugins', props.slug ) }>
+		<Panel title={ __( 'Grouped plugins', 'plugin-groups' ) }>
 			{ hasPlugins &&
 			<>
 				<ListItem
-					name={ __( 'Select All', props.slug ) }
+					name={ __( 'Select All', 'plugin-groups' ) }
 					className={ 'list-control' }
 					callback={ toggleAll }
 					checked={ selected.length === group.plugins.length }
@@ -44,7 +44,7 @@ export default function PluginGroupPlugins( props ) {
 					        className={ 'button' }
 					        onClick={ removeSelected }
 					>
-						{ __( 'Remove selected', props.slug ) }
+						{ __( 'Remove selected', 'plugin-groups' ) }
 					</button>
 
 				</ListItem>
@@ -80,7 +80,7 @@ export default function PluginGroupPlugins( props ) {
 			{ ! hasPlugins &&
 			<div className={ 'ui-body-edit-plugins' }>
 			<span className={ 'ui-body-edit-plugins-item' }>{ __(
-				'No plugins selected', props.slug ) }</span>
+				'No plugins selected', 'plugin-groups' ) }</span>
 			</div>
 			}
 		</Panel>

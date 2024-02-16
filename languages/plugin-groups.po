@@ -1,15 +1,177 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Plugin Groups\n"
-"POT-Creation-Date: Mon, 03 Nov 2014 09:14:47 +0000\n"
-"PO-Revision-Date: Mon, 03 Nov 2014 09:14:47 +0000\n"
+"Report-Msgid-Bugs-To: \n"
 "Last-Translator: David <david@digilab.co.za>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: Mon, 03 Nov 2014 09:14:47 +0000\n"
+"PO-Revision-Date: Mon, 03 Nov 2014 09:14:47 +0000\n"
+"Language: \n"
 "X-Generator: Poedit 1.6.4\n"
 "X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: ..\n"
+
+#. Plugin Name of the plugin
+msgid "Plugin Groups"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://cramer.co.za"
+msgstr ""
+
+#. Description of the plugin
+msgid "Organize Plugins in groups"
+msgstr ""
+
+#. Author of the plugin
+msgid "David Cramer"
+msgstr ""
+
+#. Translators: placeholder is group name.
+#: classes/class-bulk-actions.php:108
+msgid "Remove from %s"
+msgstr ""
+
+#: classes/class-bulk-actions.php:110
+#: classes/class-extras.php:72
+msgid "Add to group"
+msgstr ""
+
+#: plugincore.php:35
+msgid "Plugin Groups requires PHP version 5.6 or later. We strongly recommend PHP 5.6 or later for security and performance reasons."
+msgstr ""
+
+#: js/bulk-handler.js:1
+#: js/install.js:1
+#: src/js/bulk-handler.js:59
+#: src/js/install.js:30
+msgid "New group"
+msgstr ""
+
+#: js/bulk-handler.js:1
+#: src/js/bulk-handler.js:69
+msgid "New group name"
+msgstr ""
+
+#: js/install.js:1
+#: src/js/install.js:51
+msgid "Plugin added."
+msgstr ""
+
+#: js/plugin-groups.js:1
+#: src/js/components/header.js:42
+msgid "Settings Saved"
+msgstr ""
+
+#: js/plugin-groups.js:1
+#: src/js/components/plugins.js:55
+msgid "Missing"
+msgstr ""
+
+#: src/js/components/group-list.js:66
+msgid "Delete selected"
+msgstr ""
+
+#: src/js/components/group-list.js:77
+msgid "No groups created"
+msgstr ""
+
+#: src/js/components/group-list.js:85
+msgid "Create new group"
+msgstr ""
+
+#: src/js/components/header.js:30
+msgid "Loading site config."
+msgstr ""
+
+#: src/js/components/header.js:51
+msgid "Save Settings"
+msgstr ""
+
+#: src/js/components/header.js:66
+msgid "Groups Management"
+msgstr ""
+
+#: src/js/components/header.js:69
+msgid "Multisite"
+msgstr ""
+
+#: src/js/components/header.js:72
+msgid "Settings"
+msgstr ""
+
+#: src/js/components/keywords.js:37
+msgid "Keywords"
+msgstr ""
+
+#: src/js/components/methods/loader.js:6
+msgid "Changes that you made may not be saved."
+msgstr ""
+
+#: src/js/components/multisite.js:31
+msgid "Main Site"
+msgstr ""
+
+#: src/js/components/navigation/dropdown.js:8
+#: src/js/components/navigation/navbar.js:10
+#: src/js/components/plugins-list.js:106
+msgid "Ungrouped"
+msgstr ""
+
+#: src/js/components/plugins-list.js:94
+msgid "Plugins"
+msgstr ""
+
+#: src/js/components/plugins-list.js:110
+msgid "Select all"
+msgstr ""
+
+#: src/js/components/plugins.js:33
+msgid "Grouped plugins"
+msgstr ""
+
+#: src/js/components/plugins.js:37
+msgid "Select All"
+msgstr ""
+
+#: src/js/components/plugins.js:47
+msgid "Remove selected"
+msgstr ""
+
+#: src/js/components/plugins.js:82
+msgid "No plugins selected"
+msgstr ""
+
+#: src/js/components/settings.js:16
+msgid "Use Legacy status based grouping"
+msgstr ""
+
+#: src/js/components/settings.js:21
+msgid "Enable admin menu"
+msgstr ""
+
+#: src/js/components/settings.js:26
+msgid "Show ungrouped items"
+msgstr ""
+
+#: src/js/components/settings.js:34
+msgid "Navigation style"
+msgstr ""
+
+#: src/js/components/settings.js:35
+msgid "Legacy"
+msgstr ""
+
+#: src/js/components/settings.js:36
+msgid "Modern"
+msgstr ""
+
+#: src/js/components/settings.js:37
+msgid "Dropdown"
+msgstr ""

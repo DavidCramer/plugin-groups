@@ -319,7 +319,7 @@ class Plugin_Groups {
 		global $status;
 
 		$this->current_status = $status;
-		$selected_group       = filter_input( INPUT_GET, self::$slug, FILTER_SANITIZE_STRING );
+		$selected_group       = Utils::get_sanitized_text( INPUT_GET, self::$slug );
 		if ( $selected_group && isset( $this->groups[ $selected_group ] ) ) {
 			$this->current_group = $selected_group;
 			if ( ! empty( $plugins ) ) {
@@ -347,7 +347,7 @@ class Plugin_Groups {
 	 */
 	protected function get_nav_url( $id = null ) {
 
-		$url = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
+		$url = Utils::get_sanitized_text( INPUT_SERVER, 'REQUEST_URI' );
 		if ( ! $url || false === strpos( 'plugins.php', $url ) ) {
 			// Just in case.
 			$url = self_admin_url( 'plugins.php' );
@@ -709,12 +709,6 @@ class Plugin_Groups {
 	 */
 	public function admin_init() {
 
-		if ( ! empty( $_POST['plugin-group-config'] ) ) {
-			$data = stripslashes( $_POST['plugin-group-config'] );
-			$data = json_decode( $data, true );
-			update_option( Plugin_Groups::CONFIG_KEY, $data );
-			wp_safe_redirect( admin_url( 'plugins.php?page=plugin-groups' ) );
-		}
 		$asset = include PLGGRP_PATH . 'js/' . self::$slug . '.asset.php';
 		wp_register_script( self::$slug, PLGGRP_URL . 'js/' . self::$slug . '.js', $asset['dependencies'], $asset['version'], true );
 		wp_register_style( self::$slug, PLGGRP_URL . 'css/' . self::$slug . '.css', array(), $asset['version'] );
@@ -796,7 +790,7 @@ class Plugin_Groups {
 	 */
 	public function enqueue_assets() {
 
-		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		$page = Utils::get_sanitized_text( INPUT_GET, 'page' );
 		if ( $page && self::$slug === $page ) {
 			wp_enqueue_script( self::$slug );
 			wp_enqueue_style( self::$slug );

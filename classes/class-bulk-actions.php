@@ -65,10 +65,10 @@ class Bulk_Actions {
 		$referer = wp_get_raw_referer();// Get the referer.
 		switch ( $action ) {
 			case 'add-to-group':
-				$selected_group = filter_input( INPUT_POST, 'group_id', FILTER_SANITIZE_STRING );
+				$selected_group = Utils::get_sanitized_text( INPUT_POST, 'group_id' );
 				if ( '__new' === $selected_group ) {
 					// Create a new group.
-					$new_group_name = filter_input( INPUT_POST, 'new_group_name', FILTER_SANITIZE_STRING );
+					$new_group_name = Utils::get_sanitized_text( INPUT_POST, 'new_group_name' );
 					$succeed        = $this->plugin_groups->create_group( $new_group_name, $plugins );
 					if ( $succeed ) {
 						$selected_group = $succeed;
@@ -104,6 +104,7 @@ class Bulk_Actions {
 
 		$current_group = $this->plugin_groups->get_current_group();
 		if ( $current_group ) {
+			// Translators: placeholder is group name.
 			$actions['remove-from-group'] = sprintf( __( 'Remove from %s', 'plugin-groups' ), $current_group['name'] );
 		}
 		$actions['add-to-group'] = __( 'Add to group', 'plugin-groups' );

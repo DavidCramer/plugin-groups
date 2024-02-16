@@ -91,7 +91,7 @@ export default function PluginsList( props ) {
 
 	return (
 		<div className={ 'ui-body-sidebar' }>
-			<Panel key={ 'plist-panel' } title={ __( 'Plugins', props.slug ) }>
+			<Panel key={ 'plist-panel' } title={ __( 'Plugins', 'plugin-groups' ) }>
 				<div style={ { display: 'flex' } }>
 					<input className={ 'regular-text search' } placeholder={ __(
 						'Search',
@@ -103,11 +103,11 @@ export default function PluginsList( props ) {
 							checked={ state.ungrouped }
 							onChange={ showUngrouped }
 						/>
-						<strong>{ __( 'Ungrouped', props.slug ) }</strong>
+						<strong>{ __( 'Ungrouped', 'plugin-groups' ) }</strong>
 					</label>
 				</div>
 				<ListItem
-					name={ __( 'Select all', props.slug ) }
+					name={ __( 'Select all', 'plugin-groups' ) }
 					id={ 'all' }
 					key={ '_master' }
 					callback={ ( event ) => checkAll( event.target.checked ) }

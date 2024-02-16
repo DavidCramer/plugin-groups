@@ -1,0 +1,25 @@
+{
+  "name": "davidcramer/plugin-groups",
+  "description": "Organize Plugins in groups",
+  "minimum-stability": "stable",
+  "license": "GPL2+",
+  "homepage": "https://github.com/DavidCramer/plugin-groups",
+  "support": {
+    "issues": "https://github.com/DavidCramer/plugin-groups/issues",
+    "source": "https://github.com/DavidCramer/plugin-groups"
+  },
+  "authors": [
+    {
+      "name": "David Cramer",
+      "homepage": "https://github.com/david/graphs/contributors"
+    }
+  ],
+  "require-dev": {
+    "wp-cli/i18n-command": "^2.2",
+    "wp-cli/wp-cli-bundle": "^2.4"
+  },
+  "scripts": {
+    "make-pot": "wp i18n make-pot . ./languages/plugin-groups.pot --exclude=vendor,build,tests",
+    "update-po": "wp i18n update-po ./languages/plugin-groups.pot ./languages/plugin-groups.po"
+  }
+}

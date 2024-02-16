@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 const loadSiteConfig = ( props ) => {
 
 	const { id, loadURL, setConfig, restNonce, navTab } = props;
-	if ( window.localStorage.getItem( '_plgUnsaved' ) && ! confirm( __( 'Changes that you made may not be saved.', props.slug ) ) ) {
+	if ( window.localStorage.getItem( '_plgUnsaved' ) && ! confirm( __( 'Changes that you made may not be saved.', 'plugin-groups' ) ) ) {
 		return;
 	}
 	navTab( 0 );

@@ -126,4 +126,17 @@ class Utils {
 
 		return uniqid( 'nd' );
 	}
+
+	/**
+	 * Get a sanitized input text field.
+	 *
+	 * @param int    $type The type to get.
+	 * @param string $var  The value to get.
+	 *
+	 * @return mixed
+	 */
+	public static function get_sanitized_text( $type, $var ) {
+		return filter_input( $type, $var, FILTER_CALLBACK, array( 'options' => 'sanitize_text_field' ) );
+	}
+
 }
