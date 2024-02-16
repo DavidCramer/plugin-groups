@@ -20,7 +20,7 @@
     "postinstall": "composer install"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^24.4.0",
+    "@wordpress/scripts": "^27.2.0",
     "@wordpress/i18n": "^4.20.0",
     "grunt": "^1.4.1",
     "grunt-cli": "^1.4.3",
