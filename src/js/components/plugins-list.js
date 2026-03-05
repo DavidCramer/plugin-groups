@@ -97,7 +97,7 @@ export default function PluginsList( props ) {
 						'Search',
 						props.slug
 					) } type={ 'search' } onInput={ searchText } value={ state.search }/>
-					<label style={ { 'white-space': 'nowrap', padding: '12px 0 12px 12px' } }>
+					<label style={ { whiteSpace: 'nowrap', padding: '12px 0 12px 12px' } }>
 						<input
 							type={ 'checkbox' }
 							checked={ state.ungrouped }
@@ -132,10 +132,9 @@ export default function PluginsList( props ) {
 								return;
 							}
 							return (
-								<>
+								<React.Fragment key={ item }>
 									{ match &&
 									<ListItem
-										key={ item }
 										name={ plugin.Name }
 										id={ item }
 										version={ plugin.Version }
@@ -143,7 +142,7 @@ export default function PluginsList( props ) {
 										callback={ checkItem }
 									/>
 									}
-								</>
+								</React.Fragment>
 							);
 						} ) }
 					</div>

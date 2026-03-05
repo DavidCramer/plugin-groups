@@ -25,7 +25,7 @@ export default function GroupListItem( props ) {
 				<>
 					<span>
 						<span className="sort-handle dashicons dashicons-menu"></span>
-						<input type={ 'checkbox' } checked={ selected } onClick={ ( event ) => selectGroup(
+						<input type={ 'checkbox' } checked={ selected } onChange={ ( event ) => selectGroup(
 							id ) }/>
 						<span className={ 'ui-body-sidebar-list-item-title' } onClick={ ( event ) => openGroup(
 							id ) }>

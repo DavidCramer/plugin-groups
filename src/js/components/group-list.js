@@ -17,25 +17,26 @@ export default function PluginGroupList( props ) {
 	const checked = getSelected().length === Object.keys(
 		props.groups ).length;
 
-	if ( 0 !== getList().length ) {
-		useEffect( () => {
-			const callback = () => {
-				const orders = sortable.toArray();
-				setOrder( orders );
-			};
-			const options = {
-				animation: 150,
-				ghostClass: 'active-sort',
-				handle: '.sort-handle',
-				direction: 'vertical',
-				onUpdate: function() {
-					callback();
-				},
-			};
-			const element = document.getElementById( 'plugin-groups-list' );
-			const sortable = Sortable.create( element, options );
-		} );
-	}
+	useEffect( () => {
+		if ( 0 === getList().length ) {
+			return;
+		}
+		const callback = () => {
+			const orders = sortable.toArray();
+			setOrder( orders );
+		};
+		const options = {
+			animation: 150,
+			ghostClass: 'active-sort',
+			handle: '.sort-handle',
+			direction: 'vertical',
+			onUpdate: function() {
+				callback();
+			},
+		};
+		const element = document.getElementById( 'plugin-groups-list' );
+		const sortable = Sortable.create( element, options );
+	} );
 
 	return (
 		<div className={ 'ui-body-sidebar wide' }>

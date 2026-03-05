@@ -345,7 +345,7 @@ function PluginGroupApp( data ) {
 			newTempGroup( event );
 		}
 		else if ( 'Escape' === event.key ) {
-			const id = event.path[ 0 ].dataset.edit;
+			const id = ( event.composedPath ? event.composedPath() : event.path )[ 0 ].dataset.edit;
 			if ( config.groups[ id ] ) {
 				if ( isTemp( id ) ) {
 					deleteGroup( id );
