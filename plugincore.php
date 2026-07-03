@@ -3,7 +3,7 @@
  * Plugin Name: Plugin Groups
  * Plugin URI: https://cramer.co.za
  * Description: Organize Plugins in groups
- * Version: 2.0.8
+ * Version: 2.0.9
  * Author: David Cramer
  * Author URI: https://cramer.co.za
  * Text Domain: plugin-groups
@@ -35,4 +35,3 @@ function plugin_groups_php_ver() {
 	$message = __( 'Plugin Groups requires PHP version 5.6 or later. We strongly recommend PHP 5.6 or later for security and performance reasons.', 'plugin-groups' );
 	echo sprintf( '<div id="plugin_groups_error" class="error notice notice-error"><p>%s</p></div>', esc_html( $message ) );
 }
-
