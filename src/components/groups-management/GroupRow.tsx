@@ -75,6 +75,13 @@ export function GroupRow({ group, ui, onReorderDrop }: GroupRowProps) {
           onClick={(event) => event.stopPropagation()}
           onChange={(event) => dispatch({ type: 'SELECT_GROUPS', ids: [group.id], selected: event.target.checked })}
         />
+        {group.color && (
+          <span
+            className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: group.color }}
+            title={__('Group color', 'plugin-groups')}
+          />
+        )}
         {ui.editing ? (
           <input
             className="wp-input flex-1"

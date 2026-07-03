@@ -3,6 +3,7 @@ export interface PersistedGroup {
   name: string;
   plugins: string[];
   keywords: string[];
+  color?: string;
 }
 
 export interface GroupUIState {

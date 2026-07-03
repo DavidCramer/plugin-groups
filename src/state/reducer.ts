@@ -32,6 +32,7 @@ export type Action =
   | { type: 'CREATE_GROUP'; id: string; name: string }
   | { type: 'START_RENAME_GROUP'; ids: string[] }
   | { type: 'CHANGE_GROUP_NAME'; id: string; name: string }
+  | { type: 'SET_GROUP_COLOR'; id: string; color: string }
   | { type: 'COMMIT_GROUP_NAME'; id: string }
   | { type: 'REVERT_GROUP_NAME'; id: string }
   | { type: 'DELETE_GROUPS'; ids: string[] }
@@ -45,6 +46,7 @@ export type Action =
   | { type: 'MOVE_PLUGIN_BETWEEN_GROUPS'; pluginFile: string; fromGroupId: string | null; toGroupId: string }
   | { type: 'ADD_KEYWORD'; groupId: string; keyword: string }
   | { type: 'REMOVE_KEYWORD'; groupId: string; keyword: string }
+  | { type: 'AUTO_ASSIGN_BY_KEYWORDS'; groupId: string }
   | { type: 'TOGGLE_PRESET'; presetName: string }
   | { type: 'SET_PARAM'; param: keyof Config['params']; value: unknown }
   | { type: 'SET_SITE_ACCESS'; ids: number[]; enabled: boolean }
@@ -73,6 +75,7 @@ function sanitizeGroups(rawGroups: Record<string, unknown> | undefined): Record<
       name: raw.name ?? '',
       plugins: Array.isArray(raw.plugins) ? raw.plugins : [],
       keywords: Array.isArray(raw.keywords) ? raw.keywords : [],
+      color: typeof raw.color === 'string' ? raw.color : undefined,
     };
   });
   return groups;
@@ -201,6 +204,24 @@ export function reducer(state: AppState, action: Action): AppState {
           groups: {
             ...state.config.groups,
             [action.id]: { ...group, name: action.name },
+          },
+        },
+        isDirty: true,
+      };
+    }
+
+    case 'SET_GROUP_COLOR': {
+      const group = state.config.groups[action.id];
+      if (!group) {
+        return state;
+      }
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          groups: {
+            ...state.config.groups,
+            [action.id]: { ...group, color: action.color },
           },
         },
         isDirty: true,
@@ -441,6 +462,46 @@ export function reducer(state: AppState, action: Action): AppState {
           },
         },
         isDirty: true,
+      };
+    }
+
+    case 'AUTO_ASSIGN_BY_KEYWORDS': {
+      const group = state.config.groups[action.groupId];
+      if (!group || group.keywords.length === 0) {
+        return state;
+      }
+      const keywords = group.keywords.map((keyword) => keyword.toLowerCase());
+      const claimed = new Set<string>();
+      Object.values(state.config.groups).forEach((g) => {
+        g.plugins.forEach((file) => claimed.add(file));
+      });
+      const newPlugins: string[] = [];
+      Object.entries(state.config.plugins).forEach(([file, meta]) => {
+        if (claimed.has(file)) {
+          return;
+        }
+        const pluginString = Object.values(meta)
+          .filter((value): value is string => typeof value === 'string')
+          .join(' ')
+          .toLowerCase();
+        if (keywords.some((keyword) => pluginString.includes(keyword))) {
+          newPlugins.push(file);
+        }
+      });
+      if (newPlugins.length === 0) {
+        return { ...state, toast: makeToast('No new matching plugins found', 'success') };
+      }
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          groups: {
+            ...state.config.groups,
+            [action.groupId]: { ...group, plugins: [...group.plugins, ...newPlugins] },
+          },
+        },
+        isDirty: true,
+        toast: makeToast(`Added ${newPlugins.length} matching plugin(s)`, 'success'),
       };
     }
 

@@ -47,6 +47,7 @@ export function parseImportedGroups(data: unknown): Record<string, PersistedGrou
       name: group.name ?? '',
       plugins: group.plugins ?? [],
       keywords: group.keywords ?? [],
+      color: group.color,
     };
   });
   return groups;

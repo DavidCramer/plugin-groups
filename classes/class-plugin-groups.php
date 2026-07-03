@@ -150,6 +150,8 @@ class Plugin_Groups {
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_item' ], 100 );
 		add_filter( 'self_admin_url', [ $this, 'append_group_to_self' ], 10, 3 );
 		add_filter( 'plugin_action_links', [ $this, 'append_group_to_actions' ] );
+		add_action( 'activated_plugin', [ $this, 'auto_assign_by_keywords' ], 10, 0 );
+		add_action( 'upgrader_process_complete', [ $this, 'after_plugin_upgrade' ], 10, 2 );
 	}
 
 	/**
@@ -265,6 +267,7 @@ class Plugin_Groups {
 			$html      = Utils::build_tag( 'div', [ 'class' => self::$slug ], $group_set );
 			if ( 1 < count( $parts ) ) {
 				echo wp_kses( $html, wp_kses_allowed_html( 'post' ) );
+				$this->render_group_bulk_actions();
 			}
 		}
 	}
@@ -330,6 +333,131 @@ class Plugin_Groups {
 					'selected' => true,
 				],
 			]
+		);
+		$this->render_group_bulk_actions();
+	}
+
+	/**
+	 * Render bulk activate/deactivate/update controls for the currently selected group.
+	 */
+	protected function render_group_bulk_actions() {
+
+		if ( true === $this->config['params']['legacyGrouping'] || empty( $this->current_group ) || empty( $this->groups[ $this->current_group ] ) ) {
+			return;
+		}
+
+		$plugin_files = array_keys( $this->groups[ $this->current_group ] );
+		$controls     = [];
+
+		if ( current_user_can( 'activate_plugins' ) ) {
+			$inactive = array_filter(
+				$plugin_files,
+				function ( $plugin ) {
+
+					return ! is_plugin_active( $plugin );
+				}
+			);
+			if ( ! empty( $inactive ) ) {
+				$controls[] = $this->build_bulk_action_form( 'activate-selected', $inactive, __( 'Activate All', self::$slug ) );
+			}
+		}
+
+		if ( current_user_can( 'deactivate_plugins' ) ) {
+			$active = array_filter( $plugin_files, 'is_plugin_active' );
+			if ( ! empty( $active ) ) {
+				$controls[] = $this->build_bulk_action_form( 'deactivate-selected', $active, __( 'Deactivate All', self::$slug ) );
+			}
+		}
+
+		if ( current_user_can( 'update_plugins' ) ) {
+			$updates   = get_site_transient( 'update_plugins' );
+			$updatable = ! empty( $updates->response ) ? array_intersect( $plugin_files, array_keys( $updates->response ) ) : [];
+			if ( ! empty( $updatable ) ) {
+				$url = wp_nonce_url(
+					self_admin_url( 'update.php?action=update-selected&plugins=' . rawurlencode( implode( ',', $updatable ) ) ),
+					'bulk-update-plugins'
+				);
+
+				$controls[] = Utils::build_tag(
+					'a',
+					[
+						'href'  => $url,
+						'class' => 'button button-secondary',
+					],
+					esc_html__( 'Update All', self::$slug )
+				);
+			}
+		}
+
+		if ( empty( $controls ) ) {
+			return;
+		}
+
+		echo wp_kses(
+			Utils::build_tag( 'div', [ 'class' => 'group-bulk-actions' ], implode( ' ', $controls ) ),
+			array_merge(
+				wp_kses_allowed_html( 'post' ),
+				[
+					'form'   => [
+						'method' => true,
+						'action' => true,
+						'style'  => true,
+					],
+					'input'  => [
+						'type'  => true,
+						'name'  => true,
+						'value' => true,
+					],
+					'button' => [
+						'type'  => true,
+						'class' => true,
+					],
+				]
+			)
+		);
+	}
+
+	/**
+	 * Build a small inline POST form for a plugins.php bulk action (activate/deactivate-selected).
+	 *
+	 * @param string $action       The plugins.php bulk action slug.
+	 * @param array  $plugin_files The plugin files to act on.
+	 * @param string $label        The button label.
+	 *
+	 * @return string
+	 */
+	protected function build_bulk_action_form( $action, array $plugin_files, $label ) {
+
+		$inputs = '';
+		foreach ( $plugin_files as $plugin_file ) {
+			$inputs .= Utils::build_tag(
+				'input',
+				[
+					'type'  => 'hidden',
+					'name'  => 'checked[]',
+					'value' => $plugin_file,
+				]
+			);
+		}
+		$inputs .= wp_nonce_field( 'bulk-plugins', '_wpnonce', true, false );
+		$inputs .= Utils::build_tag(
+			'input',
+			[
+				'type'  => 'hidden',
+				'name'  => 'action',
+				'value' => $action,
+			]
+		);
+		$inputs .= Utils::build_tag( 'button', [ 'type' => 'submit', 'class' => 'button button-secondary' ], esc_html( $label ) );
+
+		return Utils::build_tag(
+			'form',
+			[
+				'method' => 'post',
+				'action' => self_admin_url( 'plugins.php' ),
+				'style'  => 'display:inline-block;margin-right:6px',
+			],
+			$inputs
 		);
 	}
 
@@ -454,7 +582,19 @@ class Plugin_Groups {
 			$link_atts['aria-current'] = 'page';
 		}
 
-		$link = Utils::build_tag( 'a', $link_atts, $group['name'] . $counter );
+		$color_dot = '';
+		if ( ! empty( $group['color'] ) && preg_match( '/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/', $group['color'] ) ) {
+			$color_dot = Utils::build_tag(
+				'span',
+				[
+					'class' => 'group-color-dot',
+					'style' => 'background-color: ' . $group['color'],
+				],
+				''
+			);
+		}
+
+		$link = Utils::build_tag( 'a', $link_atts, $color_dot . $group['name'] . $counter );
 
 		return Utils::build_tag( 'li', $li_atts, $link );
 	}
@@ -486,7 +626,32 @@ class Plugin_Groups {
 				'All in One SEO',
 				'Yoast SEO',
 			],
-			// @todo: Add more categories for presets.
+			'Security'               => [
+				'Wordfence',
+				'Sucuri',
+				'iThemes Security',
+			],
+			'Caching'                => [
+				'WP Rocket',
+				'W3 Total Cache',
+				'WP Super Cache',
+				'WP Fastest Cache',
+			],
+			'Backups'                => [
+				'UpdraftPlus',
+				'BackWPup',
+				'Duplicator',
+			],
+			'Page Builders'          => [
+				'Elementor',
+				'Beaver Builder',
+				'Divi Builder',
+			],
+			'Email/SMTP'             => [
+				'WP Mail SMTP',
+				'FluentSMTP',
+				'Post SMTP',
+			],
 		];
 
 		/**
@@ -936,8 +1101,11 @@ class Plugin_Groups {
 			$config['networkAdmin'] = true;
 		}
 
-		// Load the presets.
-		$config += $this->load_presets();
+		// Load the presets. Use array_merge (not +=) so freshly computed presets
+		// always win over a stale 'presets'/'preset_groups' pair persisted into
+		// the option by a previous save (set_config()/save_config() store the
+		// whole $this->config array, presets included).
+		$config = array_merge( $config, $this->load_presets() );
 
 		return $config;
 	}
@@ -1034,12 +1202,28 @@ class Plugin_Groups {
 		if ( ! isset( $this->config['groups'][ $id ] ) || empty( $this->config['groups'][ $id ]['keywords'] ) ) {
 			return;
 		}
-		$keywords = array_map( 'strtolower', $this->config['groups'][ $id ]['keywords'] );
-		$plugins  = get_plugins();
-		foreach ( $plugins as $plugin_key => $plugin_data ) {
-			if ( isset( $this->groups[ $id ][ $plugin_key ] ) ) {
-				continue;
+		$matches = $this->match_plugins_by_keywords( $this->config['groups'][ $id ]['keywords'], get_plugins() );
+		foreach ( $matches as $plugin_key => $plugin_data ) {
+			if ( ! isset( $this->groups[ $id ][ $plugin_key ] ) ) {
+				$this->groups[ $id ][ $plugin_key ] = $plugin_data;
 			}
+		}
+	}
+
+	/**
+	 * Match plugins against a list of keywords, substring-matched (case-insensitive)
+	 * against each plugin's concatenated header metadata.
+	 *
+	 * @param array $keywords The keywords to match.
+	 * @param array $plugins  Plugin file => plugin data map, as returned by get_plugins().
+	 *
+	 * @return array Plugin file => plugin data map of matched plugins.
+	 */
+	protected function match_plugins_by_keywords( array $keywords, array $plugins ) {
+
+		$keywords = array_map( 'strtolower', $keywords );
+		$matches  = [];
+		foreach ( $plugins as $plugin_key => $plugin_data ) {
 			$plugin_string = strtolower( implode( ' ', $plugin_data ) );
 			$matched       = array_filter(
 				$keywords,
@@ -1049,9 +1233,69 @@ class Plugin_Groups {
 				}
 			);
 			if ( ! empty( $matched ) ) {
-				$this->groups[ $id ][ $plugin_key ] = $plugin_data;
+				$matches[ $plugin_key ] = $plugin_data;
 			}
 		}
+
+		return $matches;
+	}
+
+	/**
+	 * Persist keyword-matched plugins into a group's (or all groups') saved plugin list.
+	 *
+	 * Unlike populate_keywords(), which only affects the runtime nav/count state, this
+	 * writes matches into $this->config['groups'][$id]['plugins'] and saves the config.
+	 *
+	 * @param string|null $group_id Optional group ID to limit to; null runs for every group with keywords.
+	 *
+	 * @return bool True if any group was updated and saved.
+	 */
+	public function auto_assign_by_keywords( $group_id = null ) {
+
+		$plugins   = get_plugins();
+		$group_ids = null !== $group_id ? [ $group_id ] : array_keys( $this->config['groups'] );
+
+		$claimed = [];
+		foreach ( $this->config['groups'] as $group ) {
+			$claimed = array_merge( $claimed, $group['plugins'] );
+		}
+
+		$updated = false;
+		foreach ( $group_ids as $id ) {
+			if ( ! isset( $this->config['groups'][ $id ] ) || empty( $this->config['groups'][ $id ]['keywords'] ) ) {
+				continue;
+			}
+			$matches     = $this->match_plugins_by_keywords( $this->config['groups'][ $id ]['keywords'], $plugins );
+			$new_plugins = array_diff( array_keys( $matches ), $claimed );
+			if ( empty( $new_plugins ) ) {
+				continue;
+			}
+			$this->config['groups'][ $id ]['plugins'] = array_values(
+				array_unique( array_merge( $this->config['groups'][ $id ]['plugins'], $new_plugins ) )
+			);
+			$claimed = array_merge( $claimed, $new_plugins );
+			$updated = true;
+		}
+
+		if ( $updated ) {
+			$this->save_config();
+		}
+
+		return $updated;
+	}
+
+	/**
+	 * Re-run keyword auto-assignment for all groups after a plugin is installed or updated.
+	 *
+	 * @param \WP_Upgrader $upgrader   The upgrader instance (unused).
+	 * @param array        $hook_extra Extra data describing the upgrade action.
+	 */
+	public function after_plugin_upgrade( $upgrader, $hook_extra ) {
+
+		if ( ! isset( $hook_extra['type'] ) || 'plugin' !== $hook_extra['type'] ) {
+			return;
+		}
+		$this->auto_assign_by_keywords();
 	}
 
 	/**
@@ -1068,6 +1312,7 @@ class Plugin_Groups {
 		$new_id                            = Utils::generate_id();
 		$group                             = [
 			'id'       => $new_id,
+			'color'    => '',
 			'keywords' => [],
 			'name'     => trim( $name ),
 			'open'     => false,

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-03T10:23:22+00:00\n"
+"POT-Creation-Date: 2026-07-03T11:10:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: plugin-groups\n"
@@ -37,7 +37,7 @@ msgid "Remove from %s"
 msgstr ""
 
 #: classes/class-bulk-actions.php:110
-#: classes/class-extras.php:73
+#: classes/class-extras.php:71
 msgid "Add to group"
 msgstr ""
 

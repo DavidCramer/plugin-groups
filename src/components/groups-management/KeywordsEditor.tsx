@@ -44,6 +44,15 @@ export function KeywordsEditor({ group }: KeywordsEditorProps) {
         placeholder={__('Add keyword', 'plugin-groups')}
         onKeyDown={handleKeyDown}
       />
+      {group.keywords.length > 0 && (
+        <button
+          type="button"
+          className="btn-secondary text-xs mt-2"
+          onClick={() => dispatch({ type: 'AUTO_ASSIGN_BY_KEYWORDS', groupId: group.id })}
+        >
+          {__('Re-run auto-assign', 'plugin-groups')}
+        </button>
+      )}
     </div>
   );
 }

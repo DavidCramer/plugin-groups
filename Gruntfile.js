@@ -41,7 +41,8 @@ module.exports = function (grunt) {
                     '!.travis.yml',
                     '!.scrutinizer.yml',
                     '!phpunit.xml',
-                    '!tests/**'
+                    '!tests/**',
+                    '!vendor/**'
                 ],
                 dest: 'build/'
             }

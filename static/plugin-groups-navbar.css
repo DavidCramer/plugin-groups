@@ -65,3 +65,20 @@
 .plugin-groups .groups-modern li .count {
 	color: #646970
 }
+
+.plugin-groups .group-color-dot {
+	border-radius: 50%;
+	display: inline-block;
+	height: 8px;
+	margin-right: 6px;
+	vertical-align: middle;
+	width: 8px
+}
+
+.plugin-groups .subsubsub .group-color-dot {
+	margin-right: 4px
+}
+
+.plugin-groups .group-bulk-actions {
+	margin: 0 0 10px
+}

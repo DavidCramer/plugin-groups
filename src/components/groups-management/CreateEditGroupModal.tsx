@@ -11,6 +11,9 @@ export function CreateEditGroupModal() {
   const [name, setName] = useState(() =>
     isRename && groupModal?.groupId ? config.groups[groupModal.groupId]?.name ?? '' : ''
   );
+  const [color, setColor] = useState(() =>
+    isRename && groupModal?.groupId ? config.groups[groupModal.groupId]?.color ?? '' : ''
+  );
 
   if (!groupModal) {
     return null;
@@ -26,13 +29,20 @@ export function CreateEditGroupModal() {
     if (isRename && groupModal.groupId) {
       dispatch({ type: 'CHANGE_GROUP_NAME', id: groupModal.groupId, name: trimmed });
       dispatch({ type: 'COMMIT_GROUP_NAME', id: groupModal.groupId });
+      if (color) {
+        dispatch({ type: 'SET_GROUP_COLOR', id: groupModal.groupId, color });
+      }
     } else {
       const id = generateGroupId();
       dispatch({ type: 'CREATE_GROUP', id, name: trimmed });
       dispatch({ type: 'COMMIT_GROUP_NAME', id });
+      if (color) {
+        dispatch({ type: 'SET_GROUP_COLOR', id, color });
+      }
     }
     close();
     setName('');
+    setColor('');
   };
 
   return (
@@ -50,6 +60,13 @@ export function CreateEditGroupModal() {
             save();
           }
         }}
+      />
+      <label className="block text-xs font-medium text-gray-700 mb-1">{__('Color', 'plugin-groups')}</label>
+      <input
+        className="wp-input mb-1"
+        type="color"
+        value={color || '#888888'}
+        onChange={(event) => setColor(event.target.value)}
       />
       <div className="flex justify-end gap-2 mt-4">
         <button type="button" className="btn-secondary text-xs" onClick={close}>
