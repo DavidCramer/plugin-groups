@@ -45,8 +45,9 @@ class Extras {
 	 */
 	public function enqueue_script() {
 
-		$asset = include PLGGRP_PATH . 'js/install.asset.php';
-		wp_enqueue_script( 'plugin-groups-install', PLGGRP_URL . 'js/install.js', $asset['dependencies'], $asset['version'], true );
+		$asset        = include PLGGRP_PATH . 'js/install.asset.php';
+		$dependencies = array_unique( array_merge( $asset['dependencies'], array( 'jquery' ) ) );
+		wp_enqueue_script( 'plugin-groups-install', PLGGRP_URL . 'js/install.js', $dependencies, $asset['version'], true );
 
 		$data = array(
 			'url'   => rest_url( Plugin_Groups::$slug . '/add' ),
@@ -67,13 +68,13 @@ class Extras {
 		$groups      = $this->plugin_groups->get_groups();
 		$last        = array_pop( $actions );
 		$newaction   = array();
-		$newaction[] = '<select disabled=disabled data-plugin="' . $plugin['slug'] . '" style="width:120px;">';
+		$newaction[] = '<select disabled=disabled data-plugin="' . esc_attr( $plugin['slug'] ) . '" style="width:120px;">';
 		$newaction[] = '<option value="_select">';
 		$newaction[] = __( 'Add to group', 'plugin-groups' );
 		$newaction[] = '</option>';
 		foreach ( $groups as $group ) {
-			$newaction[] = '<option value="' . $group['id'] . '">';
-			$newaction[] = $group['name'];
+			$newaction[] = '<option value="' . esc_attr( $group['id'] ) . '">';
+			$newaction[] = esc_html( $group['name'] );
 			$newaction[] = '</option>';
 		}
 		$newaction[] = '</select>';

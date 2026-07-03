@@ -16,7 +16,9 @@
   ],
   "require-dev": {
     "wp-cli/i18n-command": "^2.2",
-    "wp-cli/wp-cli-bundle": "^2.4"
+    "wp-cli/wp-cli-bundle": "^2.4",
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^2.0"
   },
   "scripts": {
     "make-pot": "wp i18n make-pot . ./languages/plugin-groups.pot --exclude=vendor,build,tests",

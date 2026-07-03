@@ -296,7 +296,7 @@ class Plugin_Groups {
 				$selected = ' selected="selected"';
 			}
 
-			$html[] = "\t" . '<option value="' . esc_url( $this->get_nav_url( $key ) ) . '"' . $selected . '>' . $group['name'] . ' (' . count( $plugins ) . ')</option>' . "\n";
+			$html[] = "\t" . '<option value="' . esc_url( $this->get_nav_url( $key ) ) . '"' . $selected . '>' . esc_html( $group['name'] ) . ' (' . count( $plugins ) . ')</option>' . "\n";
 		}
 
 		$html[] = "</select>\n";
@@ -304,7 +304,23 @@ class Plugin_Groups {
 		if ( false === $echo ) {
 			return $html;
 		}
-		echo $html;
+		echo wp_kses(
+			$html,
+			array(
+				'label'  => array(
+					'for'   => true,
+					'class' => true,
+				),
+				'select' => array(
+					'id'       => true,
+					'onchange' => true,
+				),
+				'option' => array(
+					'value'    => true,
+					'selected' => true,
+				),
+			)
+		);
 	}
 
 	/**

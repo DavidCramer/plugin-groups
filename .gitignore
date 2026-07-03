@@ -1,4 +1,7 @@
-node_modules
-vendor
-build
-releases
+/node_modules
+/vendor
+/build
+/releases
+/js
+/css
+CLAUDE.md

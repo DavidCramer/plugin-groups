@@ -44,7 +44,7 @@ export default function PluginGroupKeywords( props ) {
 				<input
 					className={ 'regular-text keywords-input' }
 					type={ 'text' }
-					placeholder={ __( 'Add keyword' ) }
+					placeholder={ __( 'Add keyword', 'plugin-groups' ) }
 					data-keywords={ true }
 					onKeyDown={ handleKeyword }/>
 			</Panel>

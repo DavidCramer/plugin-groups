@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { __, _n } from '@wordpress/i18n';
 import PluginGroupHeader from './header';
 import PluginGroupList from './group-list';
@@ -23,7 +23,7 @@ function PluginGroupApp( data ) {
 	};
 	const generateID = () => {
 		return 'pgxxxxx'.replace( /x/g, function( c ) {
-			var r = Math.random() * 16 | 0,
+			const r = Math.random() * 16 | 0,
 				v = c === 'x' ? r : ( r & 0x3 | 0x8 );
 			return v.toString( 16 );
 		} );
@@ -180,7 +180,7 @@ function PluginGroupApp( data ) {
 				'X-WP-Nonce': config.restNonce,
 			},
 			body: data
-		} ).then( response => response.json() ).then( ( data ) => {
+		} ).then( response => response.json() ).then( () => {
 			const savedConf = getConf();
 			savedConf.saved = true;
 			setTimeout( () => {
@@ -301,9 +301,6 @@ function PluginGroupApp( data ) {
 
 	const getSelected = () => {
 		return getGroupsBy( 'selected' );
-	};
-	const getOpen = () => {
-		return getGroupsBy( 'open' );
 	};
 	const getEditing = () => {
 		return getGroupsBy( 'edit' );
@@ -433,10 +430,6 @@ function PluginGroupApp( data ) {
 		reader.readAsText( event.target.files[ 0 ] );
 	};
 
-	const checkSaved = () => {
-
-	};
-
 	React.useEffect( () => {
 		window.addEventListener( 'keydown', keyNavHandler );
 		return () => {
@@ -548,10 +541,8 @@ function PluginGroupApp( data ) {
 const UI =
 	{
 		init( data ) {
-			ReactDOM.render(
-				<PluginGroupApp { ...data } />,
-				document.getElementById( 'plg-app' )
-			);
+			const container = document.getElementById( 'plg-app' );
+			createRoot( container ).render( <PluginGroupApp { ...data } /> );
 		}
 	}
 ;

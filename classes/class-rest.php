@@ -55,7 +55,7 @@ class Rest {
 
 					if ( is_multisite() ) {
 						$data = $request->get_json_params();
-						$can  = current_user_can_for_blog( $data['siteID'], 'manage_options' );
+						$can  = current_user_can_for_site( $data['siteID'], 'manage_options' );
 					} else {
 						$can = current_user_can( 'manage_options' );
 					}
@@ -76,7 +76,7 @@ class Rest {
 
 					$id = $request->get_param( 'siteID' );
 
-					return current_user_can_for_blog( $id, 'manage_options' );
+					return current_user_can_for_site( $id, 'manage_options' );
 				},
 			)
 		);
@@ -92,7 +92,7 @@ class Rest {
 
 					if ( is_multisite() ) {
 						$data = $request->get_json_params();
-						$can  = current_user_can_for_blog( $data['siteID'], 'manage_options' );
+						$can  = current_user_can_for_site( $data['siteID'], 'manage_options' );
 					} else {
 						$can = current_user_can( 'manage_options' );
 					}
