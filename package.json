@@ -1,6 +1,6 @@
 {
     "name": "plugin-groups",
-    "version": "2.1.0",
+    "version": "3.0.0",
     "description": "Organize plugins by groups and filter types",
     "repository": {
         "type": "git",
@@ -29,23 +29,28 @@
     "devDependencies": {
         "@tailwindcss/cli": "^4.2.2",
         "@tailwindcss/vite": "^4.2.2",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
         "@typescript-eslint/eslint-plugin": "^8.15.0",
         "@typescript-eslint/parser": "^8.15.0",
         "@vitejs/plugin-react": "^6.0.2",
         "@wordpress/i18n": "^6.23.0",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "eslint-plugin-react-refresh": "^0.5.3",
+        "globals": "^17.7.0",
         "grunt": "^1.4.1",
         "grunt-cli": "^1.4.3",
         "grunt-contrib-clean": "^2.0.0",
         "grunt-contrib-compress": "^2.0.0",
         "grunt-contrib-copy": "^1.0.0",
         "mini-css-extract-plugin": "^2.10.2",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
         "sortablejs": "^1.15.0",
         "tailwindcss": "^4.1.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.58.2",
-        "vite": "^8.0.16",
-        "react": "^19.2.7",
-        "react-dom": "^19.2.7"
+        "vite": "^8.0.16"
     }
 }

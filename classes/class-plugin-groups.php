@@ -1124,7 +1124,11 @@ class Plugin_Groups {
 	 * Render the admin page.
 	 */
 	public function render_admin() {
-		$config = $this->build_config_object();
+		$bootstrap = array(
+			'loadURL'   => rest_url( self::$slug . '/load' ),
+			'restNonce' => wp_create_nonce( 'wp_rest' ),
+			'siteID'    => get_current_blog_id(),
+		);
 
 		include PLGGRP_PATH . 'includes/main.php';
 	}
