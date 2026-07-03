@@ -40,7 +40,7 @@ export function GroupsColumn() {
           <span>{__('Groups', 'plugin-groups')}</span>
           <span className="count-pill green">{ids.length}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pt-3">
           <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs font-medium">
             <input
               type="checkbox"
@@ -78,7 +78,7 @@ export function GroupsColumn() {
       <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
         <button
           type="button"
-          className="btn-secondary text-xs"
+          className="btn-primary text-xs"
           onClick={() => dispatch({ type: 'OPEN_GROUP_MODAL', mode: 'create' })}
         >
           {__('Create new group', 'plugin-groups')}

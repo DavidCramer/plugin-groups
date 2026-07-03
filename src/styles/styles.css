@@ -47,7 +47,7 @@
 }
 
 .plugin-groups-main {
-
+	@import "../../static/plugin-groups-navbar.css";
 
 	h1 {
 		@apply py-1 m-0 text-inherit;

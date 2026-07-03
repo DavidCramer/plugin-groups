@@ -2,7 +2,7 @@ import type { PersistedGroup } from './group';
 import type { PluginsMap } from './plugin';
 import type { PresetGroup } from './preset';
 
-export type NavStyle = 'subsubsub' | 'groups-modern' | 'groups-dropdown';
+export type NavStyle = 'default' | 'groups-modern' | 'groups-dropdown';
 
 export interface Params {
   legacyGrouping: boolean;

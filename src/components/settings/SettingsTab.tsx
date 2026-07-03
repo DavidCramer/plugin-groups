@@ -4,7 +4,7 @@ import type { NavStyle } from '@/types/config';
 import { NavStylePreview } from './NavStylePreview';
 
 const NAV_STYLES: Array<{ value: NavStyle; label: string }> = [
-  { value: 'subsubsub', label: __('Legacy', 'plugin-groups') },
+  { value: 'default', label: __('Legacy', 'plugin-groups') },
   { value: 'groups-modern', label: __('Modern', 'plugin-groups') },
   { value: 'groups-dropdown', label: __('Dropdown', 'plugin-groups') },
 ];
@@ -15,8 +15,8 @@ export function SettingsTab() {
   const { params } = config;
 
   return (
-    <div className="flex gap-4 p-4">
-      <div className="w-72 bg-white border border-gray-200 rounded flex-shrink-0">
+    <div className="flex bg-white h-full">
+      <div className="w-72  shrink-0 border-r border-gray-200">
         <div className="px-4 pt-4 pb-3">
           <div className="section-title">{__('Settings', 'plugin-groups')}</div>
         </div>
@@ -47,7 +47,7 @@ export function SettingsTab() {
       </div>
 
       {!params.legacyGrouping && (
-        <div className="flex-1 bg-white border border-gray-200 rounded">
+        <div className="flex-1">
           <div className="px-4 pt-4 pb-3">
             <div className="section-title">{__('Navigation style', 'plugin-groups')}</div>
           </div>

@@ -32,6 +32,7 @@ export function CreateEditGroupModal() {
       dispatch({ type: 'COMMIT_GROUP_NAME', id });
     }
     close();
+    setName('');
   };
 
   return (

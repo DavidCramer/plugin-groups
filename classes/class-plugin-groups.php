@@ -755,7 +755,7 @@ class Plugin_Groups {
 			$css_path = PLGGRP_URL . 'build/' . $manifest['src/main.tsx']['css'][0] ?? '';
 			wp_register_style( self::$slug, $css_path, [], PLGGRP_VERSION );
 		}
-		//wp_register_style( self::$slug . '-navbar', PLGGRP_URL . 'css/' . self::$slug . '-navbar.css', [], $asset['version'] );
+		wp_register_style( self::$slug . '-navbar', PLGGRP_URL . 'static/' . self::$slug . '-navbar.css', [], PLGGRP_VERSION );
 	}
 
 	/**

@@ -8,8 +8,8 @@ export function TabNav() {
 
   const tabButtonClass = (isActive: boolean) =>
     isActive
-      ? 'bg-brand text-white text-sm px-5 py-2 font-medium transition-colors'
-      : 'text-white/70 text-sm px-5 py-2 hover:text-white transition-colors cursor-pointer';
+      ? 'bg-brand text-white text-sm px-4 py-2 font-medium transition-colors'
+      : 'text-white/70 text-sm px-4 py-2 hover:text-white transition-colors cursor-pointer';
 
   return (
     <div className="bg-brand-dark flex border-b border-brand-darker">
