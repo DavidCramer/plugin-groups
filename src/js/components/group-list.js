@@ -39,13 +39,13 @@ export default function PluginGroupList( props ) {
 
 	return (
 		<div className={ 'ui-body-sidebar wide' }>
-			<Panel title={ __( 'Groups' ) }>
+			<Panel title={ __( 'Groups', 'plugin-groups' ) }>
 				<div className={ 'ui-body-sidebar-list' }>
 					{ 0 !== getList().length &&
 					<>
 
 						<ListItem
-							name={ __( 'Select All' ) }
+							name={ __( 'Select All', 'plugin-groups' ) }
 							bold={ true }
 							callback={ ( event ) => {
 								selectGroups(

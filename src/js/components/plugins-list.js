@@ -95,9 +95,9 @@ export default function PluginsList( props ) {
 				<div style={ { display: 'flex' } }>
 					<input className={ 'regular-text search' } placeholder={ __(
 						'Search',
-						props.slug
+						'plugin-groups'
 					) } type={ 'search' } onInput={ searchText } value={ state.search }/>
-					<label style={ { 'white-space': 'nowrap', padding: '12px 0 12px 12px' } }>
+					<label style={ { whiteSpace: 'nowrap', padding: '12px 0 12px 12px' } }>
 						<input
 							type={ 'checkbox' }
 							checked={ state.ungrouped }
@@ -116,7 +116,7 @@ export default function PluginsList( props ) {
 					className={ 'list-control' }
 				>
 					<button className={ 'button' } type={ 'button' } onClick={ addSelected } disabled={ ! enabledButton }>
-						<span className={ 'text' }>{ __( 'Send to Selected Groups' ) }</span>
+						<span className={ 'text' }>{ __( 'Send to Selected Groups', 'plugin-groups' ) }</span>
 						<span className="dashicons dashicons-arrow-right-alt2"></span>
 					</button>
 				</ListItem>
@@ -129,21 +129,20 @@ export default function PluginsList( props ) {
 							const checked = -1 < state.checked.indexOf(
 								item ) && isMatched( plugin.Name );
 							if ( state.ungrouped && -1 !== grouped.indexOf( item ) ) {
-								return;
+								return null;
+							}
+							if ( ! match ) {
+								return null;
 							}
 							return (
-								<>
-									{ match &&
-									<ListItem
-										key={ item }
-										name={ plugin.Name }
-										id={ item }
-										version={ plugin.Version }
-										checked={ checked }
-										callback={ checkItem }
-									/>
-									}
-								</>
+								<ListItem
+									key={ item }
+									name={ plugin.Name }
+									id={ item }
+									version={ plugin.Version }
+									checked={ checked }
+									callback={ checkItem }
+								/>
 							);
 						} ) }
 					</div>

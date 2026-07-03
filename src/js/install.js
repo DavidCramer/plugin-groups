@@ -47,7 +47,7 @@ const Install = {
 			body: JSON.stringify( data ),
 		} )
 			.then( response => response.json() )
-			.then( data => {
+			.then( () => {
 				notice.innerText = __( 'Plugin added.', 'plugin-groups' );
 				selector.value = '_select';
 			} );

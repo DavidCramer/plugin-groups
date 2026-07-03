@@ -13,7 +13,7 @@ export default function Multisite( props ) {
 			<div className={ 'ui-body-sidebar' }>
 				<Panel title={ 'Sites with full access' }>
 					<ListItem
-						name={ __( 'Select All' ) }
+						name={ __( 'Select All', 'plugin-groups' ) }
 						bold={ true }
 						callback={ ( event ) => setSiteAccess( siteList, event.target.checked ) }
 						className={ 'list-control' }

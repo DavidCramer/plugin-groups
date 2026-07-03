@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables" as *;
 
 .plugin-groups {
 	&-main > & {
@@ -214,10 +214,6 @@
 						&:not(.active) {
 							background-color : $color_white_hover;
 						}
-					}
-
-					span {
-
 					}
 
 					label, .version {

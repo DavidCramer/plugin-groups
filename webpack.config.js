@@ -24,24 +24,6 @@ const pluginGroups = {
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			// Remove the css/postcss loaders from `@wordpress/scripts` due to version conflicts.
-			...defaultConfig.module.rules.filter(
-				( rule ) => ! rule.test.toString().match( '.css' )
-			),
-			{
-				test: /\.css$/,
-				use: [
-					// prettier-ignore
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					'postcss-loader',
-				],
-			},
-		],
-	},
 	plugins: [
 		...defaultConfig.plugins,
 		new MiniCssExtractPlugin( {

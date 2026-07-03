@@ -130,13 +130,32 @@ class Utils {
 	/**
 	 * Get a sanitized input text field.
 	 *
+	 * Reads directly from the superglobals rather than filter_input(), which has a
+	 * long-standing PHP/SAPI bug where INPUT_POST/INPUT_GET can return NULL even
+	 * though the superglobal has the value.
+	 *
 	 * @param int    $type The type to get.
 	 * @param string $var  The value to get.
 	 *
 	 * @return mixed
 	 */
 	public static function get_sanitized_text( $type, $var ) {
-		return filter_input( $type, $var, FILTER_CALLBACK, array( 'options' => 'sanitize_text_field' ) );
+
+		switch ( $type ) {
+			case INPUT_POST:
+				$value = isset( $_POST[ $var ] ) ? wp_unslash( $_POST[ $var ] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				break;
+			case INPUT_GET:
+				$value = isset( $_GET[ $var ] ) ? wp_unslash( $_GET[ $var ] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				break;
+			case INPUT_SERVER:
+				$value = isset( $_SERVER[ $var ] ) ? wp_unslash( $_SERVER[ $var ] ) : null;
+				break;
+			default:
+				$value = null;
+		}
+
+		return null === $value ? null : sanitize_text_field( $value );
 	}
 
 }
