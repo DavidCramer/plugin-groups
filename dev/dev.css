@@ -1,0 +1,17 @@
+.xdebug-var-dump {
+	background-color: #efefef; border: 1px solid #ddd;
+	position: relative;
+	z-index: 99999999;
+}
+
+.xdebug-error {
+
+	tbody {
+
+		td:nth-child(4) {
+			height: 105px;
+			overflow: hidden;
+			display: block;
+		}
+	}
+}

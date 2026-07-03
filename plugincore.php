@@ -22,7 +22,17 @@ define( 'PLGGRP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PLGGRP_CORE', __FILE__ );
 define( 'PLGGRP_URL', plugin_dir_url( __FILE__ ) );
 define( 'PLGGRP_SLUG', basename( __DIR__ ) . '/' . basename( __FILE__ ) );
-
+define( 'PLGGRP_VERSION', '2.1.0' );
+/**
+ * Check if we're running dev mode.
+ */
+if ( file_exists( PLGGRP_PATH . '/.dev-server-running' ) ) {
+	$domain = filter_var( $_SERVER['HTTP_HOST'], FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME );
+	if ( str_ends_with( $domain, '.local' ) ) {
+		$port = trim( file_get_contents( PLGGRP_PATH . '.dev-server-running' ) );
+		define( 'PLGGRP_DEV_MODE', $port );
+	}
+}
 if ( ! version_compare( PHP_VERSION, '7.4', '>=' ) ) {
 	if ( is_admin() ) {
 		add_action( 'admin_notices', 'plugin_groups_php_ver' );
