@@ -45,9 +45,7 @@ class Extras {
 	 */
 	public function enqueue_script() {
 
-		$asset        = include PLGGRP_PATH . 'js/install.asset.php';
-		$dependencies = array_unique( array_merge( $asset['dependencies'], array( 'jquery' ) ) );
-		wp_enqueue_script( 'plugin-groups-install', PLGGRP_URL . 'js/install.js', $dependencies, $asset['version'], true );
+		wp_enqueue_script( 'plugin-groups-install', PLGGRP_URL . 'static/install.js', ['jquery'], PLGGRP_VERSION, true );
 
 		$data = array(
 			'url'   => rest_url( Plugin_Groups::$slug . '/add' ),

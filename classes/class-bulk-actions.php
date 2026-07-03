@@ -45,8 +45,8 @@ class Bulk_Actions {
 	 */
 	protected function enqueue_script() {
 
-		$asset = include PLGGRP_PATH . 'js/bulk-handler.asset.php';
-		wp_enqueue_script( 'plugin-groups-bulk', PLGGRP_URL . 'js/bulk-handler.js', $asset['dependencies'], $asset['version'], true );
+		$asset = include PLGGRP_PATH . 'static/bulk-handler.asset.php';
+		wp_enqueue_script( 'plugin-groups-bulk', PLGGRP_URL . 'static/bulk-handler.js', $asset['dependencies'], $asset['version'], true );
 		$groups = $this->plugin_groups->get_groups();
 		wp_add_inline_script( 'plugin-groups-bulk', 'var plgData = ' . wp_json_encode( $groups ), 'before' );
 	}

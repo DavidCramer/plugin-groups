@@ -6,7 +6,6 @@ import {resolve} from 'path';
 
 const entryPoints = {
   main: resolve(__dirname, 'src/main.tsx'),
-  "bulk-handler": resolve(__dirname, 'src/legacy/js/bulk-handler.js'),
 };
 
 export default defineConfig({
