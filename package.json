@@ -1,40 +1,63 @@
 {
-  "name": "plugin-groups",
-  "version": "2.1.0",
-  "description": "Organize plugins by groups and filter types",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/DavidCramer/plugin-groups"
-  },
-  "author": "DavidCramer",
-  "license": "GPLv2+",
-  "bugs": {
-    "url": "https://github.com/DavidCramer/plugin-groups/issues"
-  },
-  "engines": {
-    "node": ">=20.19.0",
-    "npm": ">=10.2.3"
-  },
-  "scripts": {
-    "build": "npm run build:assets && npm run build:pot",
-    "build:assets": "wp-scripts build",
-    "build:pot": "composer make-pot",
-    "dev": "wp-scripts start",
-    "lint:js": "wp-scripts lint-js",
-    "lint:css": "wp-scripts lint-style",
-    "format": "wp-scripts format",
-    "pack": "grunt",
-    "postinstall": "composer install"
-  },
-  "devDependencies": {
-    "@wordpress/i18n": "^6.23.0",
-    "@wordpress/scripts": "^32.6.0",
-    "grunt": "^1.4.1",
-    "grunt-cli": "^1.4.3",
-    "grunt-contrib-clean": "^2.0.0",
-    "grunt-contrib-compress": "^2.0.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "mini-css-extract-plugin": "^2.10.2",
-    "sortablejs": "^1.15.0"
-  }
+    "name": "plugin-groups",
+    "version": "3.0.0",
+    "description": "Organize plugins by groups and filter types",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DavidCramer/plugin-groups"
+    },
+    "author": "DavidCramer",
+    "license": "GPLv2+",
+    "bugs": {
+        "url": "https://github.com/DavidCramer/plugin-groups/issues"
+    },
+    "engines": {
+        "node": ">=20.19.0",
+        "npm": ">=10.2.3"
+    },
+    "scripts": {
+        "build": "npm run build:assets && npm run build:pot && npm run dist",
+        "build:assets": "vite build && vite build --config vite.config-static.ts",
+        "build:pot": "composer make-pot",
+        "dev": "vite",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "type-check": "tsc --noEmit",
+        "format": "prettier --write '**/*.{js,jsx,ts,tsx,css,scss,md}'",
+        "release": "RELEASE=1 npm run build && npm run pack",
+        "pack" : "gulp pack",
+        "dist": "gulp dist",
+        "postinstall": "composer install"
+    },
+    "devDependencies": {
+        "@tailwindcss/cli": "^4.2.2",
+        "@tailwindcss/vite": "^4.2.2",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
+        "@typescript-eslint/eslint-plugin": "^8.15.0",
+        "@typescript-eslint/parser": "^8.15.0",
+        "@vitejs/plugin-react": "^6.0.2",
+        "@wordpress/i18n": "^6.23.0",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "eslint-plugin-react-refresh": "^0.5.3",
+        "globals": "^17.7.0",
+        "grunt": "^1.4.1",
+        "grunt-cli": "^1.4.3",
+        "grunt-contrib-clean": "^2.0.0",
+        "grunt-contrib-compress": "^2.0.0",
+        "grunt-contrib-copy": "^1.0.0",
+        "mini-css-extract-plugin": "^2.10.2",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "tailwindcss": "^4.1.17",
+        "tailwindcss-animate": "^1.0.7",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.58.2",
+        "vite": "^8.0.16",
+        "gulp": "^4.0.2",
+        "gulp-clean": "^0.4.0",
+        "gulp-filter": "^9.0.1",
+        "gulp-newer": "^1.4.0",
+        "gulp-zip": "^6.1.0",
+        "react-icons": "5.5.0"
+    }
 }

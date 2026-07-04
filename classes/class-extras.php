@@ -44,16 +44,7 @@ class Extras {
 	 * Enqueue our scripts and data for the bulk actions JS.
 	 */
 	public function enqueue_script() {
-
-		$asset        = include PLGGRP_PATH . 'js/install.asset.php';
-		$dependencies = array_unique( array_merge( $asset['dependencies'], array( 'jquery' ) ) );
-		wp_enqueue_script( 'plugin-groups-install', PLGGRP_URL . 'js/install.js', $dependencies, $asset['version'], true );
-
-		$data = array(
-			'url'   => rest_url( Plugin_Groups::$slug . '/add' ),
-			'nonce' => wp_create_nonce( 'wp_rest' ),
-		);
-		wp_add_inline_script( 'plugin-groups-install', 'var plgData = ' . wp_json_encode( $data ), 'before' );
+		wp_add_inline_script( 'plugin-groups-bulk', 'var plgData = ' . wp_json_encode( $data ), 'before' );
 	}
 
 	/**

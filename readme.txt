@@ -5,7 +5,7 @@ Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plug
 Requires at least: 6.7
 Requires PHP: 7.4
 Tested up to: 7.0
-Stable tag: 2.1.0
+Stable tag: 3.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,7 +41,15 @@ Yes it does! It has full support from network admin being able to set groups for
 
 == Changelog ==
 
-= 2.1.0 =
+= 3.0.0 =
+- Completely rewritten admin UI in React and TypeScript, built with Vite, replacing the old jQuery-based interface.
+- Added per-group colors, shown as color dots in the groups navigation and plugins list.
+- Added keyword-based auto-assignment of plugins to groups, with a manual "Re-run auto-assign" action and automatic reassignment when plugins are activated or upgraded.
+- Added group-level bulk Activate/Deactivate/Update actions in the Plugins list.
+- Added a new "Pills" navigation style, alongside a renamed "Default" (formerly "subsubsub") style.
+- Added the ability to create a new group directly from the "Add to group" bulk action modal.
+- Improved the create/edit group modal layout and various settings UI/UX refinements.
+- Switched packaging/build tooling to Vite and Gulp, replacing Grunt/webpack and the wp-scripts asset pipeline.
 - Fixed a security issue where group names could inject unescaped HTML into the plugins list dropdown and bulk actions.
 - Fixed a security issue where plugin/group data was not escaped in the "Add to group" action on the Add Plugins screen.
 - Replaced deprecated current_user_can_for_blog() with current_user_can_for_site() for multisite permission checks.
