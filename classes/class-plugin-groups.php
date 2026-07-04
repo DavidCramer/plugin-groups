@@ -599,7 +599,7 @@ class Plugin_Groups {
 			);
 		}
 
-		$link = Utils::build_tag( 'a', $link_atts, $color_dot . $group['name'] . $counter );
+		$link = Utils::build_tag( 'a', $link_atts, $color_dot . esc_html( $group['name'] ) . $counter );
 
 		return Utils::build_tag( 'li', $li_atts, $link );
 	}
