@@ -17,7 +17,7 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require $_tests_dir . '/includes/bootstrap.php';
 
-activate_plugin( 'cy_plugin_groups/plugincore.php' );
+activate_plugin( 'plugin-groups/plugincore.php' );
 
 echo "Installing Plugin Groups...\n";
 

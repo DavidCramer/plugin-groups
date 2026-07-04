@@ -1,0 +1,38 @@
+import { __ } from '@wordpress/i18n';
+import { useAppDispatch, useAppState } from '@/state/context';
+
+/**
+ * Right column of Groups Management: built-in/filtered preset group definitions
+ * (see `Plugin_Groups::load_presets()` server-side) that the user can toggle on or
+ * off. Presets stay separate from user-created groups until enabled here.
+ */
+export function PresetsColumn() {
+  const { config } = useAppState();
+  const dispatch = useAppDispatch();
+
+  return (
+    <div className="w-56 bg-white flex flex-col shrink-0">
+      <div className="px-4 pt-4 pb-3 border-b border-gray-200">
+        <div className="section-title">{__('Presets', 'plugin-groups')}</div>
+      </div>
+      <div className="overflow-y-auto flex-1 py-1">
+        {config.presets.map((preset) => {
+          const checked = config.selectedPresets.includes(preset);
+          return (
+            <label
+              key={preset}
+              className="preset-row px-4 py-2 flex items-center gap-2 border-b border-gray-100 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => dispatch({ type: 'TOGGLE_PRESET', presetName: preset })}
+              />
+              <span className="flex-1 text-sm text-gray-700">{preset}</span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

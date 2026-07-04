@@ -1,0 +1,117 @@
+.plugin-groups .nav-settings {
+	cursor: pointer;
+	margin-bottom: 20px;
+	margin-top: 8px;
+	overflow: hidden;
+	padding: 8px
+}
+
+.plugin-groups .nav-settings label {
+	font-weight: bolder
+}
+
+.plugin-groups .nav-settings.selected {
+	background-color: #fff;
+	border: 1px solid #74a008
+}
+
+.plugin-groups .nav-settings select {
+	margin-top: 6px
+}
+
+.plugin-groups .subsubsub {
+	float: none
+}
+
+.plugin-groups .subsubsub li:not(:last-child):after {
+	content: "|";
+	padding: 0 3px
+}
+
+.plugin-groups .groups-modern {
+	background-color: #fff;
+	border-color: #d0d0d0 #fff;
+	border-style: solid;
+	border-width: 1px;
+	display: block;
+	margin: 10px -20px;
+	padding: 0 12px
+}
+
+.plugin-groups .groups-modern li {
+	display: inline-block;
+	margin: 0
+}
+
+.plugin-groups .groups-modern li a {
+	border-bottom: 5px solid transparent;
+	color: #646970;
+	display: inline-block;
+	margin: 0 10px;
+	padding: 20px 0 15px;
+	text-decoration: none
+}
+
+.plugin-groups .groups-modern li a:hover {
+	border-bottom: 5px solid #d0d0d0;
+	color: #135e96
+}
+
+.plugin-groups .groups-modern li a.current {
+	border-bottom: 5px solid #646970;
+	color: #1d2327
+}
+
+.plugin-groups .groups-modern li .count {
+	color: #646970
+}
+
+.plugin-groups .groups-pills {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+
+	li {
+
+
+		a {
+			background: #fff;
+			border-radius: 18px;
+			color: inherit;
+			display: inline-block;
+
+			padding: 8px 12px;
+			text-decoration: none;
+
+			&.current {
+				background: rgb(var(--wp-admin-theme-color--rgb));
+				color: #fff;
+			}
+
+			&:hover {
+				background: rgb(var(--wp-admin-theme-color-darker-10--rgb));
+				color: #fff;
+			}
+
+
+		}
+	}
+
+	.group-color-dot {
+		border: 1px solid #fff;
+		padding: 4px;
+	}
+}
+
+.plugin-groups .group-color-dot {
+	border-radius: 50%;
+	display: inline-block;
+	margin-right: 6px;
+	padding: 5px;
+}
+
+.plugins-php .alignleft.actions.bulkactions {
+	display: inline-flex;
+	gap: 5px;
+}
