@@ -17,7 +17,7 @@ class Plugin_Groups {
 	/**
 	 * The single instance of the class.
 	 *
-	 * @var Plugin_Groups
+	 * @var groups\classes\Plugin_Groups
 	 */
 	protected static $instance = null;
 
@@ -383,7 +383,7 @@ class Plugin_Groups {
 					'a',
 					[
 						'href'  => $url,
-						'class' => 'button button-secondary '. $button_class,
+						'class' => 'button button-secondary ' . $button_class,
 					],
 					esc_html__( 'Update All', self::$slug )
 				);
@@ -429,7 +429,7 @@ class Plugin_Groups {
 	 */
 	protected function build_bulk_action_form( $action, array $plugin_files, $label ) {
 
-		$inputs = '';
+		$inputs       = '';
 		$button_class = $this->config['params']['navStyle'] === 'groups-dropdown' ? 'action' : 'button-small';
 		foreach ( $plugin_files as $plugin_file ) {
 			$inputs .= Utils::build_tag(
@@ -450,7 +450,10 @@ class Plugin_Groups {
 				'value' => $action,
 			]
 		);
-		$inputs .= Utils::build_tag( 'button', [ 'type' => 'submit', 'class' => 'button button-secondary '. $button_class ], esc_html( $label ) );
+		$inputs .= Utils::build_tag( 'button', [
+			'type'  => 'submit',
+			'class' => 'button button-secondary ' . $button_class,
+		], esc_html( $label ) );
 
 		return Utils::build_tag(
 			'form',
@@ -894,7 +897,7 @@ class Plugin_Groups {
 		/**
 		 * Init the settings system
 		 *
-		 * @param Plugin_Groups ${slug} The core object.
+		 * @param groups\classes\Plugin_Groups ${slug} The core object.
 		 */
 		do_action( 'plugin_groups_init' );
 	}
@@ -904,29 +907,29 @@ class Plugin_Groups {
 	 */
 	public function admin_init() {
 
-		$manifest_path = PLGGRP_PATH . 'build/manifest.json';
+		$manifest_path        = PLGGRP_PATH . 'build/manifest.json';
 		$navbar_manifest_path = PLGGRP_PATH . 'static/manifest.json';
 		if ( ! file_exists( $manifest_path ) || ! file_exists( $navbar_manifest_path ) ) {
 			wp_die(
 				__( 'The Plugin Groups build is missing. Please run the build process.', 'plugin-groups' )
 			);
 		}
-		$manifest = json_decode( file_get_contents( $manifest_path ), true );
+		$manifest        = json_decode( file_get_contents( $manifest_path ), true );
 		$navbar_manifest = json_decode( file_get_contents( $navbar_manifest_path ), true );
-		if ( ! isset( $manifest['src/main.tsx'] ) || ! isset( $navbar_manifest['src/extras.ts'] ) ) {
+		if ( ! isset( $manifest['src/main.tsx'] ) || ! isset( $navbar_manifest['src/extras.js'] ) ) {
 			wp_die(
 				__( 'The Plugin Groups build is invalid. Please run the build process again.', 'plugin-groups' )
 			);
 		}
 		$js_path = PLGGRP_URL . 'build/' . $manifest['src/main.tsx']['file'];
-		wp_register_script( self::$slug, $js_path, [], PLGGRP_VERSION, ['in_footer' => true] );
+		wp_register_script( self::$slug, $js_path, [], PLGGRP_VERSION, [ 'in_footer' => true ] );
 
 		if ( ! empty( $manifest['src/main.tsx']['css'] ) ) {
 			$css_path = PLGGRP_URL . 'build/' . $manifest['src/main.tsx']['css'][0] ?? '';
 			wp_register_style( self::$slug, $css_path, [], PLGGRP_VERSION );
 		}
-		if ( ! empty( $navbar_manifest['src/extras.ts']['css'] ) ) {
-			$css_path = PLGGRP_URL . 'static/' . $navbar_manifest['src/extras.ts']['css'][0] ?? '';
+		if ( ! empty( $navbar_manifest['src/extras.js']['css'] ) ) {
+			$css_path = PLGGRP_URL . 'static/' . $navbar_manifest['src/extras.js']['css'][0] ?? '';
 			wp_register_style( self::$slug . '-navbar', $css_path, [], PLGGRP_VERSION );
 		}
 	}
@@ -1020,7 +1023,19 @@ class Plugin_Groups {
 				wp_enqueue_style( self::$slug );
 				wp_set_script_translations( self::$slug, self::$slug );
 			}
+			$this->prep_config();
 		}
+	}
+
+	/**
+	 * Prepare the config data for output to the admin UI.
+	 */
+	protected function prep_config() {
+
+		$data = $this->build_config_object();
+
+		// Add config data.
+		wp_add_inline_script( self::$slug, 'var plgData = ' . $data, 'before' );
 	}
 
 	/**
@@ -1111,7 +1126,7 @@ class Plugin_Groups {
 		}
 		$presets = $this->load_presets();
 
-		$config['presets'] = $presets['presets'];
+		$config['presets']       = $presets['presets'];
 		$config['preset_groups'] = $presets['preset_groups'];
 
 		return $config;
@@ -1280,8 +1295,8 @@ class Plugin_Groups {
 			$this->config['groups'][ $id ]['plugins'] = array_values(
 				array_unique( array_merge( $this->config['groups'][ $id ]['plugins'], $new_plugins ) )
 			);
-			$claimed = array_merge( $claimed, $new_plugins );
-			$updated = true;
+			$claimed                                  = array_merge( $claimed, $new_plugins );
+			$updated                                  = true;
 		}
 
 		if ( $updated ) {
@@ -1376,19 +1391,24 @@ class Plugin_Groups {
 	 * Render the admin page.
 	 */
 	public function render_admin() {
-		$bootstrap = array(
+
+		$bootstrap = [
 			'loadURL'   => rest_url( self::$slug . '/load' ),
 			'restNonce' => wp_create_nonce( 'wp_rest' ),
 			'siteID'    => get_current_blog_id(),
-		);
+		];
 
+		// Flag if network admin vs main site.
+		if ( is_network_admin() && is_main_site() ) {
+			$bootstrap['networkAdmin'] = true;
+		}
 		include PLGGRP_PATH . 'includes/main.php';
 	}
 
 	/**
 	 * Get the instance of the class.
 	 *
-	 * @return Plugin_Groups
+	 * @return groups\classes\Plugin_Groups
 	 */
 	public static function get_instance() {
 

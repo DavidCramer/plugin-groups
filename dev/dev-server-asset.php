@@ -20,4 +20,4 @@ $port = file_get_contents( PLGGRP_PATH . '.dev-server-running' );
 wp_enqueue_script_module( 'plugin-vite-client', 'http://localhost:' . $port . '/@vite/client', [], null );
 
 // Main app.
-wp_enqueue_script_module( 'plugin-app', 'http://localhost:' . $port . '/src/main.tsx', [], null, [ 'in_footer' => true ] );
+wp_enqueue_script_module( 'plugin-groups', 'http://localhost:' . $port . '/src/main.tsx', [], null, [ 'in_footer' => true ] );

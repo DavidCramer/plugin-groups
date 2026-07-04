@@ -52,12 +52,12 @@ class Bulk_Actions {
 			);
 		}
 		$manifest = json_decode( file_get_contents( $manifest_path ), true );
-		if ( ! isset( $manifest['src/extras.ts'] )) {
+		if ( ! isset( $manifest['src/extras.js'] )) {
 			wp_die(
 				__( 'The Plugin Groups build is invalid. Please run the build process again.', 'plugin-groups' )
 			);
 		}
-		$js_path = PLGGRP_URL . 'static/' . $manifest['src/extras.ts']['file'];
+		$js_path = PLGGRP_URL . 'static/' . $manifest['src/extras.js']['file'];
 		wp_enqueue_script( 'plugin-groups-bulk', $js_path, [], PLGGRP_VERSION, true );
 		$groups = $this->plugin_groups->get_groups();
 		wp_add_inline_script( 'plugin-groups-bulk', 'var plgData = ' . wp_json_encode( $groups ), 'before' );

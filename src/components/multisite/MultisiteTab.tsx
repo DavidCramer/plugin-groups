@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { useAppDispatch, useAppState } from '@/state/context';
 
-export function MultisiteTab() {
+export function MultisiteTab () {
   const { config } = useAppState();
   const dispatch = useAppDispatch();
   const sites = config.sites ?? [];
@@ -10,8 +10,8 @@ export function MultisiteTab() {
   const allSelected = sites.length > 0 && siteIds.every((id) => sitesEnabled.includes(id));
 
   return (
-    <div className="p-4">
-      <div className="w-96 bg-white border border-gray-200 rounded">
+    <div className="flex bg-white h-full">
+      <div className="w-72  shrink-0 border-r border-gray-200">
         <div className="px-4 pt-4 pb-3">
           <div className="section-title">{__('Sites with full access', 'plugin-groups')}</div>
         </div>

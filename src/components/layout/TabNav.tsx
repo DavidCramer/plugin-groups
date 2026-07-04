@@ -4,7 +4,7 @@ import { useAppDispatch, useAppState } from '@/state/context';
 export function TabNav() {
   const { tab, config } = useAppState();
   const dispatch = useAppDispatch();
-  const showMultisite = !!config.sites && config.mainSite === config.siteID;
+  const showMultisite = config.networkAdmin;
 
   const tabButtonClass = (isActive: boolean) =>
     isActive

@@ -21,7 +21,7 @@ const buildPaths = {
     '!./**/src/**',
     '!./**/bin/**',
     '!./**/*-src/**',
-    '!./**/release/**',
+    '!./**/releases/**',
     '!./**/vendor/**',
     '!./**/node_modules/**',
     '!./**/tests/**',

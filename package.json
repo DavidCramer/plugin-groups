@@ -16,14 +16,15 @@
         "npm": ">=10.2.3"
     },
     "scripts": {
-        "build": "npm run build:assets && npm run build:pot",
+        "build": "npm run build:assets && npm run build:pot && npm run dist",
         "build:assets": "vite build && vite build --config vite.config-static.ts",
         "build:pot": "composer make-pot",
         "dev": "vite",
-        "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
-        "lint:css": "stylelint '**/*.{css,scss}'",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "type-check": "tsc --noEmit",
         "format": "prettier --write '**/*.{js,jsx,ts,tsx,css,scss,md}'",
-        "release": "RELEASE=1 npm run build && npm run dist",
+        "release": "RELEASE=1 npm run build && npm run pack",
+        "pack" : "gulp pack",
         "dist": "gulp dist",
         "postinstall": "composer install"
     },
@@ -47,7 +48,6 @@
         "mini-css-extract-plugin": "^2.10.2",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
-        "sortablejs": "^1.15.0",
         "tailwindcss": "^4.1.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.3",

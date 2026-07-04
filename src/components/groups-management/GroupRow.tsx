@@ -4,6 +4,7 @@ import { useAppDispatch, useAppState } from '@/state/context';
 import type { PersistedGroup, GroupUIState } from '@/types/group';
 import { GroupPluginRow, PLUGIN_DRAG_MIME } from './GroupPluginRow';
 import { KeywordsEditor } from './KeywordsEditor';
+import { LuGrip } from 'react-icons/lu';
 
 export const GROUP_DRAG_MIME = 'application/x-plugin-groups-group';
 
@@ -55,19 +56,12 @@ export function GroupRow({ group, ui, onReorderDrop }: GroupRowProps) {
     >
       <div className="flex items-center gap-2 px-4 py-2.5 cursor-pointer" onClick={() => dispatch({ type: 'TOGGLE_GROUP_OPEN', id: group.id })}>
         <span
-          className="shrink-0"
+          className="shrink-0 cursor-grab"
           draggable
           onDragStart={handleDragStart}
           onClick={(event) => event.stopPropagation()}
         >
-          <svg className="drag-handle w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="9" cy="6" r="1.5" />
-            <circle cx="15" cy="6" r="1.5" />
-            <circle cx="9" cy="12" r="1.5" />
-            <circle cx="15" cy="12" r="1.5" />
-            <circle cx="9" cy="18" r="1.5" />
-            <circle cx="15" cy="18" r="1.5" />
-          </svg>
+          <LuGrip size={16} className="text-gray-400" />
         </span>
         <input
           type="checkbox"

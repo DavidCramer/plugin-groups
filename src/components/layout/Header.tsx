@@ -8,9 +8,10 @@ interface HeaderProps {
   onSiteSwitch: (siteId: number) => void;
 }
 
-export function Header({ onSave, onSiteSwitch }: HeaderProps) {
+export function Header ({ onSave, onSiteSwitch }: HeaderProps) {
   const { config, isSaving } = useAppState();
   const dispatch = useAppDispatch();
+  const { networkAdmin } = config;
 
   const handleExport = () => exportGroups(config.groups);
 
@@ -46,9 +47,12 @@ export function Header({ onSave, onSiteSwitch }: HeaderProps) {
           <input type="file" accept="application/json" className="hidden" onChange={handleImport} />
         </label>
       </div>
-      <div className="ml-auto">
-        <MultisiteSiteSwitcher onSiteSwitch={onSiteSwitch} />
-      </div>
+      {networkAdmin && (
+        <div className="ml-auto flex items-center gap-2 text-nowrap text-white">
+          {__('Switch site', 'plugin-groups')}
+          <MultisiteSiteSwitcher onSiteSwitch={onSiteSwitch} />
+        </div>
+      )}
     </div>
   );
 }

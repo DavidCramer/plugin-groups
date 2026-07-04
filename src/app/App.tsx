@@ -12,7 +12,7 @@ import { GroupsManagementTab } from '@/components/groups-management/GroupsManage
 import { SettingsTab } from '@/components/settings/SettingsTab';
 import { MultisiteTab } from '@/components/multisite/MultisiteTab';
 
-export function App() {
+export function App () {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const { config, tab, isDirty } = state;
@@ -21,11 +21,11 @@ export function App() {
     dispatch({ type: 'SAVE_START' });
     try {
       await saveConfig(config.saveURL, config.restNonce, {
-        groups: config.groups,
+        groups         : config.groups,
         selectedPresets: config.selectedPresets,
-        params: config.params,
-        sitesEnabled: config.sitesEnabled,
-        siteID: config.siteID,
+        params         : config.params,
+        sitesEnabled   : config.sitesEnabled,
+        siteID         : config.siteID,
       });
       dispatch({ type: 'SAVE_SUCCESS' });
     } catch (error) {
@@ -45,28 +45,17 @@ export function App() {
       dispatch({ type: 'LOAD_SITE_START' });
       try {
         const nextConfig = await loadSiteConfig(config.loadURL, config.restNonce, siteId);
-        dispatch({ type: 'REPLACE_CONFIG', config: nextConfig });
+        dispatch({ type: 'REPLACE_CONFIG', config: { ...nextConfig, networkAdmin: config.networkAdmin } });
       } catch (error) {
         const message = error instanceof ApiError ? error.message : __('Could not load that site', 'plugin-groups');
         dispatch({ type: 'LOAD_SITE_ERROR', message });
       }
     },
-    [dispatch, isDirty, config.loadURL, config.restNonce]
+    [dispatch, isDirty, config.loadURL, config.restNonce],
   );
 
   useKeyboardShortcuts({ state, dispatch, onSave: handleSave });
   useUnsavedChanges(isDirty);
-
-  if (tab === 0) {
-    return (
-      <div className={`${config.slug}`}>
-        <div className="bg-brand px-6 py-3 text-white text-sm shadow-sm flex items-center">
-          <span className={`inline-flex border-3 border-brand-light border-r-brand-border rounded-full animate-spin mr-2 w-6 h-6`}></span>
-          {__('Loading site config…', 'plugin-groups')}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={`${config.slug}  flex flex-col h-full`}>
@@ -75,6 +64,14 @@ export function App() {
       {tab === 1 && <GroupsManagementTab />}
       {tab === 2 && <SettingsTab />}
       {tab === 3 && <MultisiteTab />}
+      {tab === 0 && (
+        <div className={`${config.slug}`}>
+          <div className="bg-brand px-6 py-3 text-white text-sm shadow-sm flex items-center">
+            <span className={`inline-flex border-3 border-brand-light border-r-brand-border rounded-full animate-spin mr-2 w-6 h-6`}></span>
+            {__('Loading site config…', 'plugin-groups')}
+          </div>
+        </div>
+      )}
       <Toast />
     </div>
   );

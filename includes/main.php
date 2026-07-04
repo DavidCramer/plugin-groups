@@ -7,9 +7,10 @@
  *
  * @package plugin_groups
  * @var $bootstrap array {
- *     @type string $loadURL   REST URL for the `load` route.
- *     @type string $restNonce Nonce for X-WP-Nonce.
- *     @type int    $siteID    Current site ID.
+ *     @type string $loadURL      REST URL for the `load` route.
+ *     @type string $restNonce    Nonce for X-WP-Nonce.
+ *     @type int    $siteID       Current site ID.
+ * 	   @type bool   $networkAdmin Flag if in network admin.
  * }
  */
 
