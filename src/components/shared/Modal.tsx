@@ -29,6 +29,8 @@ export function Modal({ title, onClose, children, widthClassName = 'w-96' }: Mod
             type="button"
             className="text-white/70 hover:text-white text-lg leading-none"
             onClick={onClose}
+            aria-label="Close"
+            title="Close"
           >
             ✕
           </button>
