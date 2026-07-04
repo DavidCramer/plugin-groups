@@ -342,12 +342,13 @@ class Plugin_Groups {
 	 */
 	protected function render_group_bulk_actions() {
 
-		if ( true === $this->config['params']['legacyGrouping'] || empty( $this->current_group ) || empty( $this->groups[ $this->current_group ] ) ) {
+		if ( empty( $this->config['params']['groupBulkActions'] ) || true === $this->config['params']['legacyGrouping'] || empty( $this->current_group ) || empty( $this->groups[ $this->current_group ] ) ) {
 			return;
 		}
 
 		$plugin_files = array_keys( $this->groups[ $this->current_group ] );
 		$controls     = [];
+		$button_class = $this->config['params']['navStyle'] === 'groups-dropdown' ? 'action' : 'button-small';
 
 		if ( current_user_can( 'activate_plugins' ) ) {
 			$inactive = array_filter(
@@ -382,7 +383,7 @@ class Plugin_Groups {
 					'a',
 					[
 						'href'  => $url,
-						'class' => 'button button-secondary',
+						'class' => 'button button-secondary '. $button_class,
 					],
 					esc_html__( 'Update All', self::$slug )
 				);
@@ -429,6 +430,7 @@ class Plugin_Groups {
 	protected function build_bulk_action_form( $action, array $plugin_files, $label ) {
 
 		$inputs = '';
+		$button_class = $this->config['params']['navStyle'] === 'groups-dropdown' ? 'action' : 'button-small';
 		foreach ( $plugin_files as $plugin_file ) {
 			$inputs .= Utils::build_tag(
 				'input',
@@ -448,14 +450,14 @@ class Plugin_Groups {
 				'value' => $action,
 			]
 		);
-		$inputs .= Utils::build_tag( 'button', [ 'type' => 'submit', 'class' => 'button button-secondary' ], esc_html( $label ) );
+		$inputs .= Utils::build_tag( 'button', [ 'type' => 'submit', 'class' => 'button button-secondary '. $button_class ], esc_html( $label ) );
 
 		return Utils::build_tag(
 			'form',
 			[
 				'method' => 'post',
 				'action' => self_admin_url( 'plugins.php' ),
-				'style'  => 'display:inline-block;margin-right:6px',
+				'style'  => 'display:inline-block;',
 			],
 			$inputs
 		);
@@ -583,7 +585,7 @@ class Plugin_Groups {
 		}
 
 		$color_dot = '';
-		if ( ! empty( $group['color'] ) && preg_match( '/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/', $group['color'] ) ) {
+		if ( ! empty( $group['color'] ) ) {
 			$color_dot = Utils::build_tag(
 				'span',
 				[
@@ -1064,9 +1066,10 @@ class Plugin_Groups {
 			'groups'          => [],
 			'selectedPresets' => [],
 			'params'          => [
-				'legacyGrouping' => false,
-				'navStyle'       => 'subsubsub',
-				'menuGroups'     => false,
+				'legacyGrouping'   => false,
+				'navStyle'         => 'subsubsub',
+				'menuGroups'       => false,
+				'groupBulkActions' => false,
 			],
 
 			'sitesEnabled' => [], // Used for multisite.

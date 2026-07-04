@@ -21,7 +21,7 @@ export function GroupPluginRow({ groupId, file, plugin, onRemove }: GroupPluginR
       draggable
       onDragStart={handleDragStart}
     >
-      <svg className="drag-handle w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+      <svg className="drag-handle w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <circle cx="9" cy="6" r="1.5" />
         <circle cx="15" cy="6" r="1.5" />
         <circle cx="9" cy="12" r="1.5" />

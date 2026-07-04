@@ -94,6 +94,7 @@ const DEFAULT_PARAMS: Config['params'] = {
   navStyle: 'subsubsub',
   menuGroups: false,
   showUngrouped: false,
+  groupBulkActions: false,
 };
 
 function normalizeConfig(config: Config): Config {

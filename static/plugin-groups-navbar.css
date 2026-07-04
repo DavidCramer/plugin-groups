@@ -66,19 +66,52 @@
 	color: #646970
 }
 
+.plugin-groups .groups-pills {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+
+	li {
+
+
+		a {
+			background: #fff;
+			border-radius: 18px;
+			color: inherit;
+			display: inline-block;
+
+			padding: 8px 12px;
+			text-decoration: none;
+
+			&.current {
+				background: rgb(var(--wp-admin-theme-color--rgb));
+				color: #fff;
+			}
+
+			&:hover {
+				background: rgb(var(--wp-admin-theme-color-darker-10--rgb));
+				color: #fff;
+			}
+
+
+		}
+	}
+
+	.group-color-dot {
+		border: 1px solid #fff;
+		padding: 4px;
+	}
+}
+
 .plugin-groups .group-color-dot {
 	border-radius: 50%;
 	display: inline-block;
-	height: 8px;
 	margin-right: 6px;
-	vertical-align: middle;
-	width: 8px
+	padding: 5px;
 }
 
-.plugin-groups .subsubsub .group-color-dot {
-	margin-right: 4px
-}
-
-.plugin-groups .group-bulk-actions {
-	margin: 0 0 10px
+.plugins-php .alignleft.actions.bulkactions {
+	display: inline-flex;
+	gap: 5px;
 }

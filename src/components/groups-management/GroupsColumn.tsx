@@ -5,7 +5,7 @@ import { GroupRow } from './GroupRow';
 import { CreateEditGroupModal } from './CreateEditGroupModal';
 
 export function GroupsColumn() {
-  const { config, groupUI } = useAppState();
+  const { config, groupUI, groupModal } = useAppState();
   const dispatch = useAppDispatch();
   const ids = getOrderedGroupIds(config);
   const selectedIds = ids.filter((id) => groupUI[id]?.selected);
@@ -84,7 +84,7 @@ export function GroupsColumn() {
           {__('Create new group', 'plugin-groups')}
         </button>
       </div>
-      <CreateEditGroupModal />
+      <CreateEditGroupModal key={groupModal ? `${groupModal.mode}-${groupModal.groupId ?? ''}` : 'closed'} />
     </div>
   );
 }

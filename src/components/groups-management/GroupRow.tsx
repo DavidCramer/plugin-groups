@@ -55,7 +55,7 @@ export function GroupRow({ group, ui, onReorderDrop }: GroupRowProps) {
     >
       <div className="flex items-center gap-2 px-4 py-2.5 cursor-pointer" onClick={() => dispatch({ type: 'TOGGLE_GROUP_OPEN', id: group.id })}>
         <span
-          className="flex-shrink-0"
+          className="shrink-0"
           draggable
           onDragStart={handleDragStart}
           onClick={(event) => event.stopPropagation()}
@@ -77,7 +77,7 @@ export function GroupRow({ group, ui, onReorderDrop }: GroupRowProps) {
         />
         {group.color && (
           <span
-            className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+            className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
             style={{ backgroundColor: group.color }}
             title={__('Group color', 'plugin-groups')}
           />

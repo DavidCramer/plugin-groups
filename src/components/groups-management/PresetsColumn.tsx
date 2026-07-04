@@ -6,7 +6,7 @@ export function PresetsColumn() {
   const dispatch = useAppDispatch();
 
   return (
-    <div className="w-56 bg-white flex flex-col flex-shrink-0">
+    <div className="w-56 bg-white flex flex-col shrink-0">
       <div className="px-4 pt-4 pb-3 border-b border-gray-200">
         <div className="section-title">{__('Presets', 'plugin-groups')}</div>
         <p className="text-xs text-gray-500 mt-2">
