@@ -623,6 +623,7 @@ class Plugin_Groups {
 				'Gravity Forms',
 				'WPForms',
 				'Formidable Forms',
+				'Contact Form 7',
 			],
 			'SEO'                    => [
 				'All in One SEO',
@@ -904,13 +905,15 @@ class Plugin_Groups {
 	public function admin_init() {
 
 		$manifest_path = PLGGRP_PATH . 'build/manifest.json';
-		if ( ! file_exists( $manifest_path ) ) {
+		$navbar_manifest_path = PLGGRP_PATH . 'static/manifest.json';
+		if ( ! file_exists( $manifest_path ) || ! file_exists( $navbar_manifest_path ) ) {
 			wp_die(
 				__( 'The Plugin Groups build is missing. Please run the build process.', 'plugin-groups' )
 			);
 		}
 		$manifest = json_decode( file_get_contents( $manifest_path ), true );
-		if ( ! isset( $manifest['src/main.tsx'] ) ) {
+		$navbar_manifest = json_decode( file_get_contents( $navbar_manifest_path ), true );
+		if ( ! isset( $manifest['src/main.tsx'] ) || ! isset( $navbar_manifest['src/extras.ts'] ) ) {
 			wp_die(
 				__( 'The Plugin Groups build is invalid. Please run the build process again.', 'plugin-groups' )
 			);
@@ -922,7 +925,10 @@ class Plugin_Groups {
 			$css_path = PLGGRP_URL . 'build/' . $manifest['src/main.tsx']['css'][0] ?? '';
 			wp_register_style( self::$slug, $css_path, [], PLGGRP_VERSION );
 		}
-		wp_register_style( self::$slug . '-navbar', PLGGRP_URL . 'static/' . self::$slug . '-navbar.css', [], PLGGRP_VERSION );
+		if ( ! empty( $navbar_manifest['src/extras.ts']['css'] ) ) {
+			$css_path = PLGGRP_URL . 'static/' . $navbar_manifest['src/extras.ts']['css'][0] ?? '';
+			wp_register_style( self::$slug . '-navbar', $css_path, [], PLGGRP_VERSION );
+		}
 	}
 
 	/**
@@ -1103,12 +1109,10 @@ class Plugin_Groups {
 		if ( is_network_admin() && is_main_site() ) {
 			$config['networkAdmin'] = true;
 		}
+		$presets = $this->load_presets();
 
-		// Load the presets. Use array_merge (not +=) so freshly computed presets
-		// always win over a stale 'presets'/'preset_groups' pair persisted into
-		// the option by a previous save (set_config()/save_config() store the
-		// whole $this->config array, presets included).
-		$config = array_merge( $config, $this->load_presets() );
+		$config['presets'] = $presets['presets'];
+		$config['preset_groups'] = $presets['preset_groups'];
 
 		return $config;
 	}

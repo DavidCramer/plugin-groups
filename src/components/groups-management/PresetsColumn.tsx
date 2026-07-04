@@ -9,9 +9,6 @@ export function PresetsColumn() {
     <div className="w-56 bg-white flex flex-col shrink-0">
       <div className="px-4 pt-4 pb-3 border-b border-gray-200">
         <div className="section-title">{__('Presets', 'plugin-groups')}</div>
-        <p className="text-xs text-gray-500 mt-2">
-          {__('Click a preset to create that group and auto-assign matching plugins.', 'plugin-groups')}
-        </p>
       </div>
       <div className="overflow-y-auto flex-1 py-1">
         {config.presets.map((preset) => {

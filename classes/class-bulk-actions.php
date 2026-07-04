@@ -45,8 +45,20 @@ class Bulk_Actions {
 	 */
 	protected function enqueue_script() {
 
-		$asset = include PLGGRP_PATH . 'static/bulk-handler.asset.php';
-		wp_enqueue_script( 'plugin-groups-bulk', PLGGRP_URL . 'static/bulk-handler.js', $asset['dependencies'], $asset['version'], true );
+		$manifest_path = PLGGRP_PATH . 'static/manifest.json';
+		if ( ! file_exists( $manifest_path ) ) {
+			wp_die(
+				__( 'The Plugin Groups build is missing. Please run the build process.', 'plugin-groups' )
+			);
+		}
+		$manifest = json_decode( file_get_contents( $manifest_path ), true );
+		if ( ! isset( $manifest['src/extras.ts'] )) {
+			wp_die(
+				__( 'The Plugin Groups build is invalid. Please run the build process again.', 'plugin-groups' )
+			);
+		}
+		$js_path = PLGGRP_URL . 'static/' . $manifest['src/extras.ts']['file'];
+		wp_enqueue_script( 'plugin-groups-bulk', $js_path, [], PLGGRP_VERSION, true );
 		$groups = $this->plugin_groups->get_groups();
 		wp_add_inline_script( 'plugin-groups-bulk', 'var plgData = ' . wp_json_encode( $groups ), 'before' );
 	}

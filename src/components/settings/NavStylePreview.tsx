@@ -50,7 +50,7 @@ export function NavStylePreview ({
                 {'subsubsub' === navStyle && index > 0 && (
                   <span className={'px-2'}>|</span>
                 )}
-                <a href={'#'} className={`${index === 0 ? 'font-medium text-black!' : ''}`}>
+                <a href={'#'} className={`${index === 0 ? 'current' : ''}`}>
                   {name} ({index + 1})
                 </a>
               </li>

@@ -17,13 +17,14 @@
     },
     "scripts": {
         "build": "npm run build:assets && npm run build:pot",
-        "build:assets": "vite build",
+        "build:assets": "vite build && vite build --config vite.config-static.ts",
         "build:pot": "composer make-pot",
         "dev": "vite",
         "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:css": "stylelint '**/*.{css,scss}'",
         "format": "prettier --write '**/*.{js,jsx,ts,tsx,css,scss,md}'",
-        "pack": "grunt",
+        "release": "RELEASE=1 npm run build && npm run dist",
+        "dist": "gulp dist",
         "postinstall": "composer install"
     },
     "devDependencies": {
@@ -51,6 +52,12 @@
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.58.2",
-        "vite": "^8.0.16"
+        "vite": "^8.0.16",
+        "gulp": "^4.0.2",
+        "gulp-clean": "^0.4.0",
+        "gulp-filter": "^9.0.1",
+        "gulp-newer": "^1.4.0",
+        "gulp-zip": "^6.1.0",
+        "react-icons": "5.5.0"
     }
 }
