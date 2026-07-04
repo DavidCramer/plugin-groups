@@ -6,6 +6,12 @@ interface KeywordsEditorProps {
   group: PersistedGroup;
 }
 
+/**
+ * Keyword tag editor shown inside an expanded <GroupRow>. Keywords let a group
+ * auto-assign plugins whose name matches; adding a keyword (Enter or comma) doesn't
+ * re-run matching by itself — the explicit "Re-run auto-assign" button dispatches
+ * `AUTO_ASSIGN_BY_KEYWORDS` for that.
+ */
 export function KeywordsEditor({ group }: KeywordsEditorProps) {
   const dispatch = useAppDispatch();
 

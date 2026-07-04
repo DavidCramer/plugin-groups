@@ -1,6 +1,11 @@
 import { __ } from '@wordpress/i18n';
 import { useAppDispatch, useAppState } from '@/state/context';
 
+/**
+ * Right column of Groups Management: built-in/filtered preset group definitions
+ * (see `Plugin_Groups::load_presets()` server-side) that the user can toggle on or
+ * off. Presets stay separate from user-created groups until enabled here.
+ */
 export function PresetsColumn() {
   const { config } = useAppState();
   const dispatch = useAppDispatch();

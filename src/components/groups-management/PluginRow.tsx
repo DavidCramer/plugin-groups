@@ -9,6 +9,11 @@ interface PluginRowProps {
   onToggle: (file: string) => void;
 }
 
+/**
+ * A single row in <PluginsColumn>'s list: plugin name, version, and a checkbox for
+ * bulk selection. The whole row is clickable to toggle the checkbox. `groups` is
+ * accepted for callers that already compute it but isn't rendered here.
+ */
 export function PluginRow({ file, plugin, groups, checked, onToggle }: PluginRowProps) {
   return (
     <div

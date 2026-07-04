@@ -8,6 +8,12 @@ interface HeaderProps {
   onSiteSwitch: (siteId: number) => void;
 }
 
+/**
+ * Top bar: plugin name/version, Save, Export/Import of the groups config as JSON,
+ * and (network admins only) the multisite site switcher. Save and site-switch are
+ * implemented by the parent (<App>) and passed in as callbacks; this component only
+ * handles the export/import file I/O itself.
+ */
 export function Header ({ onSave, onSiteSwitch }: HeaderProps) {
   const { config, isSaving } = useAppState();
   const dispatch = useAppDispatch();

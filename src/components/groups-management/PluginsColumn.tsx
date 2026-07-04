@@ -5,6 +5,13 @@ import { getGroupsForPlugin, isPluginUngrouped } from '@/state/selectors';
 import { PluginRow } from './PluginRow';
 import { SendToGroupsModal } from './SendToGroupsModal';
 
+/**
+ * Left column of Groups Management: the full list of installed plugins with search,
+ * an "ungrouped only" filter, and multi-select checkboxes for bulk-assigning the
+ * selection to one or more groups via <SendToGroupsModal>. Search/filter/selection
+ * are local UI state — only the resulting group assignment is dispatched to the
+ * shared config.
+ */
 export function PluginsColumn () {
   const { config } = useAppState();
   const [search, setSearch] = useState('');

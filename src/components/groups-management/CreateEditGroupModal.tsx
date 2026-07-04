@@ -4,6 +4,13 @@ import { useAppDispatch, useAppState } from '@/state/context';
 import { Modal } from '@/components/shared/Modal';
 import { generateGroupId } from '@/utils/id';
 
+/**
+ * Modal for both creating a new group and renaming/recoloring an existing one, driven
+ * by `state.groupModal` (`{ mode: 'create' | 'rename', groupId? }`, opened via the
+ * `OPEN_GROUP_MODAL` action). Rendered by <GroupsColumn> with a `key` derived from
+ * `groupModal` so switching between create/rename or between two renames remounts it
+ * and resets its local name/color state.
+ */
 export function CreateEditGroupModal () {
   const { groupModal, config } = useAppState();
   const dispatch = useAppDispatch();

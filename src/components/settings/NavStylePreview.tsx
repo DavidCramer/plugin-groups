@@ -11,6 +11,12 @@ interface NavStylePreviewProps {
   onSelect: () => void;
 }
 
+/**
+ * Clickable preview card for one nav style option in <SettingsTab>, rendering a
+ * mocked-up version of how the plugins-list group tabs (and optional bulk-action
+ * buttons) will actually look with that style applied — using the real preset names
+ * and the current showUngrouped/groupBulkActions settings, capped at 6 visible items.
+ */
 export function NavStylePreview ({
   styleName,
   navStyle,

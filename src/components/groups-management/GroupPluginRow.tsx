@@ -1,5 +1,7 @@
 import type { PluginMeta } from '@/types/plugin';
+import { LuGrip } from 'react-icons/lu';
 
+/** Drag-and-drop MIME type used when dragging a plugin out of a group (read by <GroupRow>). */
 export const PLUGIN_DRAG_MIME = 'application/x-plugin-groups-plugin';
 
 interface GroupPluginRowProps {
@@ -9,6 +11,11 @@ interface GroupPluginRowProps {
   onRemove: (file: string) => void;
 }
 
+/**
+ * A plugin listed inside an expanded <GroupRow>: name, version, a remove button, and
+ * draggable-out support so it can be dropped onto a different group (encodes its own
+ * file + source group id into the drag payload for the target to read).
+ */
 export function GroupPluginRow({ groupId, file, plugin, onRemove }: GroupPluginRowProps) {
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
     event.dataTransfer.effectAllowed = 'move';
@@ -21,14 +28,7 @@ export function GroupPluginRow({ groupId, file, plugin, onRemove }: GroupPluginR
       draggable
       onDragStart={handleDragStart}
     >
-      <svg className="drag-handle w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-        <circle cx="9" cy="6" r="1.5" />
-        <circle cx="15" cy="6" r="1.5" />
-        <circle cx="9" cy="12" r="1.5" />
-        <circle cx="15" cy="12" r="1.5" />
-        <circle cx="9" cy="18" r="1.5" />
-        <circle cx="15" cy="18" r="1.5" />
-      </svg>
+      <LuGrip size={10} className="shrink-0 text-gray-400" />
       <span className="flex-1 text-xs text-gray-700 truncate">{plugin?.Name ?? file}</span>
       <span className="text-gray-400 text-xs font-mono">{plugin?.Version ?? ''}</span>
       <button

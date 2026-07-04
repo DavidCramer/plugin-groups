@@ -1,6 +1,11 @@
 import { __ } from '@wordpress/i18n';
 import { useAppDispatch, useAppState } from '@/state/context';
 
+/**
+ * Tab strip below the header (Groups Management / Multisite / Settings). The
+ * Multisite tab only appears for network admins. Tab identity is a plain number
+ * (1/2/3) tracked in app state — see `tab` in `state/reducer.ts`.
+ */
 export function TabNav() {
   const { tab, config } = useAppState();
   const dispatch = useAppDispatch();

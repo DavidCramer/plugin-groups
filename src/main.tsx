@@ -10,6 +10,9 @@ declare global {
     plgData: Config;
   }
 }
+// Entry point mounted by WordPress into #plg-app. Two boot paths exist depending on
+// how the host page provides config: `window.plgData` (legacy/inline bootstrap) skips
+// straight to <App>, otherwise <Root> fetches the config from the REST API itself.
 const config: Config = window.plgData ?? null;
 const container = document.getElementById('plg-app');
 

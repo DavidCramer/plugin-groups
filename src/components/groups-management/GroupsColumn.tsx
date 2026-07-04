@@ -4,6 +4,12 @@ import { getOrderedGroupIds } from '@/state/selectors';
 import { GroupRow } from './GroupRow';
 import { CreateEditGroupModal } from './CreateEditGroupModal';
 
+/**
+ * Middle column of Groups Management: the ordered list of user-defined groups, with
+ * select-all/bulk-delete and drag-to-reorder (drop handling lives in <GroupRow>,
+ * this component only computes the reordered id list and dispatches it). Also owns
+ * the "Create new group" entry point, which opens <CreateEditGroupModal>.
+ */
 export function GroupsColumn() {
   const { config, groupUI, groupModal } = useAppState();
   const dispatch = useAppDispatch();

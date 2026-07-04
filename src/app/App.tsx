@@ -12,6 +12,12 @@ import { GroupsManagementTab } from '@/components/groups-management/GroupsManage
 import { SettingsTab } from '@/components/settings/SettingsTab';
 import { MultisiteTab } from '@/components/multisite/MultisiteTab';
 
+/**
+ * Root layout once config is loaded: header, tab nav, the active tab's content, and
+ * the toast notice. Owns the two actions that talk to the REST API directly (saving
+ * the current config, and switching the active site in a multisite/network-admin
+ * context) since both need to dispatch several follow-up state updates.
+ */
 export function App () {
   const state = useAppState();
   const dispatch = useAppDispatch();

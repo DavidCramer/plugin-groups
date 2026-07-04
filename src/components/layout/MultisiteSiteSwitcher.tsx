@@ -4,6 +4,11 @@ interface MultisiteSiteSwitcherProps {
   onSiteSwitch: (siteId: number) => void;
 }
 
+/**
+ * Site-select dropdown shown in the header on network admin. Renders nothing if the
+ * config has no `sites` list (i.e. not in a network-admin context). Selecting a site
+ * triggers `onSiteSwitch`, which is responsible for loading that site's config.
+ */
 export function MultisiteSiteSwitcher({ onSiteSwitch }: MultisiteSiteSwitcherProps) {
   const { config } = useAppState();
   if (!config.sites) {

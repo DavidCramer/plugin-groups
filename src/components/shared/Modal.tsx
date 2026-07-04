@@ -7,6 +7,11 @@ interface ModalProps {
   widthClassName?: string;
 }
 
+/**
+ * Generic centered modal shell (dimmed backdrop, brand-colored header with title and
+ * close button, padded body) used by every modal in the app. Clicking the backdrop
+ * itself (not its content) also closes it.
+ */
 export function Modal({ title, onClose, children, widthClassName = 'w-96' }: ModalProps) {
   return (
     <div

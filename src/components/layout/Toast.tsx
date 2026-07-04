@@ -3,6 +3,11 @@ import { useAppDispatch, useAppState } from '@/state/context';
 
 const AUTO_DISMISS_MS = 2500;
 
+/**
+ * Fixed-position toast notice driven by `state.toast` (set via the `SHOW_TOAST`
+ * action from anywhere in the app). Auto-dismisses itself after `AUTO_DISMISS_MS`
+ * and stays mounted (rather than unmounting) so its fade transition can play.
+ */
 export function Toast() {
   const { toast } = useAppState();
   const dispatch = useAppDispatch();

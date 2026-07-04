@@ -1,6 +1,12 @@
 import { __ } from '@wordpress/i18n';
 import { useAppDispatch, useAppState } from '@/state/context';
 
+/**
+ * The "Multisite" tab (network admin only): controls which sites are allowed to
+ * self-manage their own groups (`sitesEnabled`, checked server-side via
+ * `site_enabled()`). Network admins always have full access regardless of this list;
+ * it only restricts individual site admins.
+ */
 export function MultisiteTab () {
   const { config } = useAppState();
   const dispatch = useAppDispatch();

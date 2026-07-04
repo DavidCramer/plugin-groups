@@ -10,6 +10,11 @@ const NAV_STYLES: Array<{ value: NavStyle; label: string }> = [
   { value: 'groups-pills', label: __('Pills', 'plugin-groups') },
 ];
 
+/**
+ * The "Settings" tab: plugin-wide behavior toggles (legacy grouping, admin menu,
+ * ungrouped visibility, bulk actions) plus, unless legacy grouping is on, a picker
+ * for the plugins-list navigation style with a live <NavStylePreview> per option.
+ */
 export function SettingsTab() {
   const { config } = useAppState();
   const dispatch = useAppDispatch();

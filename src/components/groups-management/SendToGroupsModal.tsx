@@ -11,6 +11,14 @@ interface SendToGroupsModalProps {
   onAssigned: () => void;
 }
 
+/**
+ * Modal opened from <PluginsColumn> for bulk-assigning the checked plugins to one or
+ * more groups. Lets the user create a brand-new group inline (via the "Add Group"
+ * row) without leaving the modal — the new group is auto-checked as a target.
+ * `onAssigned` is called after confirming (even with zero groups selected) so the
+ * caller can clear its selection; the group assignment itself is only dispatched
+ * when at least one target group is checked.
+ */
 export function SendToGroupsModal({ pluginFiles, onClose, onAssigned }: SendToGroupsModalProps) {
   const { config } = useAppState();
   const dispatch = useAppDispatch();

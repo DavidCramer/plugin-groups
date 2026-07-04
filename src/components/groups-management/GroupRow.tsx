@@ -6,6 +6,7 @@ import { GroupPluginRow, PLUGIN_DRAG_MIME } from './GroupPluginRow';
 import { KeywordsEditor } from './KeywordsEditor';
 import { LuGrip } from 'react-icons/lu';
 
+/** Drag-and-drop MIME type used when reordering groups within <GroupsColumn>. */
 export const GROUP_DRAG_MIME = 'application/x-plugin-groups-group';
 
 interface GroupRowProps {
@@ -14,6 +15,15 @@ interface GroupRowProps {
   onReorderDrop: (draggedGroupId: string) => void;
 }
 
+/**
+ * One collapsible group entry: header row (drag handle, select checkbox, color dot,
+ * inline-editable name, plugin count, rename button, expand/collapse chevron) plus,
+ * when expanded, its assigned plugins and the keyword auto-assign editor.
+ *
+ * This is the drop target for two distinct drag payloads read off `event.dataTransfer`:
+ * a plugin dragged from <GroupPluginRow> (moves it into this group) and another group
+ * being dragged for reordering (delegated to the parent via `onReorderDrop`).
+ */
 export function GroupRow({ group, ui, onReorderDrop }: GroupRowProps) {
   const { config } = useAppState();
   const dispatch = useAppDispatch();

@@ -29,6 +29,14 @@ interface RootProps {
   container: HTMLElement;
 }
 
+/**
+ * Bootstraps the admin UI when no config was inlined into the page.
+ *
+ * Reads `data-bootstrap` off the mount element (loadURL/restNonce/siteID JSON,
+ * written server-side in `includes/main.php`), fetches the real config over REST,
+ * and renders a loading/error state until it resolves. Once loaded, hands off to
+ * <App> inside an <AppProvider>.
+ */
 export function Root ({ container }: RootProps) {
   const [config, setConfig] = useState<Config | null>(null);
   const [error, setError] = useState<string | null>(null);
