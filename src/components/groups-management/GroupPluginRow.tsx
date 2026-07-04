@@ -36,6 +36,7 @@ export function GroupPluginRow({ groupId, file, plugin, onRemove }: GroupPluginR
         className="opacity-0 group-hover/pr:opacity-100 text-gray-400 hover:text-red-500 ml-1 transition-opacity text-xs leading-none"
         onClick={() => onRemove(file)}
         title="Remove"
+        aria-label="Remove"
       >
         ✕
       </button>
