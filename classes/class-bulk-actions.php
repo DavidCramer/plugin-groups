@@ -41,12 +41,25 @@ class Bulk_Actions {
 	}
 
 	/**
-	 * Enqueue our scripts and data for the bulk actions JS.
+	 * Enqueue our scripts and data for the bulk actions and install plugin JS.
 	 */
-	protected function enqueue_script() {
+	public function enqueue_script() {
 
-		$asset = include PLGGRP_PATH . 'js/bulk-handler.asset.php';
-		wp_enqueue_script( 'plugin-groups-bulk', PLGGRP_URL . 'js/bulk-handler.js', $asset['dependencies'], $asset['version'], true );
+		if( !empty( $this->plugin_groups->dev_mode ) ){
+
+			return;
+		}
+
+		$manifest_path = PLGGRP_PATH . 'static/manifest.json';
+		if ( ! file_exists( $manifest_path ) ) {
+			return;
+		}
+		$manifest = json_decode( file_get_contents( $manifest_path ), true );//phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
+		if ( ! isset( $manifest['src/extras.js'] )) {
+			return;
+		}
+		$js_path = PLGGRP_URL . 'static/' . $manifest['src/extras.js']['file'];
+		wp_enqueue_script( 'plugin-groups-bulk', $js_path, [], PLGGRP_VERSION, true );
 		$groups = $this->plugin_groups->get_groups();
 		wp_add_inline_script( 'plugin-groups-bulk', 'var plgData = ' . wp_json_encode( $groups ), 'before' );
 	}
@@ -65,10 +78,10 @@ class Bulk_Actions {
 		$referer = wp_get_raw_referer();// Get the referer.
 		switch ( $action ) {
 			case 'add-to-group':
-				$selected_group = filter_input( INPUT_POST, 'group_id', FILTER_SANITIZE_STRING );
+				$selected_group = Utils::get_sanitized_text( INPUT_POST, 'group_id' );
 				if ( '__new' === $selected_group ) {
 					// Create a new group.
-					$new_group_name = filter_input( INPUT_POST, 'new_group_name', FILTER_SANITIZE_STRING );
+					$new_group_name = Utils::get_sanitized_text( INPUT_POST, 'new_group_name' );
 					$succeed        = $this->plugin_groups->create_group( $new_group_name, $plugins );
 					if ( $succeed ) {
 						$selected_group = $succeed;
@@ -104,6 +117,7 @@ class Bulk_Actions {
 
 		$current_group = $this->plugin_groups->get_current_group();
 		if ( $current_group ) {
+			// Translators: placeholder is group name.
 			$actions['remove-from-group'] = sprintf( __( 'Remove from %s', 'plugin-groups' ), $current_group['name'] );
 		}
 		$actions['add-to-group'] = __( 'Add to group', 'plugin-groups' );
