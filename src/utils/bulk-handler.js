@@ -1,5 +1,4 @@
 import { __ } from '@wordpress/i18n';
-import '@/styles/navbar.css';
 
 const BulkHandler = {
 	newGroupInput: null,

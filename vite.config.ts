@@ -6,6 +6,7 @@ import {resolve} from 'path';
 
 const entryPoints = {
   main: resolve(__dirname, 'src/main.tsx'),
+  styles: resolve(__dirname, 'src/styles/navbar.css')
 };
 
 export default defineConfig({
