@@ -134,7 +134,7 @@ class Plugin_Groups {
 	 */
 	protected function setup_hooks() {
 
-		// Load plugin text domain
+		// Load plugin text domain.
 		add_action( 'init', [ $this, 'plugin_groups_init' ], PHP_INT_MAX ); // Always the last thing to init.
 		add_action( 'admin_init', [ $this, 'admin_init' ] );
 		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
@@ -489,7 +489,7 @@ class Plugin_Groups {
 			}
 		}
 
-		// Add our styles if we have groups;
+		// Add our styles if we have groups.
 		if ( ! empty( $this->groups ) ) {
 			wp_enqueue_style( self::$slug . '-navbar' );
 		}
@@ -905,16 +905,15 @@ class Plugin_Groups {
 	 */
 	public function admin_init() {
 
-		$manifest_path        = PLGGRP_PATH . 'build/manifest.json';
-		$navbar_manifest_path = PLGGRP_PATH . 'static/manifest.json';
-		if ( ! file_exists( $manifest_path ) || ! file_exists( $navbar_manifest_path ) ) {
+		$manifest_path = PLGGRP_PATH . 'build/manifest.json';
+		if ( ! file_exists( $manifest_path ) ) {
 			add_action( 'admin_notices', [ $this, 'build_assets_error' ] );
+
 			return;
 		}
 
-		$manifest        = json_decode( file_get_contents( $manifest_path ), true ); //phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
-		$navbar_manifest = json_decode( file_get_contents( $navbar_manifest_path ), true ); //phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
-		if ( ! isset( $manifest['src/main.tsx'] ) || ! isset( $navbar_manifest['src/extras.js'] ) ) {
+		$manifest = json_decode( file_get_contents( $manifest_path ), true ); //phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
+		if ( ! isset( $manifest['src/main.tsx'] ) || ! isset( $manifest['src/styles/navbar.css'] ) ) {
 			add_action( 'admin_notices', [ $this, 'build_assets_error' ] );
 			return;
 		}
@@ -925,8 +924,8 @@ class Plugin_Groups {
 			$css_path = PLGGRP_URL . 'build/' . $manifest['src/main.tsx']['css'][0] ?? '';
 			wp_register_style( self::$slug, $css_path, [], PLGGRP_VERSION );
 		}
-		if ( ! empty( $navbar_manifest['src/extras.js']['css'] ) ) {
-			$css_path = PLGGRP_URL . 'static/' . $navbar_manifest['src/extras.js']['css'][0] ?? '';
+		if ( ! empty( $manifest['src/styles/navbar.css']['file'] ) ) {
+			$css_path = PLGGRP_URL . 'build/' . $manifest['src/styles/navbar.css']['file'] ?? '';
 			wp_register_style( self::$slug . '-navbar', $css_path, [], PLGGRP_VERSION );
 		}
 	}
