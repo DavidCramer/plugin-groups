@@ -40,6 +40,7 @@ export default defineConfig({
           }
           return 'build/[name]-[hash][extname]';
         },
+		format: 'iife',
       },
     },
     // Generate source maps in development

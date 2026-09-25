@@ -4,8 +4,8 @@ Donate link: https://cramer.co.za
 Tags: plugin organizer, plugin status filter, plugin filter, plugin groups, plugin group
 Requires at least: 6.7
 Requires PHP: 7.4
-Tested up to: 7.0
-Stable tag: 3.0.0
+Tested up to: 7.1.2
+Stable tag: 3.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,11 @@ Yes it does! It has full support from network admin being able to set groups for
 6. Bulk edit / create groups to speed up creation.
 
 == Changelog ==
+
+= 3.0.1 =
+- Fixed a bug that caused a "Uncaught TypeError: _.extend is not a function" in the plugins page.
+- Fixed a bug in the bulk actions that gave no option to give a new group a name if there are no existing groups.
+- Fixed a bug that caused the "Add to group" action to not work on the Add Plugins screen.
 
 = 3.0.0 =
 - Completely rewritten admin UI in React and TypeScript, built with Vite, replacing the old jQuery-based interface.

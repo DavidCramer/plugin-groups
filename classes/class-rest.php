@@ -114,11 +114,13 @@ class Rest {
 
 		$data = $request->get_json_params();
 
-		wp_parse_str( wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
-
 		$return = array(
-			'success' => $this->plugin_groups->add_to_group( $data['id'], array( $query['plugin'] ) ),
+			'success' => $this->plugin_groups->add_to_group( $data['id'], array( $data['plugin'] ) ),
 		);
+		if( true !== $return['success'] ) {
+			$return['message'] = $return['success'];
+			$return['success'] = false;
+		}
 
 		return rest_ensure_response( $return );
 	}
