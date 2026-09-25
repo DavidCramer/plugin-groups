@@ -42,6 +42,9 @@ const BulkHandler = {
 			}
 		} );
 		selector.parentNode.insertBefore( this.groupSelector, selector.nextSibling );
+		if( plgData && plgData.length === 0 ) {
+			this.newGroup( this.groupSelector );
+		}
 	},
 	makeSelector() {
 		const select = document.createElement( 'select' );

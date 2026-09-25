@@ -90,7 +90,7 @@ class Plugin_Groups {
 	 * @since 3.0.0
 	 * @var bool|string
 	 */
-	private bool|string $dev_mode = false;
+	public bool|string $dev_mode = false;
 
 	/**
 	 * Hold the record of the plugins current version for upgrade.
@@ -676,7 +676,6 @@ class Plugin_Groups {
 		 *
 		 * @return  array
 		 * @since   2.0.0
-		 *
 		 */
 		$presets       = apply_filters( 'get_preset_plugin_groups', $groups );
 		$preset_groups = [];
@@ -787,7 +786,6 @@ class Plugin_Groups {
 	 *
 	 * @param string $class class name to be checked and autoloaded.
 	 */
-
 	function autoload_class( $class ) {
 
 		$class_location = self::locate_class_file( $class );
@@ -910,16 +908,15 @@ class Plugin_Groups {
 		$manifest_path        = PLGGRP_PATH . 'build/manifest.json';
 		$navbar_manifest_path = PLGGRP_PATH . 'static/manifest.json';
 		if ( ! file_exists( $manifest_path ) || ! file_exists( $navbar_manifest_path ) ) {
-			wp_die(
-				__( 'The Plugin Groups build is missing. Please run the build process.', 'plugin-groups' )
-			);
+			add_action( 'admin_notices', [ $this, 'build_assets_error' ] );
+			return;
 		}
-		$manifest        = json_decode( file_get_contents( $manifest_path ), true );
-		$navbar_manifest = json_decode( file_get_contents( $navbar_manifest_path ), true );
+
+		$manifest        = json_decode( file_get_contents( $manifest_path ), true ); //phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
+		$navbar_manifest = json_decode( file_get_contents( $navbar_manifest_path ), true ); //phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
 		if ( ! isset( $manifest['src/main.tsx'] ) || ! isset( $navbar_manifest['src/extras.js'] ) ) {
-			wp_die(
-				__( 'The Plugin Groups build is invalid. Please run the build process again.', 'plugin-groups' )
-			);
+			add_action( 'admin_notices', [ $this, 'build_assets_error' ] );
+			return;
 		}
 		$js_path = PLGGRP_URL . 'build/' . $manifest['src/main.tsx']['file'];
 		wp_register_script( self::$slug, $js_path, [], PLGGRP_VERSION, [ 'in_footer' => true ] );
@@ -1358,11 +1355,26 @@ class Plugin_Groups {
 	 */
 	public function add_to_group( $group_id, array $plugin_slugs ) {
 
-		$success = false;
+		$success          = false;
+		$already_in_group = [];
 		if ( isset( $this->config['groups'][ $group_id ] ) ) {
+			foreach ( $plugin_slugs as $slug ) {
+				if ( in_array( $slug, $this->config['groups'][ $group_id ]['plugins'], true ) ) {
+					$already_in_group[] = $slug;
+				}
+			}
 			$new_plugins                                    = array_merge( $this->config['groups'][ $group_id ]['plugins'], $plugin_slugs );
 			$this->config['groups'][ $group_id ]['plugins'] = array_unique( $new_plugins );
 			$success                                        = $this->save_config();
+			if ( ! $success ) {
+				if ( ! empty( $already_in_group ) ) {
+					$message = sprintf(
+						__( 'The following plugins were already in the group: %s', self::$slug ),
+						implode( ', ', $already_in_group )
+					);
+				}
+				$success = ! empty( $already_in_group ) ? $message : false;
+			}
 		}
 
 		return $success;
@@ -1417,5 +1429,13 @@ class Plugin_Groups {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Output an admin notice if the build assets are missing.
+	 */
+	public function build_assets_error() {
+		$message = __( 'The Plugin Groups build assets are missing. Please run the build process again.', 'plugin-groups' );
+		echo sprintf( '<div id="plugin_groups_error" class="error notice notice-error"><p>%s</p></div>', esc_html( $message ) );
 	}
 }
